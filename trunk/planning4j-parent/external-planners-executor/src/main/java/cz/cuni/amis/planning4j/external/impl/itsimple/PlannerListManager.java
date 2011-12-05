@@ -26,7 +26,6 @@ package cz.cuni.amis.planning4j.external.impl.itsimple;
 import cz.cuni.amis.planning4j.pddl.PDDLRequirement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;

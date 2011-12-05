@@ -181,11 +181,8 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
         String plannerFile = settings.getChildText("filePath");
         //System.out.println(plannerFile);
         File plannerRunFile = new File(plannerBinariesDirectory, plannerFile);
-        boolean plannerFileExists = true;
         if (!plannerRunFile.exists()) {
-            plannerFileExists = false;
-            String toolMessage = ">> Could not find selected planner '" + plannerFile + "' in directory '" + plannerBinariesDirectory.getAbsolutePath() + "'";
-
+            String toolMessage = "Could not find selected planner '" + plannerFile + "' in directory '" + plannerBinariesDirectory.getAbsolutePath() + "'";
             throw new PlanningException(toolMessage);
         } else {
 
@@ -211,7 +208,7 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
                 XPath path = new JDOMXPath("arguments/argument[enable='true']");
                 additionalArgs = path.selectNodes(settings);
             } catch (JaxenException e1) {
-                e1.printStackTrace();
+                throw new ItSimplePlanningException("Error working with Jaxen.", e1);
             }
             if (additionalArgs != null) {
                 if (additionalArgs.size() > 0) {
