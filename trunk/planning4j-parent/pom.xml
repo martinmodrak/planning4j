@@ -23,6 +23,36 @@
     <module>external-planners-pack</module>        
   </modules>
   
+    <organization>
+        <name>AMIS research group, Faculty of Mathematics and Physics, Charles University in Prague, Czech Republic</name>
+        <url>http://amis.mff.cuni.cz</url>
+    </organization>
+    
+    <issueManagement>
+        <system>Google Code</system>
+        <url>http://code.google.com/p/planning4j/issues</url>
+    </issueManagement>
+
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>http://diana.ms.mff.cuni.cz:8080/</url>
+    </ciManagement>  
+  
+    <distributionManagement>
+        <repository>
+            <id>amis-artifactory-libs-release-local</id>
+            <name>AMIS Artifactory (local-release)</name>
+            <url>dav:http://diana.ms.mff.cuni.cz:8081/artifactory/libs-release-local</url>
+        </repository>
+        <snapshotRepository>
+            <id>amis-artifactory-libs-snapshot-local</id>
+            <name>AMIS Artifactory (local-snapshot)</name>
+            <url>dav:http://diana.ms.mff.cuni.cz:8081/artifactory/libs-snapshot-local</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+  
+  
   <build>
     <pluginManagement>
         <plugins>
