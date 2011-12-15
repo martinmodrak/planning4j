@@ -1,4 +1,5 @@
 #summary Simple example of usage of Planning4J
+#labels Featured,Phase-Implementation
 
 =Simple usage=
 
