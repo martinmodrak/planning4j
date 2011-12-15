@@ -1,0 +1,115 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>cz.cuni.amis.planning4j</groupId>
+    <artifactId>planning4j-parent</artifactId>
+    <version>0.8</version>
+    <packaging>pom</packaging>
+    <name>planning4j-parent</name>
+  
+    <licenses>
+        <license>
+            <name>GNU GPL v3</name>
+        </license>
+    </licenses>
+    <url>http://maven.apache.org</url>
+    
+    <properties>
+        <netbeans.hint.license>gpl30</netbeans.hint.license>
+        <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+    </properties>
+  
+    <modules>
+        <module>planning4j-api</module>
+        <module>external-planners-executor</module>
+        <module>external-planners-pack</module>        
+    </modules>
+  
+    <organization>
+        <name>AMIS research group, Faculty of Mathematics and Physics, Charles University in Prague, Czech Republic</name>
+        <url>http://amis.mff.cuni.cz</url>
+    </organization>
+    
+    <issueManagement>
+        <system>Google Code</system>
+        <url>http://code.google.com/p/planning4j/issues</url>
+    </issueManagement>
+
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>http://diana.ms.mff.cuni.cz:8080/</url>
+    </ciManagement>  
+  
+    <distributionManagement>
+        <repository>
+            <id>amis-artifactory-libs-release-local</id>
+            <name>AMIS Artifactory (local-release)</name>
+            <url>dav:http://diana.ms.mff.cuni.cz:8081/artifactory/libs-release-local</url>
+        </repository>
+        <snapshotRepository>
+            <id>amis-artifactory-libs-snapshot-local</id>
+            <name>AMIS Artifactory (local-snapshot)</name>
+            <url>dav:http://diana.ms.mff.cuni.cz:8081/artifactory/libs-snapshot-local</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+  
+  
+    <build>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-webdav</artifactId>
+                <version>1.0-beta-2</version>
+            </extension>
+        </extensions>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8</version>
+                <executions>
+                    <execution>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.0</version>
+                <executions>
+                    <execution>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.3.2</version>
+                    <configuration>
+                        <encoding>utf-8</encoding>
+                        <source>1.6</source>
+                        <target>1.6</target>
+                        <excludes>
+                            <exclude>**/package-info.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+  
+</project>
