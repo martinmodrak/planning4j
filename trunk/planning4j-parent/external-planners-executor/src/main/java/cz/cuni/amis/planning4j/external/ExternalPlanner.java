@@ -18,15 +18,17 @@ package cz.cuni.amis.planning4j.external;
 
 import cz.cuni.amis.planning4j.IDomainProvider;
 import cz.cuni.amis.planning4j.IPlanner;
-import cz.cuni.amis.planning4j.IPlanningResult;
 import cz.cuni.amis.planning4j.IProblemProvider;
+import cz.cuni.amis.planning4j.PlanningException;
 import cz.cuni.amis.planning4j.PlanningIOException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- *
+ * An implementation of {@link IPlanner} that writes the domain and problem to
+ * a file and delegates the planning to {@link IExternalPlannerExecutor}.
+ * 
  * @author Martin Cerny
  */
 public class ExternalPlanner implements IPlanner{
@@ -36,6 +38,14 @@ public class ExternalPlanner implements IPlanner{
     private File domainTempFile;
     private File problemTempFile;
 
+    /**
+     * Creates a temp file and wraps the checked IOException.
+     * @param prefix
+     * @param suffix
+     * @param tempDirectory
+     * @throws PlanningIOException if the creation of temp file failed
+     * @return 
+     */
     private static File silentCreateTempFile(String prefix, String suffix, File tempDirectory){
         try {
             return File.createTempFile(prefix, suffix, tempDirectory);            
@@ -44,14 +54,26 @@ public class ExternalPlanner implements IPlanner{
         }
     }
     
+    /**
+     * Create a planner with the specified executor. Input files are created in default temp directory.
+     * @param externalPlannerExecutor 
+     */
     public ExternalPlanner(IExternalPlannerExecutor externalPlannerExecutor) {
         this(externalPlannerExecutor, new File(System.getProperty("java.io.tmpdir")));
     }
     
+    /**
+     * Create a planner with the specified executor. Input files are created in specified temp directory.
+     * @param externalPlannerExecutor 
+     */
     public ExternalPlanner(IExternalPlannerExecutor externalPlannerExecutor, File tempDirectory) {
         this(externalPlannerExecutor, silentCreateTempFile("domain_", ".pddl", tempDirectory), silentCreateTempFile("problem_", ".pddl", tempDirectory));
     }
 
+    /**
+     * Create a planner with the specified executor. Location of input files is fully specified.
+     * @param externalPlannerExecutor 
+     */
     public ExternalPlanner(IExternalPlannerExecutor externalPlannerExecutor, File domainTempFile, File problemTempFile) {
         this.externalPlannerExecutor = externalPlannerExecutor;
         this.domainTempFile = domainTempFile;
@@ -59,16 +81,25 @@ public class ExternalPlanner implements IPlanner{
     }
 
         
+    /**
+     * Writes the domain and problem to file and delegates the planning to {@link #externalPlannerExecutor}.
+     * @param domainProvider
+     * @param problemProvider
+     * @return planning result
+     * @throws PlanningException if the planner execution failed or the domain and problem files could not be generated
+     */
     @Override
     public IExternalPlanningResult plan(IDomainProvider domainProvider, IProblemProvider problemProvider) {
         try {
+            long start_time = System.currentTimeMillis();
             FileWriter domainFileWriter = new FileWriter(domainTempFile);
             domainProvider.writeDomain(domainFileWriter);
             domainFileWriter.close();
             FileWriter problemFileWriter = new FileWriter(problemTempFile);
             problemProvider.writeProblem(problemFileWriter);
             problemFileWriter.close();
-            return externalPlannerExecutor.executePlanner(domainTempFile, problemTempFile);
+            long io_time = System.currentTimeMillis() - start_time;
+            return externalPlannerExecutor.executePlanner(domainTempFile, problemTempFile, io_time);
         } catch(IOException ex){
             throw new PlanningIOException(ex);
         }

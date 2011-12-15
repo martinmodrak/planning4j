@@ -19,7 +19,7 @@ package cz.cuni.amis.planning4j.external.impl.itsimple;
 import cz.cuni.amis.planning4j.PlanningException;
 
 /**
- *
+ * An exception that ocurred while working with the ItSimple planning connector.
  * @author Martin Cerny
  */
 public class ItSimplePlanningException extends PlanningException {

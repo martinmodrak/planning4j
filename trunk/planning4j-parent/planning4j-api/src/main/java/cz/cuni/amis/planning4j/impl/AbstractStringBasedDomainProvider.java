@@ -14,20 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cuni.amis.planning4j.pddl;
+package cz.cuni.amis.planning4j.impl;
+
+import cz.cuni.amis.planning4j.IDomainProvider;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
- * An object corresponding to a PDDL constant.
+ * A simple implementation of {@link IDomainProvider} that delegates everything
+ * to string definition.
  * @author Martin Cerny
  */
-public class PDDLConstant extends PDDLTypedObject{
+public abstract class AbstractStringBasedDomainProvider implements IDomainProvider{
 
-    public PDDLConstant(String name, PDDLType type) {
-        super(name, type);
-    }
-
-    public PDDLConstant(String name) {
-        super(name);
+    
+    
+    @Override
+    public void writeDomain(Writer writer) throws IOException {
+        writer.write(getDomainAsString());
     }
     
 }

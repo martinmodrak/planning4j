@@ -20,7 +20,7 @@ import cz.cuni.amis.planning4j.external.impl.itsimple.PlannerListManager;
 import cz.cuni.amis.planning4j.external.impl.itsimple.XMLUtilities;
 
 /**
- *
+ * An utility class to access planners in this package.
  * @author Martin Cerny
  */
 public class PlannersPackUtils {

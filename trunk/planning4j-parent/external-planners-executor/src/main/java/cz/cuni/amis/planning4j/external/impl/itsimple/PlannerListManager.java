@@ -33,7 +33,8 @@ import java.util.Set;
 import org.jdom.Element;
 
 /**
- *
+ * A class that works with XML definition of planners in ItSimple formats
+ * and allows to select a suitable planner for current platform.
  * @author Matheus, Martin Cerny
  */
 public class PlannerListManager {
@@ -59,12 +60,17 @@ public class PlannerListManager {
         return null;
     }
       
+    /**
+     * @see #suggestPlanners(java.util.Set) 
+     * @param requirements
+     * @return 
+     */
     public List<Element> suggestPlanners(PDDLRequirement ... requirements){
         return suggestPlanners(EnumSet.copyOf(Arrays.asList(requirements)));
     }
     
     /**
-     * This method select the planners that can deal with the given domain based on its requirements and runs on
+     * This method selects the planners that can deal with the given domain based on its requirements and runs on
      * current OS.
      * @return
      */
@@ -88,7 +94,7 @@ public class PlannerListManager {
     }
 
     /**
-     * This method verify if planner requirements contains domain requirements
+     * This method verifies if planner requirements contains domain requirements
      * @param plannerRequirements, list if DOM Element List Planner Requirements
      * @param planners, list of DOM Element Planner Requirements
      * @return
@@ -117,7 +123,7 @@ public class PlannerListManager {
     }
 
     /**
-     * This method verify if planner can be run on operating system
+     * This method verifies if planner can be run on operating system
      * @param planner, DOM Planner Element
      * @return
      */
@@ -137,7 +143,7 @@ public class PlannerListManager {
     }
 
     /**
-     * This method get the operating system name on which the itSIMPLE running
+     * This method gets the operating system name on which the program is running
      * @return
      */
     private String getOperatingSystem() {
