@@ -1,0 +1,49 @@
+#summary How to install jars for Planning4J
+#labels Phase-Deploy,Featured
+
+= Installation =
+
+Planning4J is best use with Apache Maven, it may however be used without it as well. 
+
+Currently Planning4J consists of 3 artifacts:
+
+  * *planning4j-api* Interfaces and other base classes needed by all the other artifacts
+  * *external-planners-executor* Interface to use external planners that comply with the [http://ipc.icaps-conference.org/ International Planning Competition] specifications. Refactored from [http://code.google.com/p/itsimple/ ItSimple project].
+  * *external-planners-pack* A pack of compiled planners for windows and unix platforms to be run with external-planners-executor
+
+= Maven installation =
+
+Add AMIS repository to your project
+{{{
+        <repository>
+            <id>amis-artifactory</id>
+            <name>AMIS Artifactory</name>
+            <url>http://diana.ms.mff.cuni.cz:8081/artifactory/repo</url>
+        </repository>
+
+}}}
+
+Add dependency on Planning4J artifacts to your project:
+
+{{{
+        <dependency>
+            <groupId>cz.cuni.amis.planning4j</groupId>
+            <artifactId>planning4j-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cz.cuni.amis.planning4j.external</groupId>
+            <artifactId>external-planners-pack</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cz.cuni.amis.planning4j.external</groupId>
+            <artifactId>external-planners-pack</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+}}}
+
+= Downloading JARs manually =
+
+If you do not use maven, you can download the jars manually from our artifactory at http://diana.ms.mff.cuni.cz:8081/artifactory/libs-snapshot-local/cz/cuni/amis/planning4j/
+Sorry it's not more user friendly. 
