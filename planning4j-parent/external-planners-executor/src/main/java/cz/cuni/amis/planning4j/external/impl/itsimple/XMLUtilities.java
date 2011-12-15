@@ -42,6 +42,10 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
+/**
+ * Collection of utility classes to work with XML
+ * @author Martin Cerny
+ */
 public class XMLUtilities {
 
     /**

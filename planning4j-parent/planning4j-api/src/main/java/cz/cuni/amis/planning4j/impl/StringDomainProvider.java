@@ -14,20 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cuni.amis.planning4j.pddl;
+package cz.cuni.amis.planning4j.impl;
 
 /**
- * An object corresponding to a PDDL constant.
+ * A domain provider initialized by a PDDL string
  * @author Martin Cerny
  */
-public class PDDLConstant extends PDDLTypedObject{
+public class StringDomainProvider extends AbstractStringBasedDomainProvider {
 
-    public PDDLConstant(String name, PDDLType type) {
-        super(name, type);
+    private String domain;
+
+    public StringDomainProvider(String domain) {
+        this.domain = domain;
+    }
+        
+    
+    @Override
+    public String getDomainAsString() {
+        return domain;
     }
 
-    public PDDLConstant(String name) {
-        super(name);
-    }
     
 }

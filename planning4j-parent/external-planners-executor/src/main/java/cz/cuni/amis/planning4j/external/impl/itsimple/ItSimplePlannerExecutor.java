@@ -28,6 +28,7 @@ import cz.cuni.amis.planning4j.external.impl.ExternalPlanningResult;
 import cz.cuni.amis.planning4j.external.IExternalPlannerExecutor;
 import cz.cuni.amis.planning4j.external.IExternalPlanningResult;
 import cz.cuni.amis.planning4j.PlanningStatistics;
+import cz.cuni.amis.planning4j.utils.PlanningUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,8 +50,7 @@ import org.jdom.Element;
 
 /**
  * Executes a plan using external planners specified with ItSimple XML format.
- * It is to be noted, that planners may return plans with slightly changed action names. Some planners
- * convert names to upper/lower case, some alse substitute '-' for '_' and vice versa.
+ * Identifiers of the returned plan are treated with {@link PlanningUtils#normalizeIdentifier(java.lang.String) }
  * @author Martin Cerny
  */
 public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
@@ -466,13 +466,13 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
             // the first token is the action name
             String actionName = st.nextToken();
 
-            action.setName(actionName.toUpperCase());
+            action.setName(PlanningUtils.normalizeIdentifier(actionName));
 
             // the other tokens are the parameters
             List<String> parameterValues = new ArrayList<String>();
             while (st.hasMoreTokens()) {
                 String parameterStr = st.nextToken();
-                parameterValues.add(parameterStr.toUpperCase());
+                parameterValues.add(PlanningUtils.normalizeIdentifier(parameterStr));                
             }
             action.setParameters(parameterValues);
 
@@ -544,11 +544,11 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
      * @param domainFile
      * @param problemFile
      * @return an xml representation of the plan
-     */
+     */        
     @Override
-    public IExternalPlanningResult executePlanner(File domainFile, File problemFile) {
-        //set inicial time
-        long start_time = System.currentTimeMillis();
+    public IExternalPlanningResult executePlanner(File domainFile, File problemFile, long timeInIO) {
+        //set initial time
+        long start_time = System.currentTimeMillis() - timeInIO;
         // create the xml plan format
         //Element xmlPlan = null;
         //Element xmlPlan = thePlan;

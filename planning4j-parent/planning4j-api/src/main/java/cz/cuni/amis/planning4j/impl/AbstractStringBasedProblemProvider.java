@@ -14,20 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cuni.amis.planning4j.pddl;
+package cz.cuni.amis.planning4j.impl;
+
+import cz.cuni.amis.planning4j.IProblemProvider;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
- * An object corresponding to a PDDL constant.
+ * A simple implementation of {@link IProblemProvider} that delegates everything
+ * to string definition
  * @author Martin Cerny
  */
-public class PDDLConstant extends PDDLTypedObject{
+public abstract class AbstractStringBasedProblemProvider implements IProblemProvider{
 
-    public PDDLConstant(String name, PDDLType type) {
-        super(name, type);
-    }
-
-    public PDDLConstant(String name) {
-        super(name);
+    
+    
+    @Override
+    public void writeProblem(Writer writer) throws IOException {
+        writer.write(getProblemAsString());
     }
     
 }

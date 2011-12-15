@@ -1,21 +1,41 @@
+/*
+ * Copyright (C) 2011 AMIS research group, Faculty of Mathematics and Physics, Charles University in Prague, Czech Republic
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package cz.cuni.amis.planning4j;
 
+import cz.cuni.amis.planning4j.utils.PlanningUtils;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * An abstract representation of action returned by the planner.
+ * All planning results are represented by this class.
+ * The name of the action and it's parameters are always returned normalized 
+ * by {@link  PlanningUtils#normalizeIdentifier(java.lang.String) }.
  * @author Martin Cerny
  */
 public class ActionDescription {
     
     /**
-     * The name of the action (uppercase)
+     * The name of the action (normalized)
      */
     String name;
     
     /**
-     * List of parameter values (uppercase)
+     * List of instantied parameter values (normalized)
      */
     List<String> parameters;
     double startTime;
@@ -37,6 +57,10 @@ public class ActionDescription {
         this.name = name;
     }
 
+    /**
+     * Notes for action - any metadata added by the planner.
+     * @return 
+     */
     public String getNotes() {
         return notes;
     }

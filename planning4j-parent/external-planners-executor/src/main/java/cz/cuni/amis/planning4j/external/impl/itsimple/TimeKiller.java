@@ -32,11 +32,6 @@
  */
 
 package cz.cuni.amis.planning4j.external.impl.itsimple;
-
-import java.io.*;
-import java.util.*;
-
-/// Kill a thread after a given timeout has elapsed
 // <P>
 // A simple timeout class.  You give it a thread to watch and a timeout
 // in milliseconds.  After the timeout has elapsed, the thread is killed

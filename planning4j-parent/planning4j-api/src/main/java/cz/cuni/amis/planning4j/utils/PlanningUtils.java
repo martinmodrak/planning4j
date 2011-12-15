@@ -14,20 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cuni.amis.planning4j.pddl;
+package cz.cuni.amis.planning4j.utils;
 
 /**
- * An object corresponding to a PDDL constant.
+ * A collection of utility methods employed by most planners.
  * @author Martin Cerny
  */
-public class PDDLConstant extends PDDLTypedObject{
-
-    public PDDLConstant(String name, PDDLType type) {
-        super(name, type);
-    }
-
-    public PDDLConstant(String name) {
-        super(name);
-    }
+public class PlanningUtils {
     
+    /**
+     * Normalizes an identifier. Some planners modify indentifier names,
+     * namely turn them into upper/lower case and/or replace minuses with underscores or
+     * vice-versa. Identifier returned in planning result is guaranteed to be equal
+     * to a normalized form of the identifier as it was submitted to the planner.
+     * The identifier is returned in uppercase and minuses are translated to underscores.
+     * @param identifier
+     * @return 
+     */
+    public static String normalizeIdentifier(String identifier){
+        return identifier.toUpperCase().replace('-', '_');
+    }
 }
