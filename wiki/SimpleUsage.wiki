@@ -1,0 +1,141 @@
+#summary Simple example of usage of Planning4J
+
+To run this examples you need to add Planning4J jars to your project. See [Installation] for a description of this.
+
+= ItSimple external planners =
+
+Those are so far the only working planning connectors. It executes an external binary planner. You can specfiy your own external planners with ItSimple XML format and pass it to [http://diana.ms.mff.cuni.cz:8080/view/Planning/job/Planning4J/javadoc/cz/cuni/amis/planning4j/external/impl/itsimple/PlannerListManager.html PlannerListManager] class. Or you can use the provided planner pack. The latter case will be discussed further.
+
+== Unpacking the planners ==
+
+The planners are contained in the external-planners-pack artifact. You can either extract it's contents manually to your project working directory, or you can let Maven do that for you. To extract the package automatically with your build add following XML to the build part of you POM:
+
+{{{
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-dependency-plugin</artifactId>
+    <version>2.3</version>
+    <executions>
+        <execution>
+            <phase>generate-resources</phase>
+            <goals>
+                <goal>unpack</goal>
+            </goals>
+            <configuration>
+                <artifactItems>
+                    <artifactItem>
+                        <groupId>cz.cuni.amis.planning4j.external</groupId>
+                        <artifactId>external-planners-pack</artifactId>
+                        <outputDirectory>${project.build.directory}</outputDirectory>
+                        <includes>planners/**/*</includes>
+                    </artifactItem>
+                </artifactItems>                            
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+}}}
+
+(note: the planner pack has to be declared as a dependency to your project).
+
+Now lets call a planner:
+
+{{{
+import cz.cuni.amis.planning4j.ActionDescription;
+import cz.cuni.amis.planning4j.IDomainProvider;
+import cz.cuni.amis.planning4j.IPlanner;
+import cz.cuni.amis.planning4j.IPlanningResult;
+import cz.cuni.amis.planning4j.IProblemProvider;
+import cz.cuni.amis.planning4j.PlanningException;
+import cz.cuni.amis.planning4j.external.ExternalPlanner;
+import cz.cuni.amis.planning4j.external.impl.itsimple.ItSimplePlannerExecutor;
+import cz.cuni.amis.planning4j.external.impl.itsimple.PlannerListManager;
+import cz.cuni.amis.planning4j.external.plannerspack.PlannersPackUtils;
+import cz.cuni.amis.planning4j.impl.PDDLDomainProvider;
+import cz.cuni.amis.planning4j.impl.PDDLProblemProvider;
+import cz.cuni.amis.planning4j.pddl.PDDLDomain;
+import cz.cuni.amis.planning4j.pddl.PDDLPredicate;
+import cz.cuni.amis.planning4j.pddl.PDDLProblem;
+import cz.cuni.amis.planning4j.pddl.PDDLRequirement;
+import cz.cuni.amis.planning4j.pddl.PDDLSimpleAction;
+import java.util.EnumSet;
+import java.util.List;
+import org.jdom.Element;
+
+
+public class PlanningTest {
+
+    public static void main(String args[]) {
+   
+
+        /**
+         * Create a simple domain - two locations and an action to move between them
+         */
+        PDDLDomain domain = new PDDLDomain("test", EnumSet.of(PDDLRequirement.STRIPS));
+        domain.addPredicate(new PDDLPredicate("at_loc1"));
+        domain.addPredicate(new PDDLPredicate("at_loc2"));
+
+        PDDLSimpleAction moveAction = new PDDLSimpleAction("move");
+        moveAction.setPreconditionList("at_loc1");
+        moveAction.setPositiveEffects("at_loc2");
+        moveAction.setNegativeEffects("at_loc1");
+        domain.addAction(moveAction);
+
+        PDDLProblem problem = new PDDLProblem("problem_1", "test");
+        problem.setInitialLiterals("at_loc1");
+        problem.setGoalCondition("at_loc2");
+
+        IDomainProvider domainProvider = new PDDLDomainProvider(domain);
+        IProblemProvider problemProvider = new PDDLProblemProvider(problem);
+
+        /**
+         * Get a planner:
+         */
+        PlannerListManager plannerManager = PlannersPackUtils.getPlannerListManager();
+
+        //Let the engine suggest as a planner that supports strips and runs on current platform
+        List<Element> suggestedPlanners = plannerManager.suggestPlanners(PDDLRequirement.STRIPS);
+
+        if (suggestedPlanners.isEmpty()) {
+            System.out.println("No planner found for current platform.");
+            return;
+        }
+
+        //let's use the first suggested planner
+        Element plannerElement = suggestedPlanners.get(0);
+
+        //To use a planner by name uncomment the following line
+        //Element plannerElement = plannerManager.getPlannerByName("Metric-FF");
+
+        try {
+            IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerElement));
+            IPlanningResult result = planner.plan(domainProvider, problemProvider);
+            if (!result.isSuccess()) {
+                System.out.println("No solution found.");
+                return;
+            } else {
+                System.out.println("Found solution. The plan is:");
+                for (ActionDescription action : result.getPlan()) {
+                    System.out.println(action.getName());
+                }
+            }
+        } catch (PlanningException ex) {
+            System.out.println("Exception during planning.");
+            ex.printStackTrace();
+        }
+
+
+
+    }
+}
+
+}}}
+
+
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
