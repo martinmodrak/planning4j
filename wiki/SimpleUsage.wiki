@@ -109,9 +109,11 @@ public class PlanningTest {
         //To use a planner by name uncomment the following line
         //Element plannerElement = plannerManager.getPlannerByName("Metric-FF");
 
+       //This will be true with default maven project. If you have extracted the planners elsewhere, change it
+        File plannersDirectory = new File("target");
+        
         try {
-            IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerElement));
-            IPlanningResult result = planner.plan(domainProvider, problemProvider);
+            IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerElement,plannersDirectory));            IPlanningResult result = planner.plan(domainProvider, problemProvider);
             if (!result.isSuccess()) {
                 System.out.println("No solution found.");
                 return;
