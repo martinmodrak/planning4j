@@ -16,6 +16,7 @@
  */
 package cz.cuni.amis.planning4j.pddl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,6 +43,10 @@ public class PDDLProblem {
 
     public void setInitialLiterals(List<String> initialLiterals) {
         this.initialLiterals = initialLiterals;
+    }
+
+    public void setInitialLiterals(String ... initialLiterals) {
+        this.initialLiterals = Arrays.asList(initialLiterals);
     }
 
     public String getDomainName() {
