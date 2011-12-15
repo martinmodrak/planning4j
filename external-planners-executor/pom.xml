@@ -5,13 +5,13 @@
     <groupId>cz.cuni.amis.planning4j.external</groupId>
     <artifactId>external-planners-executor</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.8</version>
     <name>external-planners-executor</name>
 
     <parent>
         <groupId>cz.cuni.amis.planning4j</groupId>
         <artifactId>planning4j-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.8</version>
     </parent>    
     
     <dependencies>
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>cz.cuni.amis.planning4j</groupId>
             <artifactId>planning4j-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.8</version>
         </dependency>
     </dependencies>
 <!--    <repositories>
