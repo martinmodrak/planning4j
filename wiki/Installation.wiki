@@ -45,5 +45,12 @@ Add dependency on Planning4J artifacts to your project:
 
 = Downloading JARs manually =
 
-If you do not use maven, you can download the jars manually from our artifactory at http://diana.ms.mff.cuni.cz:8081/artifactory/libs-snapshot-local/cz/cuni/amis/planning4j/
+If you do not use maven, you can download the jars manually from our artifactory. The most current version (snapshot) can be found at 
+
+http://diana.ms.mff.cuni.cz:8081/artifactory/libs-snapshot-local/cz/cuni/amis/planning4j/
+
+The current stable version can be found at
+
+http://diana.ms.mff.cuni.cz:8081/artifactory/libs-release-local/cz/cuni/amis/planning4j/
+
 Sorry it's not more user friendly. 
