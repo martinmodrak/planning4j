@@ -4,7 +4,7 @@
 
 A list of supported planners follows.
 
-== Platform specifix ==
+== Platform specific ==
 
 Some planners are included in binary form and are thus platform specific.
 
