@@ -1,0 +1,33 @@
+#summary List of supported planners
+
+= Supported planners =
+
+A list of supported planners follows.
+
+== Platform specifix ==
+
+Some planners are included in binary form and are thus platform specific.
+
+=== For Windows ===
+  * [http://www.loria.fr/~hoffmanj/metric-ff.html Metric-FF]
+  * [http://www.cs.rochester.edu/~kautz/satplan/blackbox/ BlackBox]
+
+== For Linux ==
+  * [http://www.loria.fr/~hoffmanj/metric-ff.html Metric-FF]
+  * [http://www.cs.rochester.edu/~kautz/satplan/blackbox/ BlackBox]
+  * [http://www.loria.fr/~hoffmanj/ff.html FF 2.3]
+  * [http://manip.crhc.uiuc.edu/programs/SGPlan/index.html SGPlan 5.22]
+  * [http://manip.crhc.uiuc.edu/programs/SGPlan/index.html SGPlan 6]
+  * [http://andorfer.cs.uni-dortmund.de/~edelkamp/mips/mips-xxl.html Mips XXL 1.0]
+  * [http://andorfer.cs.uni-dortmund.de/~edelkamp/mips/mips-xxl.html Mips XXL 2008]
+  * [http://ipc.informatik.uni-freiburg.de/Planners/ hspsp]
+  * [http://ipc.informatik.uni-freiburg.de/Planners/ Plan-A 1.0]
+  * [http://www.cse.wustl.edu/~chen/maxplan/ MaxPlan]
+  * [http://planning.cis.strath.ac.uk/LPRPG/ LPRPG]
+  * [http://planning.cis.strath.ac.uk/Marvin/ Marvin]
+ 
+
+
+== Cross-platform ==
+
+None yet, to be added soon
