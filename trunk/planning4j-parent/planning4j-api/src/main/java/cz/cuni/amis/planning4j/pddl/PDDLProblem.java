@@ -29,7 +29,7 @@ public class PDDLProblem {
     String domainName;
     
     List<String> initialLiterals;
-    String goalCondition;
+    List<String> goalConditions;
 
     public PDDLProblem(String problemName, String domainName) {
         this.problemName = problemName;
@@ -38,7 +38,7 @@ public class PDDLProblem {
     }
 
     public void setGoalCondition(String goalCondition) {
-        this.goalCondition = goalCondition;
+        this.goalConditions = Collections.singletonList(goalCondition);
     }
 
     public void setInitialLiterals(List<String> initialLiterals) {
@@ -53,8 +53,14 @@ public class PDDLProblem {
         return domainName;
     }
 
-    public String getGoalCondition() {
-        return goalCondition;
+    public String getGoalConditionAsString() {
+        if(goalConditions.isEmpty()){
+            return "true";
+        } else if (goalConditions.size() == 1){
+            return goalConditions.get(0);
+        } else {
+            return PDDLOperators.makeAnd(goalConditions);
+        }
     }
 
     public List<String> getInitialLiterals() {
@@ -63,6 +69,14 @@ public class PDDLProblem {
 
     public String getProblemName() {
         return problemName;
+    }
+
+    public List<String> getGoalConditions() {
+        return goalConditions;
+    }
+
+    public void setGoalConditions(List<String> goalConditions) {
+        this.goalConditions = goalConditions;
     }
 
     

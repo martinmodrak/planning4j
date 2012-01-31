@@ -17,6 +17,7 @@
 package cz.cuni.amis.planning4j.impl;
 
 import cz.cuni.amis.planning4j.IDomainProvider;
+import cz.cuni.amis.planning4j.pddl.PDDLDomain;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -33,5 +34,12 @@ public abstract class AbstractStringBasedDomainProvider implements IDomainProvid
     public void writeDomain(Writer writer) throws IOException {
         writer.write(getDomainAsString());
     }
+
+    @Override
+    public PDDLDomain getDomainAsPDDL() {
+        return null;
+    }
+    
+    
     
 }

@@ -18,6 +18,7 @@ package cz.cuni.amis.planning4j.impl;
 
 import cz.cuni.amis.planning4j.IProblemProvider;
 import cz.cuni.amis.planning4j.PlanningIOException;
+import cz.cuni.amis.planning4j.pddl.PDDLProblem;
 import java.io.IOException;
 import java.io.StringWriter;
 
@@ -40,5 +41,12 @@ public abstract class AbstractWriterBasedProblemProvider implements IProblemProv
             throw new PlanningIOException(ex);
         }
     }
+
+    @Override
+    public PDDLProblem getProblemAsPDDL() {
+        return null;
+    }
+    
+    
     
 }

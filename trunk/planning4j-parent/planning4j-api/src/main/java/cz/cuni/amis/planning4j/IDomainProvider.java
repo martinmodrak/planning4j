@@ -16,6 +16,7 @@
  */
 package cz.cuni.amis.planning4j;
 
+import cz.cuni.amis.planning4j.pddl.PDDLDomain;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -26,4 +27,5 @@ import java.io.Writer;
 public interface IDomainProvider {
     public void writeDomain(Writer writer) throws IOException;
     public String getDomainAsString();
+    public PDDLDomain getDomainAsPDDL();
 }

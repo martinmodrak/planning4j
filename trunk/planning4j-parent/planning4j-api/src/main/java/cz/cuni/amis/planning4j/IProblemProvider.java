@@ -16,6 +16,7 @@
  */
 package cz.cuni.amis.planning4j;
 
+import cz.cuni.amis.planning4j.pddl.PDDLProblem;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -26,4 +27,6 @@ import java.io.Writer;
 public interface IProblemProvider {
     public void writeProblem(Writer writer) throws IOException;
     public String getProblemAsString();
+    public PDDLProblem getProblemAsPDDL();
+    
 }

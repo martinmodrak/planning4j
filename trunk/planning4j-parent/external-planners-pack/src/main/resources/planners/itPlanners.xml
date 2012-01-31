@@ -309,7 +309,7 @@
 				<runAllComparison enabled="true" />
 			</settings>
 		</planner>
-		<planner id="4">
+<!--		<planner id="4">
 			<name>SATPlan2006</name>
 			<version>1.1 Linux</version>
 			<date>2006</date>
@@ -376,8 +376,8 @@
 				<timeout enabled="false">600</timeout>
 				<runAllComparison enabled="true" />
 			</settings>
-		</planner>
-		<planner id="5">
+		</planner>-->
+<!--		<planner id="5">
 			<name>LPG-td</name>
 			<version>1.0 Linux</version>
 			<date>August 2004</date>
@@ -468,8 +468,9 @@
 				<timeout enabled="false">600</timeout>
 				<runAllComparison enabled="true" />
 			</settings>
-		</planner>
-		<planner id="6">
+		</planner>-->
+                <!-- Currently not part of the pack -->
+<!--		<planner id="6">
 			<name>LPG-td</name>
 			<version>1.0 Windows</version>
 			<date>August 2004</date>
@@ -561,7 +562,7 @@
 				<timeout enabled="false">600</timeout>
 				<runAllComparison enabled="true" />
 			</settings>
-		</planner>
+		</planner>-->
 		<planner id="7">
 			<name>MIPS-XXL</name>
 			<version>IPC-6 v1.2 Linux</version>
@@ -944,7 +945,7 @@
 				<runAllComparison enabled="true" />
 			</settings>
 		</planner>
-		<planner id="11">
+<!--		<planner id="11">
 			<name>LPG</name>
 			<version>1.2 Linux</version>
 			<date>June 2003</date>
@@ -1027,7 +1028,7 @@
 				<timeout enabled="false">600</timeout>
 				<runAllComparison enabled="true" />
 			</settings>
-		</planner>
+		</planner>-->
 		<planner id="12">
 			<name>hspsp</name>
 			<version>IPC-6 (2008) Linux</version>
