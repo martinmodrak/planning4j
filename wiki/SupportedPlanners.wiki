@@ -2,11 +2,17 @@
 
 = Supported planners =
 
-A list of supported planners follows.
+A list of supported planners follows. 
+
+== Cross-platform ==
+
+  * ANA* - Fast planner for relaxed domains (without negative effects) see [Using ANA*]
 
 == Platform specific ==
 
 Some planners are included in binary form and are thus platform specific.
+
+Following platform specific planners are provided by the external planner connector taken from ItSimple project. For usage instructions see [SimpleUsage].
 
 === For Windows ===
   * [http://www.loria.fr/~hoffmanj/metric-ff.html Metric-FF]
@@ -26,8 +32,3 @@ Some planners are included in binary form and are thus platform specific.
   * [http://planning.cis.strath.ac.uk/LPRPG/ LPRPG]
   * [http://planning.cis.strath.ac.uk/Marvin/ Marvin]
  
-
-
-== Cross-platform ==
-
-None yet, to be added soon
