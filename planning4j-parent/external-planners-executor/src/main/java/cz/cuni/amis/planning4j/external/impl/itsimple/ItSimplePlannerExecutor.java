@@ -300,13 +300,13 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
                 try {
                     errorOuput = IOUtils.toString(process.getErrorStream());
                 } catch (IOException ex) {
-                    errorOuput = "Could not get error stream";
+                    errorOuput = "Could not get error stream: " + ex.getMessage();
                 }
                 StringBuilder consoleOutputTogether = new StringBuilder();
                 for(String s : consoleOutput){
                     consoleOutputTogether.append(s).append("\n");
                 }
-                throw new PlanningException("Planner terminated with an error. Planner output:\n " +consoleOutputTogether.toString() +"\nError output:\n" + errorOuput);
+                throw new PlanningException("Planner terminated with an error - exit code: " + process.exitValue() + ". Planner output:\n " +consoleOutputTogether.toString() +"\nError output:\n" + errorOuput);
             }
 
 
