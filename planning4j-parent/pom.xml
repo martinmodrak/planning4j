@@ -13,7 +13,6 @@
             <name>GNU GPL v3</name>
         </license>
     </licenses>
-    <url>http://maven.apache.org</url>
     
     <properties>
         <netbeans.hint.license>gpl30</netbeans.hint.license>

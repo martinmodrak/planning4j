@@ -51,6 +51,11 @@ public class PDDLPredicate {
     public List<PDDLParameter> getParameters() {
         return parameters;
     }
+
+    @Override
+    public String toString() {
+        return name + "/" + parameters.size();
+    }
     
     
 }

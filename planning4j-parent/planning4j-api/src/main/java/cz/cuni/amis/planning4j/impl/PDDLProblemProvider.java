@@ -31,6 +31,13 @@ public class PDDLProblemProvider extends AbstractWriterBasedProblemProvider{
     public PDDLProblemProvider(PDDLProblem problem) {
         this.problem = problem;
     }
+
+    @Override
+    public PDDLProblem getProblemAsPDDL() {
+        return problem;
+    }
+    
+    
     
     @Override
     public void writeProblem(Writer writer) throws IOException {
@@ -42,7 +49,7 @@ public class PDDLProblemProvider extends AbstractWriterBasedProblemProvider{
             }
             writer.write("\t)\n");
         }
-        writer.write("\t(:goal (" + problem.getGoalCondition() + "))\n");
+        writer.write("\t(:goal (" + problem.getGoalConditionAsString() + "))\n");
         writer.write(")\n");
     }
     

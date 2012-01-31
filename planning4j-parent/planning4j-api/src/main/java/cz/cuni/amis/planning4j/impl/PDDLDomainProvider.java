@@ -38,6 +38,13 @@ public class PDDLDomainProvider extends AbstractWriterBasedDomainProvider {
         this.domain = domain;
     }
 
+    @Override
+    public PDDLDomain getDomainAsPDDL() {
+        return domain;
+    }
+
+    
+    
     protected void writeRequirements(Writer writer) throws IOException {
         writer.write("\t(:requirements");
         for(PDDLRequirement req : domain.getRequirements()){
