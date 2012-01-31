@@ -6,7 +6,7 @@ A list of supported planners follows.
 
 == Cross-platform ==
 
-  * ANA`*` - Fast planner for relaxed domains (without negative effects) see [Using ANA]
+  * ANA`*` - Fast planner for relaxed domains (without negative effects) see [UsingANA]
 
 == Platform specific ==
 
