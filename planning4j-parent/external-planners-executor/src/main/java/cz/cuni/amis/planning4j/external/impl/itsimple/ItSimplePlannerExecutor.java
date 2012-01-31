@@ -281,6 +281,14 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
             }
             sc.close();
 
+            String errorOuput;
+            try {
+                errorOuput = IOUtils.toString(process.getErrorStream());
+            } catch (IOException ex) {
+                errorOuput = "Could not get error stream: " + ex.getMessage();
+            }
+            
+            
             try {
                 process.waitFor();
             } catch (InterruptedException ex) {
@@ -296,12 +304,6 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
             }
 
             if(process.exitValue() != 0){
-                String errorOuput;
-                try {
-                    errorOuput = IOUtils.toString(process.getErrorStream());
-                } catch (IOException ex) {
-                    errorOuput = "Could not get error stream: " + ex.getMessage();
-                }
                 StringBuilder consoleOutputTogether = new StringBuilder();
                 for(String s : consoleOutput){
                     consoleOutputTogether.append(s).append("\n");
