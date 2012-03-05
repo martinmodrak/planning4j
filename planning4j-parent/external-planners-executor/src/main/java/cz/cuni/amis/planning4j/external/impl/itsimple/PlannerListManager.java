@@ -56,8 +56,29 @@ public class PlannerListManager {
      * Uses current working directory to call {@link #extractAndPreparePlanner(java.io.File, org.jdom.Element) }
      * @param selectedPlanner 
      */
-    public void extractAndPreparePlanner(Element selectedPlanner){
+    public final void extractAndPreparePlanner(Element selectedPlanner){
         extractAndPreparePlanner(new File("."), selectedPlanner);
+    }
+    
+    protected void extractFileIfNotExists(File targetFile, String resourcePath){
+        if(!targetFile.exists()){        
+            InputStream inputStream = getClass().getResourceAsStream(resourcePath);
+            if(inputStream == null){
+                throw new ItSimplePlanningException("Could not find planner resource on classpath. Resource path:" + resourcePath);
+            }
+            if(!targetFile.getParentFile().exists() && !targetFile.getParentFile().mkdirs()){
+                throw new ItSimplePlanningException("Could not create parent dirs for planner resource " + targetFile);                
+            }
+            try {
+                FileOutputStream outputfilestream = new FileOutputStream(targetFile);
+                IOUtils.copy(inputStream, outputfilestream);
+                outputfilestream.close();
+            } catch (IOException ex){
+                throw new ItSimplePlanningException("Could not extract planner resource to " + targetFile, ex);
+            }
+        }
+        
+        
     }
     
     /**
@@ -70,26 +91,10 @@ public class PlannerListManager {
     public void extractAndPreparePlanner(File targetDirectory, Element selectedPlanner) {
 
         File binaryFile = ItSimpleUtils.getPlannerExecutableFile(targetDirectory, selectedPlanner);
+        final String plannerRelativeFileName = ItSimpleUtils.getPlannerRelativeFileName(selectedPlanner);
+        String plannerResourcePath = "/" + plannerRelativeFileName;
         
-        if(!binaryFile.exists()){        
-            final String plannerRelativeFileName = ItSimpleUtils.getPlannerRelativeFileName(selectedPlanner);
-            String plannerResourcePath = "/" + plannerRelativeFileName;
-            InputStream inputStream = getClass().getResourceAsStream(plannerResourcePath);
-            if(inputStream == null){
-                throw new ItSimplePlanningException("Could not find planner resource on classpath. Resource path:" + plannerResourcePath);
-            }
-            if(!binaryFile.getParentFile().exists() && !binaryFile.getParentFile().mkdirs()){
-                throw new ItSimplePlanningException("Could not create parent dirs for planner " + binaryFile);                
-            }
-            try {
-                FileOutputStream outputfilestream = new FileOutputStream(binaryFile);
-                IOUtils.copy(inputStream, outputfilestream);
-                outputfilestream.close();
-            } catch (IOException ex){
-                throw new ItSimplePlanningException("Could not extract planner to " + binaryFile, ex);
-            }
-        }
-        
+        extractFileIfNotExists(binaryFile, plannerResourcePath);                
         preparePlanner(targetDirectory, selectedPlanner);        
         
     }
@@ -98,7 +103,7 @@ public class PlannerListManager {
      * Uses current working directory to call {@link #extractAndPreparePlanner(java.io.File, org.jdom.Element) }
      * @param selectedPlanner 
      */
-    public void preparePlanner(Element selectedPlanner){
+    public final void preparePlanner(Element selectedPlanner){
         preparePlanner(new File("."), selectedPlanner);        
     }
         
