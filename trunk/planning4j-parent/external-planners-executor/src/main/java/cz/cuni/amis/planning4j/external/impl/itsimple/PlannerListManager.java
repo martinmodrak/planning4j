@@ -24,12 +24,19 @@
 package cz.cuni.amis.planning4j.external.impl.itsimple;
 
 import cz.cuni.amis.planning4j.pddl.PDDLRequirement;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.io.IOUtils;
 import org.jdom.Element;
 
 /**
@@ -45,6 +52,74 @@ public class PlannerListManager {
         this.plannersXml = plannersXml;
     }
 
+    /**
+     * Uses current working directory to call {@link #extractAndPreparePlanner(java.io.File, org.jdom.Element) }
+     * @param selectedPlanner 
+     */
+    public void extractAndPreparePlanner(Element selectedPlanner){
+        extractAndPreparePlanner(new File("."), selectedPlanner);
+    }
+    
+    /**
+     * If the planner does not exist in specified location, it is extracted from the planners pack,
+     * then {@link #preparePlanner(java.io.File, org.jdom.Element) } is called.
+     * @param targetDirectory the directory where the binary will be stored
+     * @param selectedPlanner 
+     * @throws ItSimplePlanningException if there is an IO error
+     */
+    public void extractAndPreparePlanner(File targetDirectory, Element selectedPlanner) {
+
+        File binaryFile = ItSimpleUtils.getPlannerExecutableFile(targetDirectory, selectedPlanner);
+        
+        if(!binaryFile.exists()){        
+            final String plannerRelativeFileName = ItSimpleUtils.getPlannerRelativeFileName(selectedPlanner);
+            String plannerResourcePath = "/" + plannerRelativeFileName;
+            InputStream inputStream = getClass().getResourceAsStream(plannerResourcePath);
+            if(inputStream == null){
+                throw new ItSimplePlanningException("Could not find planner resource on classpath. Resource path:" + plannerResourcePath);
+            }
+            if(!binaryFile.getParentFile().exists() && !binaryFile.getParentFile().mkdirs()){
+                throw new ItSimplePlanningException("Could not create parent dirs for planner " + binaryFile);                
+            }
+            try {
+                FileOutputStream outputfilestream = new FileOutputStream(binaryFile);
+                IOUtils.copy(inputStream, outputfilestream);
+                outputfilestream.close();
+            } catch (IOException ex){
+                throw new ItSimplePlanningException("Could not extract planner to " + binaryFile, ex);
+            }
+        }
+        
+        preparePlanner(targetDirectory, selectedPlanner);        
+        
+    }
+
+    /**
+     * Uses current working directory to call {@link #extractAndPreparePlanner(java.io.File, org.jdom.Element) }
+     * @param selectedPlanner 
+     */
+    public void preparePlanner(Element selectedPlanner){
+        preparePlanner(new File("."), selectedPlanner);        
+    }
+        
+    /**
+     * Prepares a planner for execution.
+     * As of now, it only tries to set executable permission on the planner file on linux
+     * systems.
+     * @param selectedPlanner 
+     * @param plannersDirectory directory where the planners were unpacked
+     */
+    public void preparePlanner(File plannersDirectory, Element selectedPlanner){
+        if(ItSimpleUtils.getOperatingSystem().equals("linux")){
+        File plannerFile = ItSimpleUtils.getPlannerExecutableFile(plannersDirectory, selectedPlanner);
+        try {
+            Runtime.getRuntime().exec(new String[] { "chmod", "+x", plannerFile.getAbsolutePath()});
+        } catch (IOException ex) {
+            Logger.getLogger(PlannerListManager.class.getName()).log(Level.SEVERE, "Could not set planner file permissions", ex);
+        }
+            
+        }
+    }
     
     /**
      * Get a planner for current platform by its name in XML.
@@ -147,17 +222,6 @@ public class PlannerListManager {
      * @return
      */
     private String getOperatingSystem() {
-
-        String operatingSystem = System.getProperty("os.name").toLowerCase();
-
-        if (operatingSystem.indexOf("linux") == 0) {
-            operatingSystem = "linux";
-        } else if (operatingSystem.indexOf("windows") == 0) {
-            operatingSystem = "windows";
-        } else if (operatingSystem.indexOf("mac") == 0) {
-            operatingSystem = "mac";
-        }
-
-        return operatingSystem;
+        return ItSimpleUtils.getOperatingSystem();
     }
 }
