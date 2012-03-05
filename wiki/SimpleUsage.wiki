@@ -11,35 +11,7 @@ Those are so far the only working planning connectors. It executes an external b
 
 == Unpacking the planners ==
 
-The planners are contained in the external-planners-pack artifact. You can either extract it's contents manually to your project working directory, or you can let Maven do that for you. To extract the package automatically with your build add following XML to the build part of you POM:
-
-{{{
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-dependency-plugin</artifactId>
-    <version>2.3</version>
-    <executions>
-        <execution>
-            <phase>generate-resources</phase>
-            <goals>
-                <goal>unpack</goal>
-            </goals>
-            <configuration>
-                <artifactItems>
-                    <artifactItem>
-                        <groupId>cz.cuni.amis.planning4j.external</groupId>
-                        <artifactId>external-planners-pack</artifactId>
-                        <outputDirectory>${project.build.directory}</outputDirectory>
-                        <includes>planners/**/*</includes>
-                    </artifactItem>
-                </artifactItems>                            
-            </configuration>
-        </execution>
-    </executions>
-</plugin>
-}}}
-
-(note: the planner pack has to be declared as a dependency to your project).
+The planners are contained in the external-planners-pack artifact. You can either extract it's contents manually to your project working directory, or you can unpack them at runtime as in the following example. You can also extract the planners with Maven see [ExtractingPlannersWithMaven]. Note that under Linux systems, you need to set executable permissions as well (if extracting at runtime, this is done for you).
 
 == Calling a planner ==
 
@@ -110,8 +82,10 @@ public class PlanningTest {
         //To use a planner by name uncomment the following line
         //Element plannerElement = plannerManager.getPlannerByName("Metric-FF");
 
-       //This will be true with default maven project. If you have extracted the planners elsewhere, change it
+       //This is the place to extract the planner
         File plannersDirectory = new File("target");
+        //The planner is extracted (only if it does not exist yet) and exec permissions are set under Linux
+        plannerManager.extractAndPreparePlanner(plannersDirectory, plannerElement);
         
         try {
             IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerElement,plannersDirectory));            IPlanningResult result = planner.plan(domainProvider, problemProvider);
