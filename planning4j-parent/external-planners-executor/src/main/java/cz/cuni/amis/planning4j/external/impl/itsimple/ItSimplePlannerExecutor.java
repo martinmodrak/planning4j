@@ -173,18 +173,22 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
 
         //1.Get main planner's parameters and arguments
         Element settings = chosenPlanner.getChild("settings");
+
+        String plannerRelativeFile = settings.getChildText("filePath");
+        //System.out.println(plannerFile);
+        File plannerExecutableFile = new File(plannerBinariesDirectory, plannerRelativeFile);
+        if (!plannerExecutableFile.exists()) {
+            String toolMessage = "Could not find selected planner '" + plannerRelativeFile + "' in directory " + plannerBinariesDirectory.getAbsolutePath();
+            throw new PlanningException(toolMessage);
+        }
+
+        
+        
         List<String> commandArguments = new ArrayList<String>();
 
         //1.0 Get planner execution file
-        commandArguments.add(settings.getChildText("filePath"));
+        commandArguments.add(plannerExecutableFile.getAbsolutePath());
 
-        String plannerFile = settings.getChildText("filePath");
-        //System.out.println(plannerFile);
-        File plannerRunFile = new File(plannerBinariesDirectory, plannerFile);
-        if (!plannerRunFile.exists()) {
-            String toolMessage = "Could not find selected planner '" + plannerFile + "' in directory '" + plannerBinariesDirectory.getAbsolutePath() + "'";
-            throw new PlanningException(toolMessage);
-        } else {
 
              //proceed only if planner file exists
 
@@ -293,7 +297,7 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
                 process.waitFor();
             } catch (InterruptedException ex) {
                 Logger.getLogger(ItSimplePlannerExecutor.class.getName()).log(Level.INFO, "Waiting for planner execution interrupted", ex);
-                destroyProcess(process, plannerRunFile);
+                destroyProcess(process, plannerExecutableFile);
                 return null;
             }
             
@@ -442,7 +446,7 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
 
 
 
-        }
+        
 
 
         return output;
@@ -557,14 +561,6 @@ public class ItSimplePlannerExecutor implements IExternalPlannerExecutor {
 
         //check if the planner file exists
         Element settings = chosenPlanner.getChild("settings");
-        String plannerFile = settings.getChildText("filePath");
-        //System.out.println(plannerFile);
-        File f = new File(plannerBinariesDirectory, plannerFile);
-        if (!f.exists()) {
-            String toolMessage = "Could not find selected planner '" + plannerFile + "' in directory " + plannerBinariesDirectory.getAbsolutePath();
-            throw new PlanningException(toolMessage);
-        }
-
 
         //1. get chosen planner output
         List<String> output = new ArrayList<String>();
