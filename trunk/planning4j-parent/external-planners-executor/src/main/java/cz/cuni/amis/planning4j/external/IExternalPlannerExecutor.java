@@ -16,6 +16,7 @@
  */
 package cz.cuni.amis.planning4j.external;
 
+import cz.cuni.amis.planning4j.IPlanFuture;
 import java.io.File;
 
 /**
@@ -38,7 +39,7 @@ public interface IExternalPlannerExecutor {
      * @param problemFile
      * @param timeSpentInIO time spent so far in writing the domain and problem file, implementations should add that to the time
      * they spent working with the planner
-     * @return an xml representation of the plan
+     * @return a future that will hold the result
      */
-    IExternalPlanningResult executePlanner(File domainFile, File problemFile, long timeSpentInIO);
+    IPlanFuture<IExternalPlanningResult> executePlanner(File domainFile, File problemFile, long timeSpentInIO);
 }

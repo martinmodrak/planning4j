@@ -19,53 +19,30 @@ package cz.cuni.amis.planning4j.external.impl;
 import cz.cuni.amis.planning4j.external.IExternalPlanningResult;
 import cz.cuni.amis.planning4j.ActionDescription;
 import cz.cuni.amis.planning4j.PlanningStatistics;
+import cz.cuni.amis.planning4j.impl.PlanningResult;
 import java.util.List;
 
 /**
  * An implementation of {@link IExternalPlanningResult}
  * @author Martin Cerny
  */
-public class ExternalPlanningResult implements IExternalPlanningResult {
-    private boolean success;
-    private List<ActionDescription> plan;
+public class ExternalPlanningResult extends PlanningResult implements IExternalPlanningResult {
     private String consoleOutput;
     
     /**
      * Time in miliseconds that the whole execution of the planner took
      */    
     private long time;
-    
-    /**
-     * Statistics about the planning as provided by the planner
-     */
-    private PlanningStatistics planningStatistics;
 
     public ExternalPlanningResult(boolean success, List<ActionDescription> plan, String consoleOutput, PlanningStatistics planningStatistics, long time) {
-        this.success = success;
-        this.plan = plan;
+        super(success, plan, planningStatistics);
         this.consoleOutput = consoleOutput;
-        this.planningStatistics = planningStatistics;
         this.time  = time;
     }
 
     @Override
     public String getConsoleOutput() {
         return consoleOutput;
-    }
-
-    @Override
-    public List<ActionDescription> getPlan() {
-        return plan;
-    }
-
-    @Override
-    public PlanningStatistics getPlanningStatistics() {
-        return planningStatistics;
-    }
-
-    @Override
-    public boolean isSuccess() {
-        return success;
     }
 
     @Override

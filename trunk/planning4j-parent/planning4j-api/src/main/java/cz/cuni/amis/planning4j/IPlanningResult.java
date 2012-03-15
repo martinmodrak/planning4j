@@ -27,6 +27,10 @@ public interface IPlanningResult {
 
     List<ActionDescription> getPlan();
 
+    /**
+     * Returns statistics of the planning process, might be null, if planning was not succesful.
+     * @return 
+     */
     PlanningStatistics getPlanningStatistics();
 
     /**
