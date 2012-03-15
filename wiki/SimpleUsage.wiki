@@ -118,3 +118,7 @@ If you have your domain in a string, just create different domain and problem pr
         IProblemProvider problemProvider = new StringProblemProvider(problemString);
 
 }}}
+
+== Asynchronuous execution ==
+
+Planning4J has facilities to run planners asynchronuously. Most planners directly implement the `IAsyncPlanner` interface, which has `planAsync` method, returning an instance of `IPlanFuture`. If a planner provides only synchronuous execution out of the box, you can wrap it in `AsyncPlannerWrapper` instance. For more details see Javadoc of those classes.
