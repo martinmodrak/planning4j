@@ -54,6 +54,24 @@
         </snapshotRepository>
     </distributionManagement>
   
+    <repositories>
+        <repository>
+            <id>amis-artifactory-libs-release-local</id>
+            <name>AMIS Artifactory (local-release)</name>
+            <url>http://diana.ms.mff.cuni.cz:8081/artifactory/libs-release-local</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>amis-artifactory-libs-snapshot-local</id>
+            <name>AMIS Artifactory (local-snapshot)</name>
+            <url>http://diana.ms.mff.cuni.cz:8081/artifactory/libs-snapshot-local</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
   
     <build>
         <extensions>

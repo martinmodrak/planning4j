@@ -20,7 +20,8 @@ import cz.cuni.amis.planning4j.utils.PlanningUtils;
 
 /**
  * General interface for any planner. The implementation must ensure, that identifiers of actions and objects in the planning
- * result were normalized with {@link PlanningUtils#normalizeIdentifier(java.lang.String) }
+ * result were normalized with {@link PlanningUtils#normalizeIdentifier(java.lang.String) }. Whenever possible, implementors should
+ * consider implementing the {@link IAsyncPlanner} interface.
  * @author Martin Cerny
  */
 public interface IPlanner {

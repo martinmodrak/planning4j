@@ -16,11 +16,15 @@
  */
 package cz.cuni.amis.planning4j.external;
 
+import cz.cuni.amis.planning4j.IAsyncPlanner;
 import cz.cuni.amis.planning4j.IDomainProvider;
+import cz.cuni.amis.planning4j.IPlanFuture;
 import cz.cuni.amis.planning4j.IPlanner;
+import cz.cuni.amis.planning4j.IPlanningResult;
 import cz.cuni.amis.planning4j.IProblemProvider;
 import cz.cuni.amis.planning4j.PlanningException;
 import cz.cuni.amis.planning4j.PlanningIOException;
+import cz.cuni.amis.planning4j.impl.AbstractAsyncPlanner;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,7 +35,7 @@ import java.io.IOException;
  * 
  * @author Martin Cerny
  */
-public class ExternalPlanner implements IPlanner{
+public class ExternalPlanner extends AbstractAsyncPlanner{
     
     
     private IExternalPlannerExecutor externalPlannerExecutor;
@@ -80,6 +84,13 @@ public class ExternalPlanner implements IPlanner{
         this.problemTempFile = problemTempFile;
     }
 
+    @Override
+    public IExternalPlanningResult plan(IDomainProvider domainProvider, IProblemProvider problemProvider) {
+        //this conversion is safe, since the super implementation just calls planAsync
+        return (IExternalPlanningResult)super.plan(domainProvider, problemProvider);
+    }
+
+    
         
     /**
      * Writes the domain and problem to file and delegates the planning to {@link #externalPlannerExecutor}.
@@ -89,7 +100,7 @@ public class ExternalPlanner implements IPlanner{
      * @throws PlanningException if the planner execution failed or the domain and problem files could not be generated
      */
     @Override
-    public IExternalPlanningResult plan(IDomainProvider domainProvider, IProblemProvider problemProvider) {
+    public IPlanFuture<IExternalPlanningResult> planAsync(IDomainProvider domainProvider, IProblemProvider problemProvider) {
         try {
             long start_time = System.currentTimeMillis();
             FileWriter domainFileWriter = new FileWriter(domainTempFile);
