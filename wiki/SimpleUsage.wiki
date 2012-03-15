@@ -7,7 +7,7 @@ To run this examples you need to add Planning4J jars to your project. See [Insta
 
 = ItSimple external planners =
 
-Those are so far the only working planning connectors. It executes an external binary planner. You can specfiy your own external planners with ItSimple XML format and pass it to [http://diana.ms.mff.cuni.cz:8080/view/Planning/job/Planning4J/javadoc/cz/cuni/amis/planning4j/external/impl/itsimple/PlannerListManager.html PlannerListManager] class. Or you can use the provided planner pack. The latter case will be discussed further.
+This is the most valuable planning connector so far. It executes an external binary planner that complies to [http://ipc.icaps-conference.org/ IPC] standards. You can specfiy your own external planners with ItSimple XML format and pass it to [http://diana.ms.mff.cuni.cz:8080/view/Planning/job/Planning4J/javadoc/cz/cuni/amis/planning4j/external/impl/itsimple/PlannerListManager.html PlannerListManager] class. Or you can use the provided planner pack. The latter case will be discussed further.
 
 == Unpacking the planners ==
 
