@@ -36,7 +36,10 @@ public abstract class AbstractAsyncPlanner implements IAsyncPlanner{
         IPlanFuture future = planAsync(domainProvider, problemProvider);
         try {
             return future.get();
-        } catch (Exception ex) {
+        } catch(PlanningException ex){
+            throw ex;
+        }
+        catch (Exception ex) {
             throw new PlanningException("Asynchronuous plan computation failed: " + ex.getMessage(), ex);
         } 
         
