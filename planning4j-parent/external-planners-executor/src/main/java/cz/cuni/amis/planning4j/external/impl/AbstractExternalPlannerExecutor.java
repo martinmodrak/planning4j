@@ -43,7 +43,11 @@ public abstract class AbstractExternalPlannerExecutor implements IExternalPlanne
 
             @Override
             public void run() {
-                future.setResult(planningProcess.executePlanner());                
+                try {
+                    future.setResult(planningProcess.executePlanner());                
+                } catch(Exception ex){
+                    future.computationException(ex);                    
+                }
                 Runtime.getRuntime().removeShutdownHook(shutdownHook);
             }
         }, "ExternalPlanner").start();

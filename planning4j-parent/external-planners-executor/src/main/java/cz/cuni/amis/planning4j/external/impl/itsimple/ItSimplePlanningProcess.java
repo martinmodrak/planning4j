@@ -318,6 +318,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             }
 
             process.waitFor();
+            logger.info("\n>> Planner " + chosenPlanner.getChildText("name") + " finished execution\n ");
         } catch (InterruptedException ex) {
             if (cancelled) {
                 return null;
@@ -336,12 +337,20 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             return null;
         }
 
+        boolean plannerFoundNoSolution = false;
+        
         if (process.exitValue() != 0) {
-            StringBuilder consoleOutputTogether = new StringBuilder();
-            for (String s : consoleOutput) {
-                consoleOutputTogether.append(s).append("\n");
+            if(settings.getChild("noPlanFoundSignal") != null && settings.getChild("noPlanFoundSignal").getChild("errorCode") != null
+                    && Integer.parseInt(settings.getChild("noPlanFoundSignal").getChild("errorCode").getText()) == process.exitValue())
+            {
+                plannerFoundNoSolution = true;
+            } else {
+                StringBuilder consoleOutputTogether = new StringBuilder();
+                for (String s : consoleOutput) {
+                    consoleOutputTogether.append(s).append("\n");
+                }
+                throw new PlanningException("Planner terminated with an error - exit code: " + process.exitValue() + ". Planner output:\n " + consoleOutputTogether.toString() + "\nError output:\n" + errorOuput);
             }
-            throw new PlanningException("Planner terminated with an error - exit code: " + process.exitValue() + ". Planner output:\n " + consoleOutputTogether.toString() + "\nError output:\n" + errorOuput);
         }
 
 
@@ -369,7 +378,10 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 outputFile.delete();
                 //TODO check permission
             } else {
-                throw new PlanningException("Could not find the planner output solution file! \n");
+                //if the planner signalled before that it found nothing, the file may  not exits and it's OK
+                if(!plannerFoundNoSolution){ 
+                    throw new PlanningException("Could not find the planner output solution file! \n");
+                }
                 //System.out.println(toolMessage);
             }
 
@@ -616,6 +628,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         //Element planNode = xmlPlan.getChild("plan");
         List<ActionDescription> actionDescriptions = parsePlanToActionDescription(plan);
 
+        //TODO better measure of success - check if the planner has explicitly returned succes or failure
         boolean success = !actionDescriptions.isEmpty();
 
 
@@ -778,7 +791,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 IOUtils.copy(is, new NullOutputStream());
                 IOUtils.copy(es, new NullOutputStream());
             } catch (IOException ex) {
-                Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.SEVERE, "Error consuming output:" + ex.getMessage(), ex);
+                Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.FINE, "Error consuming output:" + ex.getMessage(), ex);
             }
 
             String operatingSystem = System.getProperty("os.name").toLowerCase();
