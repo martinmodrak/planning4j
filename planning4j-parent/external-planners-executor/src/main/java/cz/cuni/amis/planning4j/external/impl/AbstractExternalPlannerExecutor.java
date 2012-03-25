@@ -18,10 +18,12 @@ package cz.cuni.amis.planning4j.external.impl;
 
 import cz.cuni.amis.planning4j.IPlanFuture;
 import cz.cuni.amis.planning4j.IPlanningResult;
+import cz.cuni.amis.planning4j.PlanningException;
 import cz.cuni.amis.planning4j.external.IExternalPlannerExecutor;
 import cz.cuni.amis.planning4j.external.IExternalPlanningProcess;
 import cz.cuni.amis.planning4j.external.IExternalPlanningResult;
 import cz.cuni.amis.planning4j.impl.PlanFuture;
+import cz.cuni.amis.utils.future.FutureStatus;
 import java.io.File;
 
 /**
@@ -46,9 +48,14 @@ public abstract class AbstractExternalPlannerExecutor implements IExternalPlanne
                 try {
                     future.setResult(planningProcess.executePlanner());                
                 } catch(Exception ex){
-                    future.computationException(ex);                    
+                    if(future.getStatus() == FutureStatus.FUTURE_IS_BEING_COMPUTED){
+                        future.computationException(ex);                    
+                    } else {
+                        throw new PlanningException("Exception occurred in processing planning future result", ex);
+                    }
+                } finally {
+                    Runtime.getRuntime().removeShutdownHook(shutdownHook);
                 }
-                Runtime.getRuntime().removeShutdownHook(shutdownHook);
             }
         }, "ExternalPlanner").start();
         
