@@ -24,8 +24,8 @@ import cz.cuni.amis.planning4j.IProblemProvider;
 import cz.cuni.amis.planning4j.PlanningException;
 import cz.cuni.amis.planning4j.external.ExternalPlanner;
 import cz.cuni.amis.planning4j.external.impl.itsimple.ItSimplePlannerExecutor;
+import cz.cuni.amis.planning4j.external.impl.itsimple.ItSimplePlannerInformation;
 import cz.cuni.amis.planning4j.external.impl.itsimple.PlannerListManager;
-import cz.cuni.amis.planning4j.external.plannerspack.PlannersPackUtils;
 import cz.cuni.amis.planning4j.impl.PDDLDomainProvider;
 import cz.cuni.amis.planning4j.impl.PDDLProblemProvider;
 import cz.cuni.amis.planning4j.pddl.PDDLDomain;
@@ -33,14 +33,16 @@ import cz.cuni.amis.planning4j.pddl.PDDLPredicate;
 import cz.cuni.amis.planning4j.pddl.PDDLProblem;
 import cz.cuni.amis.planning4j.pddl.PDDLRequirement;
 import cz.cuni.amis.planning4j.pddl.PDDLSimpleAction;
+import java.io.File;
 import java.util.EnumSet;
 import java.util.List;
-import org.jdom.Element;
 
-
-public class PlanningTest {
-
-    public static void main(String args[]) {
+/**
+ *
+ * @author Martin Cerny
+ */
+public class Planning4JSimpleExample {
+  public static void main(String args[]) {
    
 
         /**
@@ -69,7 +71,7 @@ public class PlanningTest {
         PlannerListManager plannerManager = PlannersPackUtils.getPlannerListManager();
 
         //Let the engine suggest as a planner that supports strips and runs on current platform
-        List<Element> suggestedPlanners = plannerManager.suggestPlanners(PDDLRequirement.STRIPS);
+        List<ItSimplePlannerInformation> suggestedPlanners = plannerManager.suggestPlanners(PDDLRequirement.STRIPS);
 
         if (suggestedPlanners.isEmpty()) {
             System.out.println("No planner found for current platform.");
@@ -77,18 +79,18 @@ public class PlanningTest {
         }
 
         //let's use the first suggested planner
-        Element plannerElement = suggestedPlanners.get(0);
+        ItSimplePlannerInformation plannerInfo = suggestedPlanners.get(0);
 
         //To use a planner by name uncomment the following line
-        //Element plannerElement = plannerManager.getPlannerByName("Metric-FF");
+        //ItSimplePlannerInformation plannerInfo = plannerManager.getPlannerByName("Metric-FF");
 
        //This is the place to extract the planner
         File plannersDirectory = new File("target");
         //The planner is extracted (only if it does not exist yet) and exec permissions are set under Linux
-        plannerManager.extractAndPreparePlanner(plannersDirectory, plannerElement);
+        plannerManager.extractAndPreparePlanner(plannersDirectory, plannerInfo);
         
         try {
-            IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerElement,plannersDirectory));            IPlanningResult result = planner.plan(domainProvider, problemProvider);
+            IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerInfo,plannersDirectory));            IPlanningResult result = planner.plan(domainProvider, problemProvider);
             if (!result.isSuccess()) {
                 System.out.println("No solution found.");
                 return;
@@ -105,8 +107,9 @@ public class PlanningTest {
 
 
 
-    }
+    }    
 }
+
 
 }}}
 
