@@ -63,7 +63,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
     protected File plannerExecutableFile;
 
-    private Element chosenPlanner;
+    private ItSimplePlannerInformation chosenPlanner;
 
     private File plannerBinariesDirectory;
 
@@ -79,7 +79,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
     private boolean cancelled = false;
 
-    public ItSimplePlanningProcess(Element chosenPlanner, File plannerBinariesDirectory, File workingDirectory, File domainFile, File problemFile, long timeInIO) {
+    public ItSimplePlanningProcess(ItSimplePlannerInformation chosenPlanner, File plannerBinariesDirectory, File workingDirectory, File domainFile, File problemFile, long timeInIO) {
         this.chosenPlanner = chosenPlanner;
         this.plannerBinariesDirectory = plannerBinariesDirectory;
         this.workingDirectory = workingDirectory;
@@ -171,7 +171,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         return plan;
     }
 
-    protected List<String> getPlannerOutput(Element chosenPlanner, File domain, File problem, List<String> consoleOutput) {
+    protected List<String> getPlannerOutput(File domain, File problem, List<String> consoleOutput) {
         List<String> output = null;
 
         //Used to know the current OS
@@ -183,9 +183,9 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
 
         //1.Get main planner's parameters and arguments
-        Element settings = chosenPlanner.getChild("settings");
+        ItSimplePlannerSettings settings = chosenPlanner.getSettings();
 
-        String plannerRelativeFile = settings.getChildText("filePath");
+        String plannerRelativeFile = settings.getExecutableFilePath();
         plannerExecutableFile = new File(plannerBinariesDirectory, plannerRelativeFile);
         //System.out.println(plannerFile);
         if (!plannerExecutableFile.exists()) {
@@ -204,56 +204,39 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         //proceed only if planner file exists
 
         //1.1 Get domain arguments
-        Element domainElement = settings.getChild("arguments").getChild("domain");
-        if (!domainElement.getAttributeValue("parameter").trim().equals("")) {
-            commandArguments.add(domainElement.getAttributeValue("parameter"));
+        if(!settings.getDomainArgumentName().trim().isEmpty()){
+            commandArguments.add(settings.getDomainArgumentName());
         }
         commandArguments.add(domain.getAbsolutePath()); //domain path
 
         //1.2 Get problem arguments
-        Element problemElement = settings.getChild("arguments").getChild("problem");
-        if (!problemElement.getAttributeValue("parameter").trim().equals("")) {
-            commandArguments.add(problemElement.getAttributeValue("parameter"));
+        if(!settings.getProblemArgumentName().trim().isEmpty()){
+            commandArguments.add(settings.getProblemArgumentName());
         }
         commandArguments.add(problem.getAbsolutePath()); //problem path
 
         //1.3 Get additional arguments
-        List<?> additionalArgs = null;
-        try {
-            XPath path = new JDOMXPath("arguments/argument[enable='true']");
-            additionalArgs = path.selectNodes(settings);
-        } catch (JaxenException e1) {
-            throw new ItSimplePlanningException("Error working with Jaxen.", e1);
-        }
-        if (additionalArgs != null) {
-            if (additionalArgs.size() > 0) {
-                for (Iterator<?> iter = additionalArgs.iterator(); iter.hasNext();) {
-                    Element argument = (Element) iter.next();
-                    //System.out.println(argument.getChildText("name"));
-                    if (!argument.getAttributeValue("parameter").trim().equals("")) {
-                        commandArguments.add(argument.getAttributeValue("parameter"));
-                    }
-                    //if there is a value for the argument then add to the command
-                    if (!argument.getChildText("value").trim().equals("")) {
-                        commandArguments.add(argument.getChildText("value").trim());
-                    }
-                }
+        for (PlannerArgument argument : settings.getAdditionalArguments()) {
+            //System.out.println(argument.getChildText("name"));
+            if (!argument.getName().trim().equals("")) {
+                commandArguments.add(argument.getName());
             }
+            //if there is a value for the argument then add to the command
+            if (!argument.getValue().trim().equals("")) {
+                commandArguments.add(argument.getValue());
+            }
+        
         }
 
         //1.4 Get output arguments
-        boolean OutputFile;
-        Element outputElement = settings.getChild("output");
-        if (outputElement.getAttributeValue("hasOutputFile").equals("true")) {
-            OutputFile = true;
-            solutionFile = outputElement.getChild("outputFile").getChildText("fileName").trim();
-            if (outputElement.getChild("outputFile").getChild("argument").getAttributeValue("needArgument").equals("true")) {
-                commandArguments.add(outputElement.getChild("outputFile").getChild("argument").getAttributeValue("parameter"));
-                commandArguments.add(solutionFile); //problem path
+        boolean OutputFile = settings.isHasOutputFile();
+        if (OutputFile) {
+            solutionFile = settings.getOutputFile();            
+            if (settings.isOutputFileNeedsArgument()) {
+                commandArguments.add(settings.getOutputFileArgumentName());
+                commandArguments.add(settings.getOutputFile()); //problem path
             }
-        } else {
-            OutputFile = false;
-        }
+        } 
 
         //System.out.println(commandArguments);
 
@@ -262,19 +245,21 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             if (cancelled) {
                 return null;
             }
-            logger.info("\n>> Calling planner " + chosenPlanner.getChildText("name") + "\n ");
+            logger.info("\n>> Calling planner " + chosenPlanner.getName() + "\n ");
+            logger.fine("Planner arguments:" + commandArguments);
             //Call the planner
             try {
                 ProcessBuilder builder = new ProcessBuilder(commandArguments);
                 builder.directory(workingDirectory);
                 process = builder.start();
             } catch (Exception e) {
-                String message = "Error while running the planner " + chosenPlanner.getChildText("name") + ". ";
+                String message = "Error while running the planner " + chosenPlanner.getName() + ". ";
                 throw new PlanningException(message, e);
             }
         }
 
-
+        boolean plannerFoundNoSolution = false;        
+        
 
         Scanner sc = new Scanner(process.getInputStream());
         //Get the planner answer exposed in the console
@@ -284,15 +269,17 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         if (consoleOutput != null) {
             while (sc.hasNextLine()) {
 
-                //consoleOutput.add(sc.nextLine());
                 String line = sc.nextLine();
                 consoleOutput.add(line);
-                //System.out.println(line);
-
-
-                //ongoingConsole += line + "<br>";
-                //ItSIMPLE.getInstance().setPlanInfoPanelText(ongoingConsole);
-                //ItSIMPLE.getInstance().setOutputPanelText(ongoingConsole);
+                
+                if(settings.getNoPlanFoundSignalType() == ENoPlanFoundSignalType.OUTPUT_TEXT){
+                    if(line.contains(settings.getNoPlanFoundOutputText())){
+                        plannerFoundNoSolution = true;
+                    }
+                }
+                            
+                
+                System.out.println(line);
                 if (logger.isLoggable(Level.FINE)) {
                     logger.fine(line);
                 }
@@ -318,7 +305,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             }
 
             process.waitFor();
-            logger.info("\n>> Planner " + chosenPlanner.getChildText("name") + " finished execution\n ");
+            logger.info("\n>> Planner " + chosenPlanner.getName() + " finished execution\n ");
         } catch (InterruptedException ex) {
             if (cancelled) {
                 return null;
@@ -337,11 +324,9 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             return null;
         }
 
-        boolean plannerFoundNoSolution = false;
         
         if (process.exitValue() != 0) {
-            if(settings.getChild("noPlanFoundSignal") != null && settings.getChild("noPlanFoundSignal").getChild("errorCode") != null
-                    && Integer.parseInt(settings.getChild("noPlanFoundSignal").getChild("errorCode").getText()) == process.exitValue())
+            if(settings.noPlanFoundSignalType == ENoPlanFoundSignalType.ERROR_CODE && settings.noPlanFoundErrorCode == process.exitValue())
             {
                 plannerFoundNoSolution = true;
             } else {
@@ -358,9 +343,19 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
         if (OutputFile) {  //The planner does provide a output file
 
-            //Checks if the planner put some automatic string in the output file name (i.e., .SOL)
-            if (!outputElement.getChild("outputFile").getChildText("fileNameAutomaticIncrement").trim().equals("")) {
-                solutionFile = solutionFile + outputElement.getChild("outputFile").getChildText("fileNameAutomaticIncrement").trim();
+            
+            if (settings.getOutputFileAutomaticIncrementSuffix() != null) {
+                int i = 1;
+                while(true) {
+                    String candidateSolutionFileName = solutionFile + settings.getOutputFileAutomaticIncrementSuffix().replace("#", Integer.toString(i));
+                    File candidateSolutionFile = new File(workingDirectory, candidateSolutionFileName);                    
+                    if(candidateSolutionFile.exists()){
+                        solutionFile = candidateSolutionFileName;
+                        i++;
+                    } else {
+                        break;
+                    }
+                }
             }
 
             //Get the planner answer exposed in the solution Output File
@@ -386,10 +381,8 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             }
 
             // delete additional generated files
-            List<?> generatedFiles = chosenPlanner.getChild("settings").getChild("output").getChild("outputFile").getChild("additionalGeneratedFiles").getChildren("fileName");
-            for (Iterator<?> iter = generatedFiles.iterator(); iter.hasNext();) {
-                Element generatedFile = (Element) iter.next();
-                File file = new File(generatedFile.getText());
+            for (String generatedFileName : settings.getAdditionalGeneratedFiles()) {
+                File file = new File(workingDirectory, generatedFileName);
                 if (file.exists()) {
                     // delete the file
                     file.delete();
@@ -399,9 +392,9 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
         } else {  //The planner does not provide a output file, just the console message
 
-            String planStartIdentifier = outputElement.getChild("consoleOutput").getChildText("planStartIdentifier");
-            int startsAfterNlines = Integer.parseInt(outputElement.getChild("consoleOutput").getChild("planStartIdentifier").getAttributeValue("startsAfterNlines"));
-            String planEndIdentifier = outputElement.getChild("consoleOutput").getChildText("planEndIdentifier");
+            String planStartIdentifier = settings.getConsoleOutputPlanStartIdentifier();
+            int startsAfterNlines = settings.getConsoleOutputStartsAfterNLines();
+            String planEndIdentifier = settings.getConsoleOutputPlanEndIdentifier();
             // testing
 
             ArrayList<String> planList = new ArrayList<String>();
@@ -596,7 +589,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         if (cancelled) {
             return null;
         }
-        output = getPlannerOutput(chosenPlanner, domainFile, problemFile, consoleOutput);
+        output = getPlannerOutput(domainFile, problemFile, consoleOutput);
 
 
         if (cancelled) {

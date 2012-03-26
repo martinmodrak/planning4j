@@ -30,31 +30,23 @@ public class ItSimpleUtils {
      * used in itSimple xml format
      * @return "linux" OR "windows" OR "mac"
      */
-    public static String getOperatingSystem() {        
+    public static EPlannerPlatform getOperatingSystem() {        
         String operatingSystem = System.getProperty("os.name").toLowerCase();
 
         if (operatingSystem.indexOf("linux") == 0) {
-            operatingSystem = "linux";
+            return EPlannerPlatform.LINUX;
         } else if (operatingSystem.indexOf("windows") == 0) {
-            operatingSystem = "windows";
+            return EPlannerPlatform.WINDOWS;
         } else if (operatingSystem.indexOf("mac") == 0) {
-            operatingSystem = "mac";
+            return EPlannerPlatform.MAC;
         }
 
-        return operatingSystem;
+        throw new IllegalStateException("Current platform could not be guessed");
     }    
     
-
-    public static String getPlannerRelativeFileName(Element chosenPlanner){
-        Element settings = chosenPlanner.getChild("settings");
-
-        String plannerRelativeFile = settings.getChildText("filePath");
-        return plannerRelativeFile;
-    }
     
-    public static File getPlannerExecutableFile(File baseDirectory, Element chosenPlanner){
-        //System.out.println(plannerFile);
-        File plannerExecutableFile = new File(baseDirectory, getPlannerRelativeFileName(chosenPlanner));        
+    public static File getPlannerExecutableFile(File baseDirectory, ItSimplePlannerInformation chosenPlanner){
+        File plannerExecutableFile = new File(baseDirectory, chosenPlanner.getSettings().getExecutableFilePath());        
         return plannerExecutableFile;
     }
 }

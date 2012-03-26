@@ -23,17 +23,10 @@
  **/
 package cz.cuni.amis.planning4j.external.impl.itsimple;
 
-import cz.cuni.amis.planning4j.pddl.PDDLRequirement;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
@@ -44,19 +37,17 @@ import org.jdom.Element;
  * and allows to select a suitable planner for current platform.
  * @author Matheus, Martin Cerny
  */
-public class PlannerListManager {
-
-    private Element plannersXml;
+public class PlannerListManager extends SimplePlannerListManager {
     
     public PlannerListManager(Element plannersXml) {
-        this.plannersXml = plannersXml;
+        super(plannersXml);
     }
-
+    
     /**
      * Uses current working directory to call {@link #extractAndPreparePlanner(java.io.File, org.jdom.Element) }
      * @param selectedPlanner 
      */
-    public final void extractAndPreparePlanner(Element selectedPlanner){
+    public final void extractAndPreparePlanner(ItSimplePlannerInformation selectedPlanner){
         extractAndPreparePlanner(new File("."), selectedPlanner);
     }
     
@@ -88,23 +79,19 @@ public class PlannerListManager {
      * @param selectedPlanner 
      * @throws ItSimplePlanningException if there is an IO error
      */
-    public void extractAndPreparePlanner(File targetDirectory, Element selectedPlanner) {
+    public void extractAndPreparePlanner(File targetDirectory, ItSimplePlannerInformation selectedPlanner) {
 
+        if(selectedPlanner == null){
+            throw new NullPointerException("Planner can't be null");
+        }
+        
         File binaryFile = ItSimpleUtils.getPlannerExecutableFile(targetDirectory, selectedPlanner);
-        final String plannerRelativeFileName = ItSimpleUtils.getPlannerRelativeFileName(selectedPlanner);
+        final String plannerRelativeFileName = selectedPlanner.getSettings().getExecutableFilePath();
         String plannerResourcePath = "/" + plannerRelativeFileName;
         
         extractFileIfNotExists(binaryFile, plannerResourcePath);                
         preparePlanner(targetDirectory, selectedPlanner);        
         
-    }
-
-    /**
-     * Uses current working directory to call {@link #extractAndPreparePlanner(java.io.File, org.jdom.Element) }
-     * @param selectedPlanner 
-     */
-    public final void preparePlanner(Element selectedPlanner){
-        preparePlanner(new File("."), selectedPlanner);        
     }
         
     /**
@@ -114,8 +101,10 @@ public class PlannerListManager {
      * @param selectedPlanner 
      * @param plannersDirectory directory where the planners were unpacked
      */
-    public void preparePlanner(File plannersDirectory, Element selectedPlanner){
-        if(ItSimpleUtils.getOperatingSystem().equals("linux")){
+    @Override
+    public void preparePlanner(File plannersDirectory, ItSimplePlannerInformation selectedPlanner){
+        super.preparePlanner(plannersDirectory, selectedPlanner);
+        if(ItSimpleUtils.getOperatingSystem().equals(EPlannerPlatform.LINUX)){
         File plannerFile = ItSimpleUtils.getPlannerExecutableFile(plannersDirectory, selectedPlanner);
         try {
             Runtime.getRuntime().exec(new String[] { "chmod", "+x", plannerFile.getAbsolutePath()});
@@ -124,109 +113,5 @@ public class PlannerListManager {
         }
             
         }
-    }
-    
-    /**
-     * Get a planner for current platform by its name in XML.
-     * @param name
-     * @return The XML element for planner or null if no such planner was found
-     */
-    public Element getPlannerByName(String name){
-        for(Element planner : getPlannersList()){
-            if(planner.getChild("name").getText().equals(name) && runOnOperatingSystem(planner)){
-                return planner;
-            }
-        }
-        return null;
-    }
-      
-    /**
-     * @see #suggestPlanners(java.util.Set) 
-     * @param requirements
-     * @return 
-     */
-    public List<Element> suggestPlanners(PDDLRequirement ... requirements){
-        return suggestPlanners(EnumSet.copyOf(Arrays.asList(requirements)));
-    }
-    
-    /**
-     * This method selects the planners that can deal with the given domain based on its requirements and runs on
-     * current OS.
-     * @return
-     */
-    public List<Element> suggestPlanners(Set<PDDLRequirement> requirements) {
-
-        List<Element> suggestedPlanners = new ArrayList<Element>();
-
-        List<Element> planners = getPlannersList();
-
-        for(Element planner : planners){
-            if (this.containsRequirements(planner, requirements) && this.runOnOperatingSystem(planner)) {
-                suggestedPlanners.add(planner);
-            } 
-        }
-        return suggestedPlanners;
-
-    }
-
-    protected List<Element> getPlannersList() {
-        return plannersXml.getChild("planners").getChildren("planner");
-    }
-
-    /**
-     * This method verifies if planner requirements contains domain requirements
-     * @param plannerRequirements, list if DOM Element List Planner Requirements
-     * @param planners, list of DOM Element Planner Requirements
-     * @return
-     */
-    public boolean containsRequirements(Element plannerElement, Set<PDDLRequirement> domainRequirements) {
-
-        List<Element> plannerRequirements = plannerElement.getChild("requirements").getChildren();
-
-        for(PDDLRequirement domainRequirement : domainRequirements){
-            
-            boolean plannerContainsRequirement = false;
-            for(Element plannerRequirement : plannerRequirements){
-                if(plannerRequirement.getName().equals(domainRequirement.getPddlName())){
-                    plannerContainsRequirement = true;
-                    break;
-                }
-            }
-
-            if(!plannerContainsRequirement){
-                return false;
-            }
-
-        }
-
-        return true;
-    }
-
-    /**
-     * This method verifies if planner can be run on operating system
-     * @param planner, DOM Planner Element
-     * @return
-     */
-    private boolean runOnOperatingSystem(Element plannerElement) {
-
-        boolean _runOnOperatingSystem = false;
-        String thisOperatingSystem = this.getOperatingSystem();
-
-        List operatingSystems = plannerElement.getChild("platform").getChildren();
-        Iterator soIterator = operatingSystems.iterator();
-        while (soIterator.hasNext()) {
-            Element plataform = (Element) soIterator.next();
-            _runOnOperatingSystem = _runOnOperatingSystem || (plataform.getName().equals(thisOperatingSystem));
-        }
-
-        return _runOnOperatingSystem;
-    }
-
-    /**
-     * This method gets the operating system name on which the program is running
-     * @return
-     */
-    private String getOperatingSystem() {
-        return ItSimpleUtils.getOperatingSystem();
     }
 }

@@ -36,21 +36,24 @@ import org.jdom.Element;
  */
 public class ItSimplePlannerExecutor extends AbstractExternalPlannerExecutor{
 
-   private Element chosenPlanner;
+   private ItSimplePlannerInformation chosenPlanner;
 
     private File plannerBinariesDirectory;
 
     private File workingDirectory;
 
-    public ItSimplePlannerExecutor(Element chosenPlanner) {
+    public ItSimplePlannerExecutor(ItSimplePlannerInformation chosenPlanner) {
         this(chosenPlanner, new File("."));
     }
 
-    public ItSimplePlannerExecutor(Element chosenPlanner, File plannerBinariesDirectory) {
+    public ItSimplePlannerExecutor(ItSimplePlannerInformation chosenPlanner, File plannerBinariesDirectory) {
         this(chosenPlanner, plannerBinariesDirectory, new File(System.getProperty("java.io.tmpdir")));
     }
 
-    public ItSimplePlannerExecutor(Element chosenPlanner, File plannerBinariesDirectory, File workingDirectory) {
+    public ItSimplePlannerExecutor(ItSimplePlannerInformation chosenPlanner, File plannerBinariesDirectory, File workingDirectory) {
+        if(chosenPlanner == null){
+            throw new NullPointerException("Chosen planner cannot be null");
+        }
         this.chosenPlanner = chosenPlanner;
         this.plannerBinariesDirectory = plannerBinariesDirectory;
         this.workingDirectory = workingDirectory;
