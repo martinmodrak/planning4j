@@ -150,9 +150,11 @@ public class SimplePlannerListManager {
             else if(argumentElement.getName().equals("problem")){
                 settings.setProblemArgumentName(argumentElement.getAttributeValue("parameter"));
             } else if(argumentElement.getName().equals("argument")) {
-                settings.addAdditionalArgument(new PlannerArgument(argumentElement.getAttributeValue("parameter"), 
-                        argumentElement.getChildText("value")
-                        ));                
+                if(argumentElement.getChildText("enable").equals("true")){
+                    settings.addAdditionalArgument(new PlannerArgument(argumentElement.getAttributeValue("parameter"), 
+                            argumentElement.getChildText("value")
+                            ));                
+                }
             }
         }
         
