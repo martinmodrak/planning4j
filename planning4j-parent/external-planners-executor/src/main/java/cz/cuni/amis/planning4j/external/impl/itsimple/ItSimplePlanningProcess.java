@@ -277,9 +277,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                         plannerFoundNoSolution = true;
                     }
                 }
-                            
-                
-                System.out.println(line);
+                                            
                 if (logger.isLoggable(Level.FINE)) {
                     logger.fine(line);
                 }
