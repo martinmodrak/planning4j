@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<itPlanners>
+	<planners>
+		<planner id="1">
+			<name>Fast Downward</name>
+			<version></version>
+			<date>2011</date>
+			<institution />
+			<author>J. Hoffmann</author>
+			<link>http://www.fast-downward.org/</link>
+			<description />
+			<platform>
+				<linux />
+			</platform>
+			<requirements>
+                            <!-- TODO Fix requirements -->
+				<adl />
+				<mdp />
+				<typing />
+				<rewards />
+				<strips />
+				<fluents />
+				<equality />
+				<conditional-effects />
+				<disjunctive-preconditions />
+				<duration-inequalities />
+				<durative-actions />
+				<existential-preconditions />
+				<negative-preconditions />
+				<numeric-fluents />
+				<quantified-preconditions />
+				<universal-preconditions />
+			</requirements>
+			<settings>
+				<filePath>src/plan</filePath>
+				<output hasOutputFile="false">
+					<outputFile>
+						<fileName>plan.out</fileName>
+						<fileNameAutomaticIncrement></fileNameAutomaticIncrement>
+						<argument needArgument="true" parameter="--plan-file"/>
+						<additionalGeneratedFiles>
+							<fileName>output.sas</fileName>
+							<fileName>output</fileName>
+						</additionalGeneratedFiles>
+					</outputFile>
+					<consoleOutput>
+						<planStartIdentifier startsAfterNlines="1">Solution found!</planStartIdentifier>
+						<planEndIdentifier>Plan length</planEndIdentifier>
+					</consoleOutput>
+				</output>
+				<arguments>
+					<domain parameter="" id="2">
+						<name>domain</name>
+						<value />
+						<enable>true</enable>
+						<description>specifies the file of the operators</description>
+					</domain>
+					<problem parameter="" id="3">
+						<name>problem</name>
+						<value />
+						<enable>true</enable>
+						<description>specifies the file of (init/goal) facts</description>
+					</problem>
+				</arguments>
+                                <noPlanFoundSignal type="outputText">Completely explored state space -- no solution!</noPlanFoundSignal>                                
+			</settings>
+		</planner>
+	</planners>
+</itPlanners>
+

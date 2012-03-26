@@ -16,11 +16,8 @@
  */
 package cz.cuni.amis.planning4j.external.plannerspack;
 
-import cz.cuni.amis.planning4j.external.impl.itsimple.ItSimpleUtils;
-import cz.cuni.amis.planning4j.external.impl.itsimple.PlannerListManager;
-import cz.cuni.amis.planning4j.external.impl.itsimple.XMLUtilities;
+import cz.cuni.amis.planning4j.external.impl.itsimple.*;
 import java.io.File;
-import org.jdom.Element;
 
 /**
  * An utility class to access planners in this package.
@@ -28,19 +25,32 @@ import org.jdom.Element;
  */
 public class PlannersPackUtils {
 
+    /**
+     * Gets planner list manager for planners that are part of this package in binary from
+     * @return 
+     */
     public static PlannerListManager getPlannerListManager(){
         return new PlannerPackListManager();        
     }
     
+    /**
+     * Gets planner list manager for planners that are supported, but need to be installed externally
+     * @return 
+     */
+    public static SimplePlannerListManager getInstalledPlannerListManager(){
+        return new SimplePlannerListManager(XMLUtilities.readPlannerListFromStream(PlannersPackUtils.class.getResourceAsStream("/planners/installedPlanners.xml")));        
+        
+    }
+
     private static class PlannerPackListManager extends PlannerListManager {
         public PlannerPackListManager(){
             super(XMLUtilities.readPlannerListFromStream(PlannersPackUtils.class.getResourceAsStream("/planners/itPlanners.xml")));
         }
 
         @Override
-        public void extractAndPreparePlanner(File targetDirectory, Element selectedPlanner) {
+        public void extractAndPreparePlanner(File targetDirectory, ItSimplePlannerInformation selectedPlanner) {
             super.extractAndPreparePlanner(targetDirectory, selectedPlanner);
-            if(ItSimpleUtils.getOperatingSystem().equals("windows")){
+            if(ItSimpleUtils.getOperatingSystem() == EPlannerPlatform.WINDOWS){
                 //On windows, some planners need cygwin...
                 extractFileIfNotExists(new File(targetDirectory,"planners/cygwin1.dll"), "/planners/cygwin1.dll");
             }
