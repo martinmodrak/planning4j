@@ -35,7 +35,14 @@ public abstract class AbstractAsyncPlanner implements IAsyncPlanner{
     public IPlanningResult plan(IDomainProvider domainProvider, IProblemProvider problemProvider) {
         IPlanFuture future = planAsync(domainProvider, problemProvider);
         try {
-            return future.get();
+            IPlanningResult result = future.get();
+            if(future instanceof PlanFuture){
+                Exception except = ((PlanFuture)future).getException();
+                if(except != null){
+                    throw except;
+                }
+            }
+            return result;
         } catch(PlanningException ex){
             throw ex;
         }
