@@ -874,7 +874,8 @@
 						<description>switch on optimization expression (default is plan length)</description>
 					</argument>
 				</arguments>
-				<timeout enabled="false">600</timeout>
+                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal>
+				<timeout enabled="false">600</timeout>                                
 				<runAllComparison enabled="true" />
 			</settings>
 		</planner>
@@ -942,6 +943,7 @@
 						<description>run-time information level</description>
 					</argument>
 				</arguments>
+                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal>
 				<timeout enabled="false">600</timeout>
 				<runAllComparison enabled="true" />
 			</settings>
