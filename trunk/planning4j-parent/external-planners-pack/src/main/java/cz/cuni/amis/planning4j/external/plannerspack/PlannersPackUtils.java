@@ -41,8 +41,37 @@ public class PlannersPackUtils {
      * @return 
      */
     public static SimplePlannerListManager getInstalledPlannerListManager(){
-        return installedPlannerListManager;        
-        
+        return installedPlannerListManager;                
+    }
+    
+    public static ItSimplePlannerInformation getBlackBox(){
+        return getPlannerListManager().getPlannerByName("Blackbox");
+    }
+    
+    public static ItSimplePlannerInformation getMetricFF(){
+        return getPlannerListManager().getPlannerByName("Metric-FF");        
+    }
+    
+    public static ItSimplePlannerInformation getSGPlan6(){
+        return getPlannerListManager().getPlannerByName("SGPlan 6");
+    }
+    
+    /**
+     * Return template for all Fast downward planner. It is then neccessary
+     * to specify which planner by adding additional arguments to planner settings.
+     */
+    public static ItSimplePlannerInformation getFastDownwardTemplate(){
+        return installedPlannerListManager.getPlannerByName("Fast Downward");
+    }
+    
+    public static ItSimplePlannerInformation getFastDownwardIPCConfiguration(String configuratioName){
+        ItSimplePlannerInformation info = getFastDownwardTemplate();
+        info.getSettings().addAdditionalArgument(new PlannerArgument("ipc",configuratioName));
+        return info;
+    }
+    
+    public static ItSimplePlannerInformation getLAMA2011() {
+        return getFastDownwardIPCConfiguration("seq-sat-lama-2011");
     }
 
     private static class PlannerPackListManager extends PlannerListManager {
