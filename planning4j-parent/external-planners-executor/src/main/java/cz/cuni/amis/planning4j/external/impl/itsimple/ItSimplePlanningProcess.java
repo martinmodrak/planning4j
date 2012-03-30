@@ -560,9 +560,14 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             } else {
                 startTimeStr = new StringTokenizer(line).nextToken();
             }
-
-            if (!startTimeStr.isEmpty()) {
-                action.setStartTime(Double.parseDouble(startTimeStr));
+            
+            if(!startTimeStr.startsWith("(")){
+				try {
+					action.setStartTime(Double.parseDouble(startTimeStr));                
+				} catch (NumberFormatException ex) {
+					logger.severe("Could not parse action: " + line);
+					continue;
+				}
             }
 
 
