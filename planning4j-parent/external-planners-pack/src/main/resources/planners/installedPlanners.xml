@@ -33,7 +33,7 @@
 			</requirements>
 			<settings>
 				<filePath>src/plan</filePath>
-				<output hasOutputFile="false">
+				<output hasOutputFile="true">
 					<outputFile>
 						<fileName>plan.out</fileName>
 						<fileNameAutomaticIncrement></fileNameAutomaticIncrement>

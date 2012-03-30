@@ -80,7 +80,7 @@ public class LAMATest {
 //        plannerInfo.getSettings().addAdditionalArgument(new PlannerArgument("--heuristic", "hlm,hff=lm_ff_syn(lm_rhw(reasonable_orders=true,cost_type=1,lm_cost_type=1))"));
 //        plannerInfo.getSettings().addAdditionalArgument(new PlannerArgument("--search", "lazy_greedy([hlm, hff], preferred=[hlm, hff])"));
         
-        File plannersDirectory = new File("/tmp/cernm6am/downward");
+        File plannersDirectory = new File("/home/martin_cerny/downward");
 
         
         try {
