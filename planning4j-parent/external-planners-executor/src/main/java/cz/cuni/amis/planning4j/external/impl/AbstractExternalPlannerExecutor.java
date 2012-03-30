@@ -46,7 +46,10 @@ public abstract class AbstractExternalPlannerExecutor implements IExternalPlanne
             @Override
             public void run() {
                 try {
-                    future.setResult(planningProcess.executePlanner());                
+                    IExternalPlanningResult planningResult = planningProcess.executePlanner();
+                    if(!future.isCancelled()){
+                        future.setResult(planningResult);                
+                    }
                 } catch(Exception ex){
                     if(future.getStatus() == FutureStatus.FUTURE_IS_BEING_COMPUTED){
                         future.computationException(ex);                    
