@@ -37,7 +37,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -46,10 +45,6 @@ import java.util.StringTokenizer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.jaxen.JaxenException;
-import org.jaxen.XPath;
-import org.jaxen.jdom.JDOMXPath;
-import org.jdom.Element;
 
 /**
  * Executes a plan using external planners specified with ItSimple XML format.
