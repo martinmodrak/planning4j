@@ -21,6 +21,14 @@ package cz.cuni.amis.planning4j.external;
  * @author Martin Cerny
  */
 public interface IExternalPlanningProcess {
+    /**
+     * Returns a planning result, or null, if process was cancelled
+     * @return 
+     */
     public IExternalPlanningResult executePlanner();
+    
+    /**
+     * Should terminate the computation as soon as possible
+     */
     public void cancel();
 }

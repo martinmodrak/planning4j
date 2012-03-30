@@ -786,6 +786,7 @@
 						<description>specifies the maximum CPU-time (in seconds)</description>
 					</argument>
 				</arguments>
+                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal>                                
 				<timeout enabled="false">600</timeout>
 				<runAllComparison enabled="true" />
 			</settings>
