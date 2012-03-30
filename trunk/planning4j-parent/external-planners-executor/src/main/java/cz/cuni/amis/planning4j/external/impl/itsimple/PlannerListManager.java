@@ -35,9 +35,12 @@ import org.jdom.Element;
 /**
  * A class that works with XML definition of planners in ItSimple formats
  * and allows to select a suitable planner for current platform.
+ * This class is thread safe.
  * @author Matheus, Martin Cerny
  */
 public class PlannerListManager extends SimplePlannerListManager {
+    
+    private final Object fileOperationsMutex = new Object();
     
     public PlannerListManager(Element plannersXml) {
         super(plannersXml);
@@ -52,20 +55,22 @@ public class PlannerListManager extends SimplePlannerListManager {
     }
     
     protected void extractFileIfNotExists(File targetFile, String resourcePath){
-        if(!targetFile.exists()){        
-            InputStream inputStream = getClass().getResourceAsStream(resourcePath);
-            if(inputStream == null){
-                throw new ItSimplePlanningException("Could not find planner resource on classpath. Resource path:" + resourcePath);
-            }
-            if(!targetFile.getParentFile().exists() && !targetFile.getParentFile().mkdirs()){
-                throw new ItSimplePlanningException("Could not create parent dirs for planner resource " + targetFile);                
-            }
-            try {
-                FileOutputStream outputfilestream = new FileOutputStream(targetFile);
-                IOUtils.copy(inputStream, outputfilestream);
-                outputfilestream.close();
-            } catch (IOException ex){
-                throw new ItSimplePlanningException("Could not extract planner resource to " + targetFile, ex);
+        synchronized(fileOperationsMutex){
+            if(!targetFile.exists()){        
+                InputStream inputStream = getClass().getResourceAsStream(resourcePath);
+                if(inputStream == null){
+                    throw new ItSimplePlanningException("Could not find planner resource on classpath. Resource path:" + resourcePath);
+                }
+                if(!targetFile.getParentFile().exists() && !targetFile.getParentFile().mkdirs()){
+                    throw new ItSimplePlanningException("Could not create parent dirs for planner resource " + targetFile);                
+                }
+                try {
+                    FileOutputStream outputfilestream = new FileOutputStream(targetFile);
+                    IOUtils.copy(inputStream, outputfilestream);
+                    outputfilestream.close();
+                } catch (IOException ex){
+                    throw new ItSimplePlanningException("Could not extract planner resource to " + targetFile, ex);
+                }
             }
         }
         
