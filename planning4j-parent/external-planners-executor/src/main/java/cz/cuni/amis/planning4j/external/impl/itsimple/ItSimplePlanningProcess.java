@@ -153,33 +153,68 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         }
     }
 
-    protected List<String> getPlan(List<String> Output) {
-        //Separate statistics and plan (get plan)
-        List<String> plan = new ArrayList<String>();
-        if (Output != null) {
-            for (Iterator<?> iter = Output.iterator(); iter.hasNext();) {
-                String element = (String) iter.next();
-                //System.out.println(element);
-                if (!element.trim().equals("")) {
-                    //get plan
-                    if (!element.trim().startsWith(";")) {
-                        plan.add(element.trim());
-                    }
-                }
-            }
+//    protected List<String> getPlan(List<String> Output) {
+//        //Separate statistics and plan (get plan)
+//        List<String> plan = new ArrayList<String>();
+//        if (Output != null) {
+//            for (Iterator<?> iter = Output.iterator(); iter.hasNext();) {
+//                String element = (String) iter.next();
+//                //System.out.println(element);
+//                if (!element.trim().equals("")) {
+//                    //get plan
+//                    if (!element.trim().startsWith(";")) {
+//                        plan.add(element.trim());
+//                    }
+//                }
+//            }
+//        }
+//        return plan;
+//    }
+    /**
+     * Guess whether line might be an action
+     * @param line
+     * @return 
+     */
+    protected boolean isLineAction(String line) {
+        if (isLineStatistics(line)) {
+            //it is surely a statistic
+            return false;
         }
-        return plan;
+
+        if (line.contains(":")) {
+            return true;
+        }
+
+        if (line.contains("(") && line.contains(")")) {
+            return true;
+        }
+
+        return false;
     }
 
-    protected List<String> getPlannerOutput(File domain, File problem, List<String> consoleOutput) {
-        List<String> output = null;
+    /**
+     * Guess whether line might be a statistic
+     * @param line
+     * @return 
+     */
+    protected boolean isLineStatistics(String line) {
+        return line.trim().startsWith(";");
+    }
 
-        //Used to know the current OS
-        //System.out.println(System.getProperty("os.name"));
+    private static enum EConsoleParseState {
 
-        //String domain = "resources/planners/domain.pddl";
-        //String problem = "resources/planners/problem.pddl";    	
-        String solutionFile = "solution.soln";
+        BEGIN,
+        COUNTING_TO_PLAN_START,
+        READING_PLAN,
+        END
+
+    }
+
+    /**
+     * Runs the planner and returns the console output
+     */
+    protected UnprocessedPlanningResult runPlanner(File domain, File problem) {
+
 
 
         //1.Get main planner's parameters and arguments
@@ -187,7 +222,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
         String plannerRelativeFile = settings.getExecutableFilePath();
         plannerExecutableFile = new File(plannerBinariesDirectory, plannerRelativeFile);
-        //System.out.println(plannerFile);
+
         if (!plannerExecutableFile.exists()) {
             String toolMessage = "Could not find selected planner '" + plannerRelativeFile + "' in directory " + plannerBinariesDirectory.getAbsolutePath();
             throw new PlanningException(toolMessage);
@@ -200,17 +235,14 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         //1.0 Get planner execution file
         commandArguments.add(plannerExecutableFile.getAbsolutePath());
 
-
-        //proceed only if planner file exists
-
         //1.1 Get domain arguments
-        if(!settings.getDomainArgumentName().trim().isEmpty()){
+        if (!settings.getDomainArgumentName().trim().isEmpty()) {
             commandArguments.add(settings.getDomainArgumentName());
         }
         commandArguments.add(domain.getAbsolutePath()); //domain path
 
         //1.2 Get problem arguments
-        if(!settings.getProblemArgumentName().trim().isEmpty()){
+        if (!settings.getProblemArgumentName().trim().isEmpty()) {
             commandArguments.add(settings.getProblemArgumentName());
         }
         commandArguments.add(problem.getAbsolutePath()); //problem path
@@ -225,21 +257,14 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             if (!argument.getValue().trim().equals("")) {
                 commandArguments.add(argument.getValue());
             }
-        
+
         }
 
         //1.4 Get output arguments
-        boolean OutputFile = settings.isHasOutputFile();
-        if (OutputFile) {
-            solutionFile = settings.getOutputFile();            
-            if (settings.isOutputFileNeedsArgument()) {
-                commandArguments.add(settings.getOutputFileArgumentName());
-                commandArguments.add(settings.getOutputFile()); //problem path
-            }
-        } 
-
-        //System.out.println(commandArguments);
-
+        if (settings.isHasOutputFile() && settings.isOutputFileNeedsArgument()) {
+            commandArguments.add(settings.getOutputFileArgumentName());
+            commandArguments.add(settings.getOutputFile()); //problem path            
+        }
 
         synchronized (this) {
             if (cancelled) {
@@ -258,126 +283,219 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             }
         }
 
-        boolean plannerFoundNoSolution = false;        
-        
+        try {
+            boolean plannerFoundNoSolution = false;
 
-        Scanner sc = new Scanner(process.getInputStream());
-        //Get the planner answer exposed in the console
-        if (logger.isLoggable(Level.FINE)) {
-            logger.fine("Planner console output:");
-        }
-        if (consoleOutput != null) {
+
+            Scanner sc = new Scanner(process.getInputStream());
+            //Get the planner answer exposed in the console
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine("Planner console output:");
+            }
+
+            StringBuilder consoleOutputBuilder = new StringBuilder();
+            List<String> unprocessedPlan = new ArrayList<String>();
+            List<String> unprocessedStatistics = new ArrayList<String>();
+
+            //Needed only when parsing plan from console, but need to be initialized here
+            EConsoleParseState consoleParseState;
+            int numLinesBeforePlan = settings.getConsoleOutputStartsAfterNLines();
+            if (settings.getConsoleOutputPlanStartIdentifier() == null || settings.getConsoleOutputPlanStartIdentifier().isEmpty()) {
+                consoleParseState = EConsoleParseState.COUNTING_TO_PLAN_START;
+            } else {
+                consoleParseState = EConsoleParseState.BEGIN;
+            }
+
+
             while (sc.hasNextLine()) {
 
                 String line = sc.nextLine();
-                consoleOutput.add(line);
-                
-                if(settings.getNoPlanFoundSignalType() == ENoPlanFoundSignalType.OUTPUT_TEXT){
-                    if(line.contains(settings.getNoPlanFoundOutputText())){
+                consoleOutputBuilder.append(line).append("\n");
+
+                if (settings.getNoPlanFoundSignalType() == ENoPlanFoundSignalType.OUTPUT_TEXT) {
+                    if (line.contains(settings.getNoPlanFoundOutputText())) {
                         plannerFoundNoSolution = true;
                     }
                 }
-                                            
+
                 if (logger.isLoggable(Level.FINE)) {
                     logger.fine(line);
                 }
-            }
-        }
-        sc.close();
 
-        if (cancelled) {
-            return null;
-        }
+                if (!settings.isHasOutputFile()) {
+                    if (!line.trim().isEmpty()) {
+                        //the plan is part of console output
+                        switch (consoleParseState) {
+                            case BEGIN: {
+                                if (line.contains(settings.getConsoleOutputPlanStartIdentifier())) {
+                                    if (numLinesBeforePlan > 0) {
+                                        consoleParseState = EConsoleParseState.COUNTING_TO_PLAN_START;
+                                        numLinesBeforePlan--;
+                                    } else {
+                                        //the plan starts on the same line
+                                        int indexPlanStart = line.indexOf(settings.getConsoleOutputPlanStartIdentifier());
+                                        String firstLine = line.substring(indexPlanStart + settings.getConsoleOutputPlanStartIdentifier().length());
+                                        if (!isLineAction(firstLine)) {
+                                            unprocessedStatistics.add(firstLine);
+                                        } else {
+                                            unprocessedPlan.add(firstLine);
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                            case COUNTING_TO_PLAN_START: {
+                                if (numLinesBeforePlan > 0) {
+                                    numLinesBeforePlan--;
+                                    break;
+                                } else {
+                                    consoleParseState = EConsoleParseState.READING_PLAN;
+                                }
+                                //intentional fallthrough!!!
+                            }
+                            case READING_PLAN: {
+                                if (line.contains(settings.getConsoleOutputPlanEndIdentifier())) {
+                                    consoleParseState = EConsoleParseState.END;
+                                } else {
+                                    if (!isLineAction(line)) {
+                                        unprocessedStatistics.add(line);
+                                    } else {
+                                        unprocessedPlan.add(line);
+                                    }
+                                }
+                                break;
+                            }
+                            case END: {
+                                if (isLineStatistics(line)) {
+                                    unprocessedStatistics.add(line);
+                                }
+                                break;
+                            }
 
-        String errorOuput;
-        try {
-            errorOuput = IOUtils.toString(process.getErrorStream());
-        } catch (IOException ex) {
-            errorOuput = "Could not get error stream: " + ex.getMessage();
-        }
-
-
-        try {
-            if (cancelled) {
-                return null;
-            }
-
-            process.waitFor();
-            logger.info("\n>> Planner " + chosenPlanner.getName() + " finished execution\n ");
-        } catch (InterruptedException ex) {
-            if (cancelled) {
-                return null;
-            }
-            Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.INFO, "Waiting for planner execution interrupted", ex);
-            destroyProcess(process, plannerExecutableFile);
-            return null;
-        }
-
-
-        process.destroy();
-        if (logger.isLoggable(Level.FINE)) {
-            logger.fine("Planner console output end.");
-        }
-        if (cancelled) {
-            return null;
-        }
-
-        
-        if (process.exitValue() != 0) {
-            if(settings.noPlanFoundSignalType == ENoPlanFoundSignalType.ERROR_CODE && settings.noPlanFoundErrorCode == process.exitValue())
-            {
-                plannerFoundNoSolution = true;
-            } else {
-                StringBuilder consoleOutputTogether = new StringBuilder();
-                for (String s : consoleOutput) {
-                    consoleOutputTogether.append(s).append("\n");
-                }
-                throw new PlanningException("Planner terminated with an error - exit code: " + process.exitValue() + ". Planner output:\n " + consoleOutputTogether.toString() + "\nError output:\n" + errorOuput);
-            }
-        }
-
-
-
-
-        if (OutputFile) {  //The planner does provide a output file
-
-            
-            if (settings.getOutputFileAutomaticIncrementSuffix() != null) {
-                int i = 1;
-                while(true) {
-                    String candidateSolutionFileName = solutionFile + settings.getOutputFileAutomaticIncrementSuffix().replace("#", Integer.toString(i));
-                    File candidateSolutionFile = new File(workingDirectory, candidateSolutionFileName);                    
-                    if(candidateSolutionFile.exists()){
-                        solutionFile = candidateSolutionFileName;
-                        i++;
-                    } else {
-                        break;
+                        }
                     }
                 }
+
+            }
+            sc.close();
+
+            if (cancelled) {
+                return null;
             }
 
-            //Get the planner answer exposed in the solution Output File
-            File outputFile = new File(workingDirectory, solutionFile);
-
-            if (outputFile.exists()) {
-                //Get output
-                try {
-                    output = FileUtils.readLines(outputFile);
-                } catch (IOException ex) {
-                    throw new PlanningException("Could not read planner output", ex);
-                }
-
-                //remove output solution file (only if the plan create it)
-                outputFile.delete();
-                //TODO check permission
-            } else {
-                //if the planner signalled before that it found nothing, the file may  not exits and it's OK
-                if(!plannerFoundNoSolution){ 
-                    throw new PlanningException("Could not find the planner output solution file! \n");
-                }
-                //System.out.println(toolMessage);
+            //Need to clean the stream, otherwise, it would block the process from terminating
+            String errorOuput;
+            try {
+                errorOuput = IOUtils.toString(process.getErrorStream());
+            } catch (IOException ex) {
+                errorOuput = "Could not get error stream: " + ex.getMessage();
             }
 
+
+            try {
+                if (cancelled) {
+                    return null;
+                }
+
+                process.waitFor();
+                logger.info("\n>> Planner " + chosenPlanner.getName() + " finished execution\n ");
+            } catch (InterruptedException ex) {
+                if (cancelled) {
+                    return null;
+                }
+                Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.INFO, "Waiting for planner execution interrupted", ex);
+                destroyProcess(process, plannerExecutableFile);
+                return null;
+            }
+
+            process.destroy();
+
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine("Planner console output end.");
+            }
+
+            if (cancelled) {
+                return null;
+            }
+
+
+            if (process.exitValue() != 0) {
+                if (settings.noPlanFoundSignalType == ENoPlanFoundSignalType.ERROR_CODE && settings.noPlanFoundErrorCode == process.exitValue()) {
+                    plannerFoundNoSolution = true;
+                } else {
+                    throw new PlanningException("Planner terminated with an error - exit code: " + process.exitValue() + ". Planner output:\n " + consoleOutputBuilder.toString() + "\nError output:\n" + errorOuput);
+                }
+            }
+
+
+
+
+            if (settings.isHasOutputFile()) {  //The planner does provide an output file
+
+                String solutionFile = "solution.soln";
+                if (!settings.getOutputFile().trim().isEmpty()) {
+                    solutionFile = settings.getOutputFile();
+                }
+
+                if (settings.getOutputFileAutomaticIncrementSuffix() != null) {
+                    //Find the existing file with the highest increment index
+                    int i = 1;
+                    while (true) {
+                        String candidateSolutionFileName = solutionFile + settings.getOutputFileAutomaticIncrementSuffix().replace("#", Integer.toString(i));
+                        File candidateSolutionFile = new File(workingDirectory, candidateSolutionFileName);
+                        if (candidateSolutionFile.exists()) {
+                            solutionFile = candidateSolutionFileName;
+                            i++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                //Get the planner answer exposed in the solution Output File
+                File outputFile = new File(workingDirectory, solutionFile);
+
+                if (outputFile.exists()) {
+                    //Get output
+                    try {
+                        for (String line : FileUtils.readLines(outputFile)) {
+                            if(line.trim().isEmpty()){
+                                continue;
+                            }
+                            if (!isLineAction(line)) {
+                                unprocessedStatistics.add(line);
+                            } else {
+                                unprocessedPlan.add(line);
+                            }
+                        }
+                    } catch (IOException ex) {
+                        throw new PlanningException("Could not read planner output", ex);
+                    }
+
+                    //remove output solution file (only if the plan create it)
+                    outputFile.delete();
+                    //TODO check permission
+                } else {
+                    //if the planner signalled before that it found nothing, the file may  not exits and it's OK
+                    if (!plannerFoundNoSolution) {
+                        throw new PlanningException("Could not find the planner output solution file! \n");
+                    }
+                    //System.out.println(toolMessage);
+                }
+
+            }
+
+            if (cancelled) {
+                return null;
+            }
+
+            if(settings.getNoPlanFoundSignalType() == ENoPlanFoundSignalType.EMPTY_PLAN){
+                plannerFoundNoSolution = unprocessedPlan.isEmpty();
+            }
+            
+            return new UnprocessedPlanningResult(unprocessedPlan, unprocessedStatistics, consoleOutputBuilder.toString(), !plannerFoundNoSolution);
+
+        } finally {
             // delete additional generated files
             for (String generatedFileName : settings.getAdditionalGeneratedFiles()) {
                 File file = new File(workingDirectory, generatedFileName);
@@ -386,96 +504,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                     file.delete();
                 }
             }
-
-
-        } else {  //The planner does not provide a output file, just the console message
-
-            String planStartIdentifier = settings.getConsoleOutputPlanStartIdentifier();
-            int startsAfterNlines = settings.getConsoleOutputStartsAfterNLines();
-            String planEndIdentifier = settings.getConsoleOutputPlanEndIdentifier();
-            // testing
-
-            ArrayList<String> planList = new ArrayList<String>();
-            ArrayList<String> statistics = new ArrayList<String>();
-
-            Boolean isThePlan = false;
-
-            //System.out.println(planStartIdentifier + ", " + startsAfterNlines + ", " + planEndIdentifier);
-            for (Iterator<?> iter = consoleOutput.iterator(); iter.hasNext();) {
-                String line = (String) iter.next();
-
-                //Check if line contains start identifier (only if the plan was not found yet)
-                int indexPlanStart = -1;
-                if (!isThePlan) {
-                    indexPlanStart = line.indexOf(planStartIdentifier);
-                }
-
-                if (!isThePlan && indexPlanStart > -1) {//The plan was found
-                    isThePlan = true;
-                    //Jump the necessary lines to reach the first line of the plan
-                    if (startsAfterNlines == 0) {//First action is in the same line as the idetifier.
-                        line = line.substring(indexPlanStart + planStartIdentifier.length(), line.length());
-                        //System.out.println("First line for nlines 0: " +line);
-                    } else if (startsAfterNlines > 0) {//Jump to the first line of the plan
-                        for (int i = 0; i < startsAfterNlines; i++) {
-                            line = (String) iter.next();
-                        }
-                    }
-                    //System.out.println("The plan stats here!");
-                } //The plan ended
-                else if (isThePlan && ((!planEndIdentifier.trim().equals("") && line.trim().indexOf(planEndIdentifier) > -1) || line.trim().equals(""))) {
-                    isThePlan = false;
-                    //System.out.println("The plan ends here!");
-                }
-
-                //capturing the plan
-                if (isThePlan) {
-
-                    if (line.trim().startsWith(";")) {
-                        statistics.add(line.trim());
-                    } else {
-                        //System.out.println("Got it: " + line.trim());
-                        String mline = line;
-                        if (line.indexOf("(") == -1) {//checking if it is in a pddl format about Parentheses
-                            //if it is not in pddl format just add "(" after ":" and ")" at the end of the line
-                            int indexOfDoubleDot = line.indexOf(":");
-                            mline = line.substring(0, indexOfDoubleDot + 2) + "("
-                                    + line.substring(indexOfDoubleDot + 2, line.length()) + ")";
-                        }
-                        if (line.indexOf("[") == -1) {//checking if it is in a pddl format about "[" - action duration
-                            //assume duration equals to 1
-                            mline = mline + " [1]";
-                        }
-                        line = mline;
-                        planList.add(line.trim());
-                    }
-
-                } else if (line.trim().startsWith(";")) {
-                    statistics.add(line.trim());
-                }
-
-            }
-
-
-            if (statistics.size() > 0 || planList.size() > 0) {
-                output = new ArrayList<String>();
-                if (statistics.size() > 0) {
-                    output.addAll(statistics);
-                    output.add("");
-                }
-                if (planList.size() > 0) {
-                    output.addAll(planList);
-                }
-            }
-
-
         }
-
-        if (cancelled) {
-            return null;
-        }
-
-        return output;
     }
 
     /**
@@ -487,7 +516,9 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         List<ActionDescription> result = new ArrayList<ActionDescription>();
 
 
-        for (String line : plan) {
+        for (int lineIndex = 0; lineIndex < plan.size(); lineIndex++) {
+            String line = plan.get(lineIndex);
+            
             ActionDescription action = new ActionDescription();
 
             //System.out.println(line);
@@ -507,11 +538,21 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 parameterValues.add(PlanningUtils.normalizeIdentifier(parameterStr));
             }
             action.setParameters(parameterValues);
-
+            
+            int colonIndex = line.indexOf(':');
+            String startTimeStr;
+            
             // set the startTime name
-            String startTimeStr = line.substring(0, line.indexOf(':'));
+            if(colonIndex > 0){
+                 startTimeStr = line.substring(0, colonIndex);
+            } else {
+                startTimeStr = new StringTokenizer(line).nextToken();
+            }
+            
+            if(!startTimeStr.isEmpty()){
+                action.setStartTime(Double.parseDouble(startTimeStr));                
+            }
 
-            action.setStartTime(Double.parseDouble(startTimeStr));
 
             // set the action duration
             String durationStr = "1";
@@ -580,47 +621,23 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         long start_time = System.currentTimeMillis() - timeInIO;
 
 
-        //1. get chosen planner output
-        List<String> output = new ArrayList<String>();
-        List<String> consoleOutput = new ArrayList<String>();
 
         if (cancelled) {
             return null;
         }
-        output = getPlannerOutput(domainFile, problemFile, consoleOutput);
-
-
-        if (cancelled) {
-            return null;
-        }
-        //2. separates the plan and the statistics
-        List<String> plan = new ArrayList<String>();
-        List<String> statistic = new ArrayList<String>();
-        getPlanAndStatistics(output, plan, statistic);
-
+        UnprocessedPlanningResult unprocessedResult = runPlanner(domainFile, problemFile);
 
 
         if (cancelled) {
             return null;
         }
 
-        //4.3 set the planner console output
-        //4.3.1 build up the text from the string array
-        StringBuilder consoleOutputBuilder = new StringBuilder();
-        for (Iterator<?> iter = consoleOutput.iterator(); iter.hasNext();) {
-            String line = (String) iter.next();
-            consoleOutputBuilder.append(line).append("\n");
-        }
 
-
-        PlanningStatistics stats = parseStatistics(statistic);
+        PlanningStatistics stats = parseStatistics(unprocessedResult.getStatistics());
 
         //6. set the plan
         //Element planNode = xmlPlan.getChild("plan");
-        List<ActionDescription> actionDescriptions = parsePlanToActionDescription(plan);
-
-        //TODO better measure of success - check if the planner has explicitly returned succes or failure
-        boolean success = !actionDescriptions.isEmpty();
+        List<ActionDescription> actionDescriptions = parsePlanToActionDescription(unprocessedResult.getPlan());
 
 
         long time = System.currentTimeMillis() - start_time;
@@ -629,146 +646,18 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             return null;
         }
 
-        return new ExternalPlanningResult(success, actionDescriptions, consoleOutputBuilder.toString(), stats, time);
+        return new ExternalPlanningResult(unprocessedResult.isPlanningSuccesful(), actionDescriptions, unprocessedResult.getConsoleOuptut(), stats, time);
     }
 
     @Override
     public synchronized void cancel() {
-        if(!cancelled){
+        if (!cancelled) {
             cancelled = true;
-            if(process != null){
+            if (process != null) {
                 //plannerExecutableFile is set always before the process is set
                 destroyProcess(process, plannerExecutableFile);
             }
         }
-    }
-
-    /**
-     * This method creates a HTML version of the information contained in the xmlPlan
-     * @param xmlPlan
-     * @return a html string containing a simple plan report (basic info). In fact,itSIMPLE class also has 
-     * such function (is is duplicated, use itSIMPLE's one) .
-     */
-    private String generateHTMLReport(Element xmlPlan) {
-
-
-        /*
-        // get the date
-        DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-        Date date = new Date();
-        String dateTime = dateFormat.format(date);
-         */
-
-        String dateTime = xmlPlan.getChildText("datetime");
-        // head
-        String info = "<TABLE width='100%' BORDER='0' align='center'>"
-                + "<TR><TD bgcolor='333399'><font size=4 face=arial color='FFFFFF'>"
-                + "<b>REPORT</b> - " + dateTime + "</font></TD></TR>";
-
-
-
-
-        // planner
-        Element planner = xmlPlan.getChild("planner");
-        Element settingsPlanner = null;
-        try {
-            XPath path = new JDOMXPath("planners/planner[@id='" + planner.getAttributeValue("id") + "']");
-            settingsPlanner = (Element) path.selectSingleNode(null); // TODO: doplnit settings ItSIMPLE.getItPlanners());
-        } catch (JaxenException e) {
-            e.printStackTrace();
-        }
-
-        if (settingsPlanner != null) {
-            info += "<TR><TD bgcolor='gray'><font size=4 face=arial color='FFFFFF'><b>Planner</b></TD></TR>"
-                    + "<TR><TD><font size=3 face=arial><b>Name: </b>" + settingsPlanner.getChildText("name")
-                    + "</font></TD></TR>"
-                    + "<TR><TD><font size=3 face=arial><b>Version: </b>" + settingsPlanner.getChildText("version")
-                    + "</font></TD></TR>"
-                    + "<TR><TD><font size=3 face=arial><b>Author(s): </b>" + settingsPlanner.getChildText("author")
-                    + "</font></TD></TR>"
-                    + "<TR><TD><font size=3 face=arial><b>Institution(s): </b>" + settingsPlanner.getChildText("institution")
-                    + "</font></TD></TR>"
-                    + "<TR><TD><font size=3 face=arial><b>Link: </b>" + settingsPlanner.getChildText("link")
-                    + "</font></TD></TR>"
-                    + "<TR><TD><font size=3 face=arial><b>Description: </b>" + settingsPlanner.getChildText("description")
-                    + "</font><p></TD></TR>";
-        }
-
-        // statistics
-        Element statistics = xmlPlan.getChild("statistics");
-        info += "<TR><TD bgcolor='gray'><font size=4 face=arial color='FFFFFF'><b>Statistics</b>"
-                + "</TD></TR>"
-                + "<TR><TD><font size=3 face=arial><b>Tool total time: </b>" + statistics.getChildText("toolTime")
-                + "</font></TD></TR>"
-                + "<TR><TD><font size=3 face=arial><b>Planner time: </b>" + statistics.getChildText("time")
-                + "</font></TD></TR>"
-                + "<TR><TD><font size=3 face=arial><b>Parsing time: </b>" + statistics.getChildText("parsingTime")
-                + "</font></TD></TR>"
-                + "<TR><TD><font size=3 face=arial><b>Number of actions: </b>" + statistics.getChildText("nrActions")
-                + "</font></TD></TR>"
-                + "<TR><TD><font size=3 face=arial><b>Make Span: </b>" + statistics.getChildText("makeSpan")
-                + "</font></TD></TR>"
-                + "<TR><TD><font size=3 face=arial><b>Metric value: </b>" + statistics.getChildText("metricValue")
-                + "</font></TD></TR>"
-                + "<TR><TD><font size=3 face=arial><b>Planning technique: </b>" + statistics.getChildText("planningTechnique")
-                + "</font></TD></TR>"
-                + "<TR><TD><font size=3 face=arial><b>Additional: </b>" + statistics.getChildText("additional").replaceAll("\n", "<br>")
-                + "</font><p></TD></TR>";
-
-
-        // plan
-        info += "<TR><TD bgcolor='gray'><font size=4 face=arial color='FFFFFF'><b>Plan</b></TD></TR>";
-
-
-        List<?> actions = xmlPlan.getChild("plan").getChildren("action");
-        if (actions.size() > 0) {
-            for (Iterator<?> iter = actions.iterator(); iter.hasNext();) {
-                Element action = (Element) iter.next();
-                // build up the action string
-                // start time
-                String actionStr = action.getChildText("startTime") + ": ";
-
-                // action name
-                actionStr += "(" + action.getAttributeValue("id") + " ";
-
-                // action parameters
-                List<?> parameters = action.getChild("parameters").getChildren("parameter");
-                for (Iterator<?> iterator = parameters.iterator(); iterator.hasNext();) {
-                    Element parameter = (Element) iterator.next();
-                    actionStr += parameter.getAttributeValue("id");
-                    if (iterator.hasNext()) {
-                        actionStr += " ";
-                    }
-                }
-                actionStr += ")";
-
-                // action duration
-                String duration = action.getChildText("duration");
-                if (!duration.equals("")) {
-                    actionStr += " [" + duration + "]";
-                }
-
-                if (iter.hasNext()) {
-                    info += "<TR><TD><font size=3 face=arial>" + actionStr + "</font></TD></TR>";
-                } else {
-                    info += "<TR><TD><font size=3 face=arial>" + actionStr + "</font><p></TD></TR>";
-                }
-            }
-        } else {
-            info += "<TR><TD><font size=3 face=arial>No plan found.</font><p></TD></TR>";
-        }
-
-
-        // planner console output
-        info += "<TR><TD bgcolor='gray'><font size=3 face=arial color='FFFFFF'>"
-                + "<b>Planner Console Output</b></TD></TR>"
-                + "<TR><TD><font size=4 face=courier>"
-                + planner.getChildText("consoleOutput").replaceAll("\n", "<br>") + "</font><p></TD></TR>";
-
-        info += "</TABLE>";
-
-
-        return info;
     }
 
     public void destroyProcess(Process process, File plannerRunFile) {
@@ -785,35 +674,69 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.FINE, "Error consuming output:" + ex.getMessage(), ex);
             }
 
-            String operatingSystem = System.getProperty("os.name").toLowerCase();
-            if (operatingSystem.indexOf("linux") == 0) {
-                //kill process in linux with comand 'killall -9 <process_name>'
-                //System.out.println("Kill" );
+//            String operatingSystem = System.getProperty("os.name").toLowerCase();
+//            if (operatingSystem.indexOf("linux") == 0) {
+//                //kill process in linux with comand 'killall -9 <process_name>'
+//                //System.out.println("Kill" );
+//
+//                if (plannerRunFile != null && plannerRunFile.exists()) {
+//
+//                    //System.out.println(plannerRunFile.getName());
+//                    String filename = plannerRunFile.getName();
+//                    if (!filename.trim().equals("")) {
+//                        String[] command = new String[3];
+//                        command[0] = "killall";
+//                        command[1] = "-9";
+//                        command[2] = filename;
+//
+//                        try {
+//                            Runtime.getRuntime().exec(command);
+//                        } catch (IOException ex) {
+//                            Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+//
+//                    }
+//
+//
+//                }
+//            }
 
-                if (plannerRunFile != null && plannerRunFile.exists()) {
-
-                    //System.out.println(plannerRunFile.getName());
-                    String filename = plannerRunFile.getName();
-                    if (!filename.trim().equals("")) {
-                        String[] command = new String[3];
-                        command[0] = "killall";
-                        command[1] = "-9";
-                        command[2] = filename;
-
-                        try {
-                            Runtime.getRuntime().exec(command);
-                        } catch (IOException ex) {
-                            Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-
-                    }
 
 
-                }
-            }
+        }
+    }
 
+    protected static class UnprocessedPlanningResult {
 
+        List<String> plan;
 
+        List<String> statistics;
+
+        String consoleOuptut;
+
+        boolean planningSuccesful;
+
+        public UnprocessedPlanningResult(List<String> plan, List<String> statistics, String consoleOuptut, boolean planningSuccesful) {
+            this.plan = plan;
+            this.statistics = statistics;
+            this.consoleOuptut = consoleOuptut;
+            this.planningSuccesful = planningSuccesful;
+        }
+
+        public List<String> getPlan() {
+            return plan;
+        }
+
+        public List<String> getStatistics() {
+            return statistics;
+        }
+
+        public String getConsoleOuptut() {
+            return consoleOuptut;
+        }
+
+        public boolean isPlanningSuccesful() {
+            return planningSuccesful;
         }
     }
 }
