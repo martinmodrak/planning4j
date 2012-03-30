@@ -245,7 +245,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             if (cancelled) {
                 return null;
             }
-            logger.info("\n>> Calling planner " + chosenPlanner.getName() + "\n ");
+            logger.info("\n>> Calling planner " + chosenPlanner.getName() + " in directory: " + workingDirectory.getAbsolutePath());
             logger.fine("Planner arguments:" + commandArguments);
             //Call the planner
             try {
