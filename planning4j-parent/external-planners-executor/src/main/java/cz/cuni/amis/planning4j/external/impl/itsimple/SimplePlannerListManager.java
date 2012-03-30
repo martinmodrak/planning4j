@@ -198,7 +198,7 @@ public class SimplePlannerListManager {
      */
     public ItSimplePlannerInformation getPlannerByName(String name) {
         for (ItSimplePlannerInformation plannerInfo : getPlannersList()) {
-            if (plannerInfo.getName().equals(name) && runOnOperatingSystem(plannerInfo)) {
+            if (plannerInfo.getName().equals(name) && runsOnOperatingSystem(plannerInfo)) {
                 return plannerInfo;
             }
         }
@@ -257,7 +257,7 @@ public class SimplePlannerListManager {
     public List<ItSimplePlannerInformation> suggestPlanners(Set<PDDLRequirement> requirements) {
         List<ItSimplePlannerInformation> suggestedPlanners = new ArrayList<ItSimplePlannerInformation>();
         for (ItSimplePlannerInformation plannerInfo : getPlannersList()) {
-            if (this.containsRequirements(plannerInfo, requirements) && this.runOnOperatingSystem(plannerInfo)) {
+            if (this.containsRequirements(plannerInfo, requirements) && this.runsOnOperatingSystem(plannerInfo)) {
                 suggestedPlanners.add(plannerInfo);
             }
         }
@@ -277,7 +277,7 @@ public class SimplePlannerListManager {
      * @param planner
      * @return
      */
-    protected boolean runOnOperatingSystem(ItSimplePlannerInformation plannerInfo) {
+    protected boolean runsOnOperatingSystem(ItSimplePlannerInformation plannerInfo) {
         return plannerInfo.getSupportedPlatforms().contains(getOperatingSystem());        
     }
     
