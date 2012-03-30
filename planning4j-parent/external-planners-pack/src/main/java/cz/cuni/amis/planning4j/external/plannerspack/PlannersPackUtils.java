@@ -24,13 +24,16 @@ import java.io.File;
  * @author Martin Cerny
  */
 public class PlannersPackUtils {
+    
+    private static final PlannerPackListManager plannerPackListManager = new PlannerPackListManager();
+    private static final SimplePlannerListManager installedPlannerListManager = new SimplePlannerListManager(XMLUtilities.readPlannerListFromStream(PlannersPackUtils.class.getResourceAsStream("/planners/installedPlanners.xml")));
 
     /**
      * Gets planner list manager for planners that are part of this package in binary from
      * @return 
      */
     public static PlannerListManager getPlannerListManager(){
-        return new PlannerPackListManager();        
+        return plannerPackListManager;        
     }
     
     /**
@@ -38,7 +41,7 @@ public class PlannersPackUtils {
      * @return 
      */
     public static SimplePlannerListManager getInstalledPlannerListManager(){
-        return new SimplePlannerListManager(XMLUtilities.readPlannerListFromStream(PlannersPackUtils.class.getResourceAsStream("/planners/installedPlanners.xml")));        
+        return installedPlannerListManager;        
         
     }
 
