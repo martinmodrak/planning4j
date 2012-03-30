@@ -62,7 +62,10 @@
 						<description>specifies the file of (init/goal) facts</description>
 					</problem>
 				</arguments>
-                                <noPlanFoundSignal type="outputText">Completely explored state space -- no solution!</noPlanFoundSignal>                                
+                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal>                                
+                                <!-- The no plan found is signalled by text "Completely explored state space - - no solution!" as well
+                                but error code checking yields better behaviour
+                                -->
 			</settings>
 		</planner>
 	</planners>
