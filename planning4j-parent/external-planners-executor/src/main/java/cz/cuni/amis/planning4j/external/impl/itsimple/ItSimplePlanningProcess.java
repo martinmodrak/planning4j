@@ -22,6 +22,9 @@
  **/
 package cz.cuni.amis.planning4j.external.impl.itsimple;
 
+import com.jezhumble.javasysmon.JavaSysMon;
+import com.jezhumble.javasysmon.OsProcess;
+import com.jezhumble.javasysmon.ProcessVisitor;
 import cz.cuni.amis.planning4j.PlanningException;
 import cz.cuni.amis.planning4j.ActionDescription;
 import cz.cuni.amis.planning4j.external.impl.ExternalPlanningResult;
@@ -37,8 +40,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 
@@ -54,7 +59,12 @@ import org.apache.commons.io.output.NullOutputStream;
  */
 public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
-    private static final Logger logger = Logger.getLogger(IExternalPlannerExecutor.LOGGER_NAME);
+    private static final Logger logger = Logger.getLogger(ItSimplePlanningProcess.class.getName());
+    
+    /**
+     * Timeout to wait for planning process to spawn to get it's pid
+     */
+    public static final int PROCESS_SPAWN_TIMEOUT = 500;
 
     protected File plannerExecutableFile;
 
@@ -74,6 +84,14 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
     private boolean cancelled = false;
 
+    private int processPid = -1;
+
+    /**
+     * Mutex that forces only one child process to be spawned at a time. This let's us 
+     * determine the PID of the process.
+     */
+    private static final Object spawnProcessMutex = new Object();
+
     public ItSimplePlanningProcess(ItSimplePlannerInformation chosenPlanner, File plannerBinariesDirectory, File workingDirectory, File domainFile, File problemFile, long timeInIO) {
         this.chosenPlanner = chosenPlanner;
         this.plannerBinariesDirectory = plannerBinariesDirectory;
@@ -85,86 +103,85 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
     }
 
     /**
-     * Parses output and fills plan with information about actio and statistics with
-     * statistical information
-     * @param output
-     * @param plan
-     * @param statistics 
+     * Spawns a new planner process and sets {@link #processPid} to it's PID. To work correctly,
+     * the code relies on the fact that no other method in this JVM runs processes with names
+     * that would be correspond to our planners and
+     * that no method kills a process unless it acquires lock on spawnProcessMutex.
+     * @param procBuilder
+     * @param identifying process name / command line fragment
+     * @return 
      */
-    private void getPlanAndStatistics(List<String> output, List<String> plan, List<String> statistics) {
-        //Separate statistics and plan (get plan)
-        if (output != null) {
-            for (String line : output) {
-                if (!line.trim().equals("")) {
-                    //get plan
-                    if (line.trim().startsWith(";")) {
-                        statistics.add(line.trim().substring(1).trim());
-                    } else {
-                        // if it is not a standard action then check if is still an action or a statistic
-                        if (!(line.indexOf(":") > -1)) {
-                            boolean isAnAction = false;
+    private Process spawnPlanner(ProcessBuilder procBuilder, String processCommandFragment) throws IOException {
+        synchronized (spawnProcessMutex) {
+            JavaSysMon monitor = new JavaSysMon();
+            DirectPlannerChildVisitor beforeVisitor = new DirectPlannerChildVisitor(processCommandFragment);
+            monitor.visitProcessTree(monitor.currentPid(), beforeVisitor);
+            Set<Integer> alreadySpawnedProcesses = beforeVisitor.getPids();
 
-                            //check if the string can still be an action (e.g. 1 (action p1 p2 ... pn) )
-                            if ((line.indexOf("(") > -1) && (line.indexOf(")") > -1)) {
-                                //check if the first element on the string is the plan index
-                                StringTokenizer st = new StringTokenizer(line.trim());
-                                String firstItem = "index";
-                                if (st.hasMoreTokens()) {
-                                    firstItem = st.nextToken();
-                                    try {
-                                        double theIndex = Double.parseDouble(firstItem);
-                                        isAnAction = true;
-                                    } catch (Exception e) {
-                                        isAnAction = false;
-                                    }
-                                }
+            Process proc = procBuilder.start();
 
-                                //if it is an action the include the ":" for standarlization
-                                if (isAnAction) {
-                                    String actionBody = "";
-                                    while (st.hasMoreTokens()) {
-                                        // for each parameter, create a node
-                                        actionBody += st.nextToken() + " ";
-                                    }
-                                    line = firstItem + ": " + actionBody;
-                                }
+            DirectPlannerChildVisitor afterVisitor = new DirectPlannerChildVisitor(processCommandFragment);
+            
+            Set<Integer> newProcesses = afterVisitor.getPids();
+            long startTime = System.currentTimeMillis();
+            while(newProcesses.isEmpty() && System.currentTimeMillis() - startTime < PROCESS_SPAWN_TIMEOUT) {                    
+                monitor.visitProcessTree(monitor.currentPid(), afterVisitor);
+                newProcesses = afterVisitor.getPids();
 
-                            }
-
-                            if (isAnAction) {
-                                plan.add(line.trim());
-                            } else {
-                                statistics.add(line.trim());
-                            }
-
-
-                        } else {//When it is really an action
-                            plan.add(line.trim());
-                        }
-
-                    }
-                }
+                newProcesses.removeAll(alreadySpawnedProcesses);
             }
+
+            if (newProcesses.isEmpty()) {
+                logger.severe("There is no new planner PID.");
+            } else if (newProcesses.size() > 1) {
+                logger.severe("Multiple new candidate planner PIDs");
+            } else {
+                processPid = newProcesses.iterator().next();
+            }
+            logger.info("Spawned planning process. Pid:" + processPid);
+            return proc;
         }
     }
 
-//    protected List<String> getPlan(List<String> Output) {
-//        //Separate statistics and plan (get plan)
-//        List<String> plan = new ArrayList<String>();
-//        if (Output != null) {
-//            for (Iterator<?> iter = Output.iterator(); iter.hasNext();) {
-//                String element = (String) iter.next();
-//                //System.out.println(element);
-//                if (!element.trim().equals("")) {
-//                    //get plan
-//                    if (!element.trim().startsWith(";")) {
-//                        plan.add(element.trim());
-//                    }
-//                }
-//            }
-//        }
-//        return plan;
-//    }
+    private void killPlannerByPID() {
+        if (processPid < 0) {
+            logger.severe("Cannot kill planner by PID. PID not set.");
+            return;
+        }
+        synchronized (spawnProcessMutex) {
+            logger.info("Killing planner pid:" + processPid);
+            JavaSysMon monitor = new JavaSysMon();
+            monitor.killProcessTree(processPid, false);
+        }
+    }
+
+    private static class DirectPlannerChildVisitor implements ProcessVisitor {
+
+        Set<Integer> pids = new HashSet<Integer>();
+
+        String processNameFragment;
+
+        public DirectPlannerChildVisitor(String processNameFragment) {
+            //normalize the fragment, if it contains separators
+            this.processNameFragment = processNameFragment.replace('\\', File.separatorChar).replace('/', File.separatorChar);
+        }
+        
+        
+        
+        @Override
+        public boolean visit(OsProcess op, int i) {
+            if (op.processInfo().getCommand().contains(processNameFragment) || op.processInfo().getName().equals(processNameFragment)) {
+                pids.add(op.processInfo().getPid());
+            }
+            return false;
+        }
+
+        public Set<Integer> getPids() {
+            return pids;
+        }
+    }
+
+
     /**
      * Guess whether line might be an action
      * @param line
@@ -271,7 +288,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             try {
                 ProcessBuilder builder = new ProcessBuilder(commandArguments);
                 builder.directory(workingDirectory);
-                process = builder.start();
+                process = spawnPlanner(builder, plannerRelativeFile);
             } catch (Exception e) {
                 String message = "Error while running the planner " + chosenPlanner.getName() + ". ";
                 throw new PlanningException(message, e);
@@ -399,7 +416,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                     return null;
                 }
                 Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.INFO, "Waiting for planner execution interrupted", ex);
-                destroyProcess(process, plannerExecutableFile);
+                destroyProcess();
                 return null;
             }
 
@@ -454,7 +471,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                     //Get output
                     try {
                         for (String line : FileUtils.readLines(outputFile)) {
-                            if(line.trim().isEmpty()){
+                            if (line.trim().isEmpty()) {
                                 continue;
                             }
                             if (!isLineAction(line)) {
@@ -484,10 +501,10 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 return null;
             }
 
-            if(settings.getNoPlanFoundSignalType() == ENoPlanFoundSignalType.EMPTY_PLAN){
+            if (settings.getNoPlanFoundSignalType() == ENoPlanFoundSignalType.EMPTY_PLAN) {
                 plannerFoundNoSolution = unprocessedPlan.isEmpty();
             }
-            
+
             return new UnprocessedPlanningResult(unprocessedPlan, unprocessedStatistics, consoleOutputBuilder.toString(), !plannerFoundNoSolution);
 
         } finally {
@@ -513,7 +530,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
         for (int lineIndex = 0; lineIndex < plan.size(); lineIndex++) {
             String line = plan.get(lineIndex);
-            
+
             ActionDescription action = new ActionDescription();
 
             //System.out.println(line);
@@ -533,19 +550,19 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 parameterValues.add(PlanningUtils.normalizeIdentifier(parameterStr));
             }
             action.setParameters(parameterValues);
-            
+
             int colonIndex = line.indexOf(':');
             String startTimeStr;
-            
+
             // set the startTime name
-            if(colonIndex > 0){
-                 startTimeStr = line.substring(0, colonIndex);
+            if (colonIndex > 0) {
+                startTimeStr = line.substring(0, colonIndex);
             } else {
                 startTimeStr = new StringTokenizer(line).nextToken();
             }
-            
-            if(!startTimeStr.isEmpty()){
-                action.setStartTime(Double.parseDouble(startTimeStr));                
+
+            if (!startTimeStr.isEmpty()) {
+                action.setStartTime(Double.parseDouble(startTimeStr));
             }
 
 
@@ -650,51 +667,34 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             cancelled = true;
             if (process != null) {
                 //plannerExecutableFile is set always before the process is set
-                destroyProcess(process, plannerExecutableFile);
+                destroyProcess();
             }
         }
     }
 
-    public void destroyProcess(Process process, File plannerRunFile) {
+    public void destroyProcess() {
         if (process != null) {
-            InputStream is = process.getInputStream();
-            InputStream es = process.getErrorStream();
-            process.destroy();
-
-            //should read and discard all output
             try {
-                IOUtils.copy(is, new NullOutputStream());
-                IOUtils.copy(es, new NullOutputStream());
-            } catch (IOException ex) {
-                Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.FINE, "Error consuming output:" + ex.getMessage(), ex);
-            }
+                process.exitValue(); //this throws an exception only iff the process has not yet stopped
+            } catch (IllegalThreadStateException ingoredException){
+                InputStream is = process.getInputStream();
+                InputStream es = process.getErrorStream();
 
-//            String operatingSystem = System.getProperty("os.name").toLowerCase();
-//            if (operatingSystem.indexOf("linux") == 0) {
-//                //kill process in linux with comand 'killall -9 <process_name>'
-//                //System.out.println("Kill" );
-//
-//                if (plannerRunFile != null && plannerRunFile.exists()) {
-//
-//                    //System.out.println(plannerRunFile.getName());
-//                    String filename = plannerRunFile.getName();
-//                    if (!filename.trim().equals("")) {
-//                        String[] command = new String[3];
-//                        command[0] = "killall";
-//                        command[1] = "-9";
-//                        command[2] = filename;
-//
-//                        try {
-//                            Runtime.getRuntime().exec(command);
-//                        } catch (IOException ex) {
-//                            Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.SEVERE, null, ex);
-//                        }
-//
-//                    }
-//
-//
-//                }
-//            }
+                if(processPid > 0){
+                    killPlannerByPID();
+                }
+
+
+                process.destroy();
+
+                //should read and discard all output
+                try {
+                    IOUtils.copy(is, new NullOutputStream());
+                    IOUtils.copy(es, new NullOutputStream());
+                } catch (IOException ex) {
+                    Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.FINE, "Error consuming output:" + ex.getMessage(), ex);
+                }                
+            }
 
 
 
