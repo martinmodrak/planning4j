@@ -101,17 +101,29 @@ public class ExternalPlanner extends AbstractAsyncPlanner{
      */
     @Override
     public IPlanFuture<IExternalPlanningResult> planAsync(IDomainProvider domainProvider, IProblemProvider problemProvider) {
+        FileWriter domainFileWriter = null;
+        FileWriter problemFileWriter = null;
         try {
             long start_time = System.currentTimeMillis();
-            FileWriter domainFileWriter = new FileWriter(domainTempFile);
+            domainFileWriter = new FileWriter(domainTempFile);
             domainProvider.writeDomain(domainFileWriter);
             domainFileWriter.close();
-            FileWriter problemFileWriter = new FileWriter(problemTempFile);
+             problemFileWriter = new FileWriter(problemTempFile);
             problemProvider.writeProblem(problemFileWriter);
             problemFileWriter.close();
             long io_time = System.currentTimeMillis() - start_time;
             return externalPlannerExecutor.executePlanner(domainTempFile, problemTempFile, io_time);
         } catch(IOException ex){
+            try {
+                if(domainFileWriter != null){
+                    domainFileWriter.close();                
+                }
+                if(problemFileWriter != null){
+                    problemFileWriter.close();
+                }
+            } catch (IOException ignored){
+                //ignore
+            }            
             throw new PlanningIOException(ex);
         }
         
