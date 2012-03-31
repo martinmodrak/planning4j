@@ -333,6 +333,9 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
                 if (!settings.isHasOutputFile()) {
                     if (!line.trim().isEmpty()) {
+						if(logger.isLoggable(Level.FINE)){
+							logger.fine(consoleParseState + ":" + line);
+						}
                         //the plan is part of console output
                         switch (consoleParseState) {
                             case BEGIN: {
@@ -349,6 +352,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                                         } else {
                                             unprocessedPlan.add(firstLine);
                                         }
+										consoleParseState = EConsoleParseState.READING_PLAN;
                                     }
                                 }
                                 break;
@@ -363,7 +367,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                                 //intentional fallthrough!!!
                             }
                             case READING_PLAN: {
-                                if (line.contains(settings.getConsoleOutputPlanEndIdentifier())) {
+                                if (!settings.getConsoleOutputPlanEndIdentifier().isEmpty() && line.contains(settings.getConsoleOutputPlanEndIdentifier())) {
                                     consoleParseState = EConsoleParseState.END;
                                 } else {
                                     if (!isLineAction(line)) {
@@ -524,7 +528,6 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
     private List<ActionDescription> parsePlanToActionDescription(List<String> plan) {
         List<ActionDescription> result = new ArrayList<ActionDescription>();
 
-
         for (int lineIndex = 0; lineIndex < plan.size(); lineIndex++) {
             String line = plan.get(lineIndex);
             try {
@@ -534,9 +537,9 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 //System.out.println(line);
                 int colonIndex = line.indexOf(':');
                 String actionInstance;
-                if (line.indexOf('(') > 0) {
+                if (line.indexOf('(') >= 0) {
                     actionInstance = line.substring(line.indexOf('(') + 1, line.lastIndexOf(')'));
-                } else if (colonIndex > 0) {
+                } else if (colonIndex >= 0) {
                     actionInstance = line.substring(colonIndex + 1);
                 } else {
                     logger.severe("Could not determine what is the actual action: " + line);
