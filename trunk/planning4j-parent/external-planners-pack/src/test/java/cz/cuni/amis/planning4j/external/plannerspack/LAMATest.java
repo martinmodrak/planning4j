@@ -58,7 +58,7 @@ public class LAMATest {
         IDomainProvider domainProvider = new PDDLDomainProvider(domain);
         IProblemProvider problemProvider = new PDDLProblemProvider(problem);
 
-        Logger.getLogger(IExternalPlannerExecutor.LOGGER_NAME).setLevel(Level.ALL);        
+        Logger.getLogger(ItSimplePlannerExecutor.class.getName()).setLevel(Level.ALL);        
         /**
          * Get a planner:
          */
