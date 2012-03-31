@@ -41,6 +41,8 @@
 						<additionalGeneratedFiles>
 							<fileName>output.sas</fileName>
 							<fileName>output</fileName>
+							<fileName>elapsed.time</fileName>
+							<fileName>plan_numbers_and_cost</fileName>
 						</additionalGeneratedFiles>
 					</outputFile>
 					<consoleOutput>
@@ -64,6 +66,58 @@
 				</arguments>
                                 <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal>                                
                                 <!-- The no plan found is signalled by text "Completely explored state space - - no solution!" as well
+                                but error code checking yields better behaviour
+                                -->
+			</settings>
+		</planner>
+		<planner id="2">
+			<name>PROBE</name>
+			<version></version>
+			<date>2011</date>
+			<institution />
+			<author>Nir Lipovetzky</author>
+			<link>http://www.tecn.upf.es/~nlipovet/</link>
+			<description />
+			<platform>
+				<linux />
+			</platform>
+			<requirements>
+                            <!-- TODO Fix requirements -->
+				<adl />
+				<mdp />
+				<typing />
+				<strips />
+				<durative-actions />
+			</requirements>
+			<settings>
+				<filePath>probe</filePath>
+				<output hasOutputFile="true">
+					<outputFile>
+						<fileName>plan.out</fileName>
+						<fileNameAutomaticIncrement>.#</fileNameAutomaticIncrement>
+						<argument needArgument="true" parameter="-o"/>
+						<additionalGeneratedFiles>
+							<fileName>grounding.stats</fileName>
+							<fileName>exec.stats</fileName>
+						</additionalGeneratedFiles>
+					</outputFile>
+				</output>
+				<arguments>
+					<domain parameter="-d" id="2">
+						<name>domain</name>
+						<value />
+						<enable>true</enable>
+						<description>specifies the file of the operators</description>
+					</domain>
+					<problem parameter="-i" id="3">
+						<name>problem</name>
+						<value />
+						<enable>true</enable>
+						<description>specifies the file of (init/goal) facts</description>
+					</problem>
+				</arguments>
+                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal>                                
+                                <!-- The no plan found is signalled by text "ff: goal can be simplified to FALSE. No plan will solve it" as well
                                 but error code checking yields better behaviour
                                 -->
 			</settings>

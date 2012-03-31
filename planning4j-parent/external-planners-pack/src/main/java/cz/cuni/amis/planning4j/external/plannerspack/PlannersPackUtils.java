@@ -16,11 +16,16 @@
  */
 package cz.cuni.amis.planning4j.external.plannerspack;
 
+import cz.cuni.amis.planning4j.external.ExternalPlanner;
 import cz.cuni.amis.planning4j.external.impl.itsimple.*;
 import java.io.File;
 
 /**
  * An utility class to access planners in this package.
+ * Note that the getXXX classes don't prepare the planners for execution. If you want to extract
+ * the planners (those that are contained), you still need to do it with {@link PlannerListManager#extractAndPreparePlanner(cz.cuni.amis.planning4j.external.impl.itsimple.ItSimplePlannerInformation) }
+ * Once you obtain the {@link ItSimplePlannerInformation} object, you can run the planner with {@link ExternalPlanner}
+ * and {@link ItSimplePlannerExecutor}.
  * @author Martin Cerny
  */
 public class PlannersPackUtils {
@@ -59,19 +64,40 @@ public class PlannersPackUtils {
     /**
      * Return template for all Fast downward planner. It is then neccessary
      * to specify which planner by adding additional arguments to planner settings.
+     * Note that fast downward is not bundled in this pack - it needs to be already installed.
      */
     public static ItSimplePlannerInformation getFastDownwardTemplate(){
         return installedPlannerListManager.getPlannerByName("Fast Downward");
     }
-    
+
+    /**
+     * Gets a specific IPC configuration of Fast Downward.
+     * Note that fast downward is not bundled in this pack - it needs to be already installed. 
+     * @param configuratioName
+     * @return 
+     */
     public static ItSimplePlannerInformation getFastDownwardIPCConfiguration(String configuratioName){
         ItSimplePlannerInformation info = getFastDownwardTemplate();
         info.getSettings().addAdditionalArgument(new PlannerArgument("ipc",configuratioName));
         return info;
     }
-    
+
+    /**
+     * Gets the LAMA-2011 planner as competed in IPC 2011.
+     * Note that fast downward is not bundled in this pack - it needs to be already installed.
+     * @return 
+     */
     public static ItSimplePlannerInformation getLAMA2011() {
         return getFastDownwardIPCConfiguration("seq-sat-lama-2011");
+    }
+
+    /**
+     * Get's the probe planner.
+     * Note that PROBE is not bundled in this pack - it needs to be already installed on your system.
+     * @return 
+     */
+    public static ItSimplePlannerInformation getProbe(){
+        return installedPlannerListManager.getPlannerByName("PROBE");
     }
 
     private static class PlannerPackListManager extends PlannerListManager {
