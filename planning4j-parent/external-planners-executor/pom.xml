@@ -44,7 +44,7 @@
         <dependency> <!-- JavaSysMon - to read process pids -->
             <groupId>com.github.jezhumble.javasysmon</groupId>
             <artifactId>javasysmon</artifactId>
-            <version>0.3.3</version>
+            <version>0.3.3a</version>
         </dependency>
         
     </dependencies>
