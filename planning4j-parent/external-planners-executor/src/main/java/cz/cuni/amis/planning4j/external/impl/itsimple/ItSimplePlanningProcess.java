@@ -60,7 +60,7 @@ import org.apache.commons.io.output.NullOutputStream;
 public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
     private static final Logger logger = Logger.getLogger(ItSimplePlanningProcess.class.getName());
-    
+
     /**
      * Timeout to wait for planning process to spawn to get it's pid
      */
@@ -121,10 +121,10 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             Process proc = procBuilder.start();
 
             DirectPlannerChildVisitor afterVisitor = new DirectPlannerChildVisitor(processCommandFragment);
-            
+
             Set<Integer> newProcesses = afterVisitor.getPids();
             long startTime = System.currentTimeMillis();
-            while(newProcesses.isEmpty() && System.currentTimeMillis() - startTime < PROCESS_SPAWN_TIMEOUT) {                    
+            while (newProcesses.isEmpty() && System.currentTimeMillis() - startTime < PROCESS_SPAWN_TIMEOUT) {
                 monitor.visitProcessTree(monitor.currentPid(), afterVisitor);
                 newProcesses = afterVisitor.getPids();
 
@@ -165,9 +165,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             //normalize the fragment, if it contains separators
             this.processNameFragment = processNameFragment.replace('\\', File.separatorChar).replace('/', File.separatorChar);
         }
-        
-        
-        
+
         @Override
         public boolean visit(OsProcess op, int i) {
             if (op.processInfo().getCommand().contains(processNameFragment) || op.processInfo().getName().equals(processNameFragment)) {
@@ -180,7 +178,6 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             return pids;
         }
     }
-
 
     /**
      * Guess whether line might be an action
@@ -530,57 +527,67 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
         for (int lineIndex = 0; lineIndex < plan.size(); lineIndex++) {
             String line = plan.get(lineIndex);
+            try {
 
-            ActionDescription action = new ActionDescription();
+                ActionDescription action = new ActionDescription();
 
-            //System.out.println(line);
+                //System.out.println(line);
+                int colonIndex = line.indexOf(':');
+                String actionInstance;
+                if (line.indexOf('(') > 0) {
+                    actionInstance = line.substring(line.indexOf('(') + 1, line.lastIndexOf(')'));
+                } else if (colonIndex > 0) {
+                    actionInstance = line.substring(colonIndex + 1);
+                } else {
+                    logger.severe("Could not determine what is the actual action: " + line);
+                    continue;
+                }
+                StringTokenizer st = new StringTokenizer(actionInstance);
 
-            String actionInstance = line.substring(line.indexOf('(') + 1, line.lastIndexOf(')'));
-            StringTokenizer st = new StringTokenizer(actionInstance);
+                // the first token is the action name
+                String actionName = st.nextToken();
 
-            // the first token is the action name
-            String actionName = st.nextToken();
+                action.setName(PlanningUtils.normalizeIdentifier(actionName));
 
-            action.setName(PlanningUtils.normalizeIdentifier(actionName));
+                // the other tokens are the parameters
+                List<String> parameterValues = new ArrayList<String>();
+                while (st.hasMoreTokens()) {
+                    String parameterStr = st.nextToken();
+                    parameterValues.add(PlanningUtils.normalizeIdentifier(parameterStr));
+                }
+                action.setParameters(parameterValues);
 
-            // the other tokens are the parameters
-            List<String> parameterValues = new ArrayList<String>();
-            while (st.hasMoreTokens()) {
-                String parameterStr = st.nextToken();
-                parameterValues.add(PlanningUtils.normalizeIdentifier(parameterStr));
+                String startTimeStr;
+
+                // set the startTime name
+                if (colonIndex > 0) {
+                    startTimeStr = line.substring(0, colonIndex);
+                } else {
+                    startTimeStr = new StringTokenizer(line).nextToken();
+                }
+
+                if (!startTimeStr.startsWith("(")) {
+                    try {
+                        action.setStartTime(Double.parseDouble(startTimeStr));
+                    } catch (NumberFormatException ex) {
+                        logger.severe("Could not parse action: " + line);
+                        continue;
+                    }
+                }
+
+
+                // set the action duration
+                String durationStr = "1";
+                if (line.indexOf('[') > - 1) {
+                    durationStr = line.substring(line.indexOf('[') + 1, line.lastIndexOf(']'));
+                }
+                action.setDuration(Double.parseDouble(durationStr));
+                action.setNotes("");
+
+                result.add(action);
+            } catch (RuntimeException ex) {
+                logger.log(Level.SEVERE, "Could not parse action: " + line, ex);
             }
-            action.setParameters(parameterValues);
-
-            int colonIndex = line.indexOf(':');
-            String startTimeStr;
-
-            // set the startTime name
-            if (colonIndex > 0) {
-                startTimeStr = line.substring(0, colonIndex);
-            } else {
-                startTimeStr = new StringTokenizer(line).nextToken();
-            }
-            
-            if(!startTimeStr.startsWith("(")){
-				try {
-					action.setStartTime(Double.parseDouble(startTimeStr));                
-				} catch (NumberFormatException ex) {
-					logger.severe("Could not parse action: " + line);
-					continue;
-				}
-            }
-
-
-            // set the action duration
-            String durationStr = "1";
-            if (line.indexOf('[') > - 1) {
-                durationStr = line.substring(line.indexOf('[') + 1, line.lastIndexOf(']'));
-            }
-            action.setDuration(Double.parseDouble(durationStr));
-            action.setNotes("");
-
-            result.add(action);
-
 
         }
 
@@ -681,11 +688,11 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         if (process != null) {
             try {
                 process.exitValue(); //this throws an exception only iff the process has not yet stopped
-            } catch (IllegalThreadStateException ingoredException){
+            } catch (IllegalThreadStateException ingoredException) {
                 InputStream is = process.getInputStream();
                 InputStream es = process.getErrorStream();
 
-                if(processPid > 0){
+                if (processPid > 0) {
                     killPlannerByPID();
                 }
 
@@ -698,7 +705,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                     IOUtils.copy(es, new NullOutputStream());
                 } catch (IOException ex) {
                     Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.FINE, "Error consuming output:" + ex.getMessage(), ex);
-                }                
+                }
             }
 
 
