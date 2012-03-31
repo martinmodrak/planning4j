@@ -64,7 +64,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
     /**
      * Timeout to wait for planning process to spawn to get it's pid
      */
-    public static final int PROCESS_SPAWN_TIMEOUT = 500;
+    public static final int PROCESS_SPAWN_TIMEOUT = 50;
 
     protected File plannerExecutableFile;
 
