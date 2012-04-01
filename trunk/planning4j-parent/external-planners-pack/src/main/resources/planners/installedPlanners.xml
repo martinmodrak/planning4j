@@ -36,7 +36,7 @@
 				<output hasOutputFile="true">
 					<outputFile>
 						<fileName>plan.out</fileName>
-						<fileNameAutomaticIncrement></fileNameAutomaticIncrement>
+						<fileNameAutomaticIncrement>.#</fileNameAutomaticIncrement>
 						<argument needArgument="true" parameter="--plan-file"/>
 						<additionalGeneratedFiles>
 							<fileName>output.sas</fileName>
