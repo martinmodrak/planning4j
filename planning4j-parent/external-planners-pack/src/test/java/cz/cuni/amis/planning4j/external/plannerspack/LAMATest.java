@@ -71,14 +71,17 @@ public class LAMATest {
 //        File plannersDirectory = new File("/tmp");
 //        plannerManager.extractAndPreparePlanner(plannersDirectory,plannerInfo);
         
-        SimplePlannerListManager plannerManager = PlannersPackUtils.getInstalledPlannerListManager();
+//        SimplePlannerListManager plannerManager = PlannersPackUtils.getInstalledPlannerListManager();
 
 
         //let's use the first suggested planner
-        ItSimplePlannerInformation plannerInfo = plannerManager.getPlannerByName("Fast Downward");
-        plannerInfo.getSettings().addAdditionalArgument(new PlannerArgument("--search", "lazy_greedy(blind())"));
+//        ItSimplePlannerInformation plannerInfo = plannerManager.getPlannerByName("Fast Downward");
+  //      plannerInfo.getSettings().addAdditionalArgument(new PlannerArgument("--search", "lazy_greedy(blind())"));
+        //ItSimplePlannerInformation plannerInfo = PlannersPackUtils.getFastDownwardTemplate();        
 //        plannerInfo.getSettings().addAdditionalArgument(new PlannerArgument("--heuristic", "hlm,hff=lm_ff_syn(lm_rhw(reasonable_orders=true,cost_type=1,lm_cost_type=1))"));
 //        plannerInfo.getSettings().addAdditionalArgument(new PlannerArgument("--search", "lazy_greedy([hlm, hff], preferred=[hlm, hff])"));
+    
+        ItSimplePlannerInformation plannerInfo = PlannersPackUtils.getLAMA2011();
         
         File plannersDirectory = new File("/home/martin_cerny/downward");
 
