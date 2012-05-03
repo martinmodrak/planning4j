@@ -13,7 +13,7 @@
     </parent>    
   
   
-    <name>external-planners-pack</name>       
+    <name>Planning4J - External planners pack</name>       
     
     <dependencies>
         <dependency>

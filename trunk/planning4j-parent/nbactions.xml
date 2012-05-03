@@ -8,7 +8,7 @@
             </goals>
             <properties>
                 <generateBackupPoms>false</generateBackupPoms>
-                <newVersion>0.8</newVersion>
+                <newVersion>1.0-SNAPSHOT</newVersion>
             </properties>
         </action>
         <action>
