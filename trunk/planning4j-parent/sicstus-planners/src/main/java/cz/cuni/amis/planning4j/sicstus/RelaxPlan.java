@@ -44,9 +44,22 @@ public class RelaxPlan extends AbstractSicstusPlanner {
 
     private long timeout;
 
-    public RelaxPlan(long timeout) {
+    boolean debug;
+    
+    public static final long DEFAULT_TIMEOUT = 300000;
+    
+    public RelaxPlan(){
+        this(DEFAULT_TIMEOUT);
+    }            
+    
+    public RelaxPlan(long timeout){
+        this(timeout, false);
+    }
+    
+    public RelaxPlan(long timeout, boolean debug) {
         super(AbstractSicstusPlanner.class.getResourceAsStream("relaxplan.sav"));
         this.timeout = timeout;
+        this. debug = debug;
     }
     
     List<String> indexedActions; //0-based
@@ -175,14 +188,22 @@ public class RelaxPlan extends AbstractSicstusPlanner {
                 if(preconditionIndex == null){
                     throw new PlanningException("Precondition " + precondition + " for action "+ action.getName() +" is not defined.");
                 }
-                problemWriter.write("p(" + currentActionIndex + "," + preconditionIndex + ").\n");
+                problemWriter.write("p(" + currentActionIndex + "," + preconditionIndex + ").");
+                if(debug){
+                    problemWriter.write("%% action: " + action.getName() + " prec: " + precondition);
+                }
+                problemWriter.write("\n");
             }
             for (String effect : simpleAction.getPositiveEffects()) {
                 Integer effectIndex = atomsToIndex.get(effect);
                 if(effectIndex == null){
                     throw new PlanningException("Effect " + effect + " for action "+ action.getName() +" is not defined.");
                 }
-                problemWriter.write("e(" + currentActionIndex + "," + effectIndex + ").\n");
+                problemWriter.write("e(" + currentActionIndex + "," + effectIndex + ").");
+                if(debug){
+                    problemWriter.write("%% action: " + action.getName() + " effect: " + effect);
+                }
+                problemWriter.write("\n");
             }
             //Action cost, unit for now
             problemWriter.write("c(" + currentActionIndex + ",1).\n");
@@ -198,14 +219,22 @@ public class RelaxPlan extends AbstractSicstusPlanner {
             if(literalIndex == null){
                 throw new PlanningException("Literal " + initialLiteral + " for initial state is not defined.");
             }
-            problemWriter.write("i(" + literalIndex + ").\n");
+            problemWriter.write("i(" + literalIndex + ").");
+            if(debug){
+                problemWriter.write("%% " + initialLiteral);
+            }
+            problemWriter.write("\n");
         }
         for (String goalLiteral : problem.getGoalConditions()) {
             Integer literalIndex = atomsToIndex.get(goalLiteral);
             if(literalIndex == null){
                 throw new PlanningException("Literal " + goalLiteral + " for initial state is not defined.");
             }
-            problemWriter.write("g(" + literalIndex + ").\n");
+            problemWriter.write("g(" + literalIndex + ").");
+            if(debug){
+                problemWriter.write("%% " + goalLiteral);
+            }
+            problemWriter.write("\n");
         }
 
 

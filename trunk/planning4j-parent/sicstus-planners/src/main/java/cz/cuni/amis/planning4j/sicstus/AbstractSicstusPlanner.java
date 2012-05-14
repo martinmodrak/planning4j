@@ -40,8 +40,9 @@ import se.sics.jasper.SPException;
  * @author Martin Cerny
  */
 public abstract class AbstractSicstusPlanner extends AbstractAsyncPlanner {
-    protected final Prolog prolog;
-    private File plannerInputFile;
+    protected static Prolog prolog = null;
+    private static File plannerInputFile = null;
+    private static final Object prologCreationMutex = new Object();
     
     private static File createTempFileFromStream(InputStream s){
         try {
@@ -62,12 +63,18 @@ public abstract class AbstractSicstusPlanner extends AbstractAsyncPlanner {
     }
     
     public AbstractSicstusPlanner(File plannerInput) {        
-        this.plannerInputFile = plannerInput;
-        try {
-            prolog = Jasper.newProlog(new String[]{}, null, plannerInput.getAbsolutePath());
-        } catch(Exception ex){
-            throw new PlanningException("Could not initialize SICStus", ex);
-        }        
+        synchronized(prologCreationMutex){
+            plannerInputFile = plannerInput;
+            if(prolog == null){
+                try {
+                    prolog = Jasper.newProlog(new String[]{}, null, plannerInput.getAbsolutePath());
+                    prolog.query("set_prolog_flag(redefine_warnings, off), set_prolog_flag(discontiguous_warnings, off).", null);            
+
+                } catch(Exception ex){
+                    throw new PlanningException("Could not initialize SICStus", ex);
+                }        
+            }
+        }
     }
 
     @Override
@@ -76,6 +83,7 @@ public abstract class AbstractSicstusPlanner extends AbstractAsyncPlanner {
         File tmpFileForOutput;
         try {
              tmpFileForOutput = File.createTempFile("sicstus_plan_", "out");
+             tmpFileForOutput.deleteOnExit();
         } catch (IOException ex) {
              throw new PlanningIOException("Could not create temp file to capture output", ex);
         }
@@ -143,9 +151,7 @@ public abstract class AbstractSicstusPlanner extends AbstractAsyncPlanner {
                 }
             } catch (Exception ex) {
                 planFuture.computationException(ex);
-            } finally{
-                tmpFileForOutput.deleteOnExit();
-            }
+            } 
             
         }
         
