@@ -37,6 +37,8 @@ import se.sics.jasper.SPException;
 
 /**
  * This class is not thread safe, only single planner execution should run at a time.
+ * Tries to read the location of Sicstus binaries from "sicstus.home" java property
+ * and if that fails, from "SICSTUS_HOME" environment property.
  * @author Martin Cerny
  */
 public abstract class AbstractSicstusPlanner extends AbstractAsyncPlanner {
@@ -67,7 +69,12 @@ public abstract class AbstractSicstusPlanner extends AbstractAsyncPlanner {
             plannerInputFile = plannerInput;
             if(prolog == null){
                 try {
-                    prolog = Jasper.newProlog(new String[]{}, null, plannerInput.getAbsolutePath());
+                    String bootPath = System.getProperty("sicstus.home");
+                    if(bootPath == null){
+                        bootPath = System.getenv("SICSTUS_HOME");
+                    }
+                    System.out.println("Bootpath: " + bootPath);
+                    prolog = Jasper.newProlog(new String[]{}, bootPath, plannerInput.getAbsolutePath());
                     prolog.query("set_prolog_flag(redefine_warnings, off), set_prolog_flag(discontiguous_warnings, off).", null);            
 
                 } catch(Exception ex){
