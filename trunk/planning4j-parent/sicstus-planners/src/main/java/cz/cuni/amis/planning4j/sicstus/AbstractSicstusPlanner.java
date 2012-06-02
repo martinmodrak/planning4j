@@ -73,7 +73,6 @@ public abstract class AbstractSicstusPlanner extends AbstractAsyncPlanner {
                     if(bootPath == null){
                         bootPath = System.getenv("SICSTUS_HOME");
                     }
-                    System.out.println("Bootpath: " + bootPath);
                     prolog = Jasper.newProlog(new String[]{}, bootPath, plannerInput.getAbsolutePath());
                     prolog.query("set_prolog_flag(redefine_warnings, off), set_prolog_flag(discontiguous_warnings, off).", null);            
 
