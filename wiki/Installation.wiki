@@ -10,6 +10,7 @@ Currently Planning4J consists of 4 artifacts:
   * *planning4j-api* Interfaces and other base classes needed by all the other artifacts
   * *external-planners-executor* Interface to use external planners that comply with the [http://ipc.icaps-conference.org/ International Planning Competition] specifications. Refactored from [http://code.google.com/p/itsimple/ ItSimple project].
   * *external-planners-pack* A pack of compiled planners for windows and unix platforms to be run with external-planners-executor
+  * *sicstus-planners* Planners running with Sicstus Prolog, currently under development.
   * *ANA planner connector* A connector for ANA`*` JAVA Planner. See [UsingANA Using ANA*] for specific instructions.
 
 = Maven installation =
