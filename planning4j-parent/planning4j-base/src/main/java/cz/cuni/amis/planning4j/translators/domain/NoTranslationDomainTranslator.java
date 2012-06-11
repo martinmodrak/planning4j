@@ -14,32 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cuni.amis.planning4j.external.plannerspack;
 
-import cz.cuni.amis.planning4j.*;
-import cz.cuni.amis.planning4j.external.ExternalPlanner;
-import cz.cuni.amis.planning4j.external.impl.itsimple.*;
-import java.io.File;
-import org.junit.Test;
+package cz.cuni.amis.planning4j.translators.domain;
+
+import cz.cuni.amis.planning4j.IDomainProvider;
+import cz.cuni.amis.planning4j.impl.AbstractDomainTranslator;
 
 /**
- *
- * @author cernm6am
+ * A helper class that provides no translation
+ * @author Martin Cerny
  */
-public class LAMATest {
-    
-   @Test 
-   public void test() {
-   
-        ItSimplePlannerInformation plannerInfo = PlannersPackUtils.getLAMA2011();
-        
-        File plannersDirectory = new File("/home/martin_cerny/downward");
+public class NoTranslationDomainTranslator<DOMAIN_TYPE extends IDomainProvider> extends AbstractDomainTranslator<DOMAIN_TYPE, DOMAIN_TYPE> {
 
-        
-        IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerInfo,plannersDirectory));            
-        
-        PlannerTestUtils.simpleDomainTest(planner, true);
-
-       
+    public NoTranslationDomainTranslator(Class<DOMAIN_TYPE> domainClass) {
+        super(domainClass, domainClass);
     }
+
+    
+    
+    @Override
+    public DOMAIN_TYPE translateDomain(DOMAIN_TYPE problem) {
+        return problem;
+    }
+
 }

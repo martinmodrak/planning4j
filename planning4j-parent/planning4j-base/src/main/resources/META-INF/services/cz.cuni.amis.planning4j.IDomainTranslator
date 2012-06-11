@@ -1,0 +1,4 @@
+cz.cuni.amis.planning4j.translators.domain.PDDLObjectToStringDomainTranslator
+cz.cuni.amis.planning4j.translators.domain.PDDLObjectToWriterDomainTranslator
+cz.cuni.amis.planning4j.translators.domain.PDDLStringToWriterDomainTranslator
+cz.cuni.amis.planning4j.translators.domain.PDDLWriterToStringDomainTranslator

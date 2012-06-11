@@ -14,32 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cuni.amis.planning4j.external.plannerspack;
+
+package cz.cuni.amis.planning4j.translators.domain;
 
 import cz.cuni.amis.planning4j.*;
-import cz.cuni.amis.planning4j.external.ExternalPlanner;
-import cz.cuni.amis.planning4j.external.impl.itsimple.*;
-import java.io.File;
-import org.junit.Test;
+import cz.cuni.amis.planning4j.impl.ChainDomainTranslator;
 
 /**
  *
- * @author cernm6am
+ * @author Martin Cerny
  */
-public class LAMATest {
-    
-   @Test 
-   public void test() {
-   
-        ItSimplePlannerInformation plannerInfo = PlannersPackUtils.getLAMA2011();
-        
-        File plannersDirectory = new File("/home/martin_cerny/downward");
+public class PDDLObjectToStringDomainTranslator extends ChainDomainTranslator<IPDDLObjectDomainProvider, IPDDLWriterDomainProvider, IPDDLStringDomainProvider> {
 
-        
-        IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerInfo,plannersDirectory));            
-        
-        PlannerTestUtils.simpleDomainTest(planner, true);
-
-       
+    public PDDLObjectToStringDomainTranslator() {
+        super(new PDDLObjectToWriterDomainTranslator(), new PDDLWriterToStringDomainTranslator(), IPDDLObjectDomainProvider.class, IPDDLStringDomainProvider.class);
     }
+
 }

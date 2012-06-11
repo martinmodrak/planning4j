@@ -14,32 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cuni.amis.planning4j.external.plannerspack;
 
-import cz.cuni.amis.planning4j.*;
-import cz.cuni.amis.planning4j.external.ExternalPlanner;
-import cz.cuni.amis.planning4j.external.impl.itsimple.*;
-import java.io.File;
-import org.junit.Test;
+package cz.cuni.amis.planning4j.impl;
+
+import cz.cuni.amis.planning4j.IPDDLStringProblemProvider;
 
 /**
  *
- * @author cernm6am
+ * @author Martin Cerny
  */
-public class LAMATest {
-    
-   @Test 
-   public void test() {
-   
-        ItSimplePlannerInformation plannerInfo = PlannersPackUtils.getLAMA2011();
-        
-        File plannersDirectory = new File("/home/martin_cerny/downward");
+public class PDDLStringProblemProvider implements IPDDLStringProblemProvider{
+    private String pddlString;
 
-        
-        IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerInfo,plannersDirectory));            
-        
-        PlannerTestUtils.simpleDomainTest(planner, true);
-
-       
+    public PDDLStringProblemProvider(String pddlString) {
+        this.pddlString = pddlString;
     }
+
+    @Override
+    public String getProblemAsPDDLString() {
+        return pddlString;
+    }
+    
+    
 }

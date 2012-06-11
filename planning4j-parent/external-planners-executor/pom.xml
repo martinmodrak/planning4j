@@ -39,7 +39,14 @@
         </dependency>
         <dependency>
             <groupId>cz.cuni.amis.planning4j</groupId>
-            <artifactId>planning4j-api</artifactId>
+            <artifactId>planning4j-base</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cz.cuni.amis.planning4j</groupId>
+            <artifactId>planning4j-base</artifactId>
+            <classifier>tests</classifier>
+            <scope>test</scope>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency> <!-- JavaSysMon - to read process pids -->

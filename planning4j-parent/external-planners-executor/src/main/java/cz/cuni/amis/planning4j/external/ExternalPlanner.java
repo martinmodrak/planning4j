@@ -16,14 +16,7 @@
  */
 package cz.cuni.amis.planning4j.external;
 
-import cz.cuni.amis.planning4j.IAsyncPlanner;
-import cz.cuni.amis.planning4j.IDomainProvider;
-import cz.cuni.amis.planning4j.IPlanFuture;
-import cz.cuni.amis.planning4j.IPlanner;
-import cz.cuni.amis.planning4j.IPlanningResult;
-import cz.cuni.amis.planning4j.IProblemProvider;
-import cz.cuni.amis.planning4j.PlanningException;
-import cz.cuni.amis.planning4j.PlanningIOException;
+import cz.cuni.amis.planning4j.*;
 import cz.cuni.amis.planning4j.impl.AbstractAsyncPlanner;
 import java.io.File;
 import java.io.FileWriter;
@@ -35,7 +28,7 @@ import java.io.IOException;
  * 
  * @author Martin Cerny
  */
-public class ExternalPlanner extends AbstractAsyncPlanner{
+public class ExternalPlanner extends AbstractAsyncPlanner<IPDDLWriterDomainProvider, IPDDLWriterProblemProvider>{
     
     
     private IExternalPlannerExecutor externalPlannerExecutor;
@@ -79,13 +72,14 @@ public class ExternalPlanner extends AbstractAsyncPlanner{
      * @param externalPlannerExecutor 
      */
     public ExternalPlanner(IExternalPlannerExecutor externalPlannerExecutor, File domainTempFile, File problemTempFile) {
+        super(IPDDLWriterDomainProvider.class, IPDDLWriterProblemProvider.class);
         this.externalPlannerExecutor = externalPlannerExecutor;
         this.domainTempFile = domainTempFile;
         this.problemTempFile = problemTempFile;
     }
 
     @Override
-    public IExternalPlanningResult plan(IDomainProvider domainProvider, IProblemProvider problemProvider) {
+    public IExternalPlanningResult plan(IPDDLWriterDomainProvider domainProvider, IPDDLWriterProblemProvider problemProvider) {
         //this conversion is safe, since the super implementation just calls planAsync
         return (IExternalPlanningResult)super.plan(domainProvider, problemProvider);
     }
@@ -100,7 +94,7 @@ public class ExternalPlanner extends AbstractAsyncPlanner{
      * @throws PlanningException if the planner execution failed or the domain and problem files could not be generated
      */
     @Override
-    public IPlanFuture<IExternalPlanningResult> planAsync(IDomainProvider domainProvider, IProblemProvider problemProvider) {
+    public IPlanFuture<IExternalPlanningResult> planAsync(IPDDLWriterDomainProvider domainProvider, IPDDLWriterProblemProvider problemProvider) {
         FileWriter domainFileWriter = null;
         FileWriter problemFileWriter = null;
         try {
