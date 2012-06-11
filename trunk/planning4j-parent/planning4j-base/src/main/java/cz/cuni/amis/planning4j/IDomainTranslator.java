@@ -14,32 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cz.cuni.amis.planning4j.external.plannerspack;
 
-import cz.cuni.amis.planning4j.*;
-import cz.cuni.amis.planning4j.external.ExternalPlanner;
-import cz.cuni.amis.planning4j.external.impl.itsimple.*;
-import java.io.File;
-import org.junit.Test;
+package cz.cuni.amis.planning4j;
 
 /**
- *
- * @author cernm6am
+ * An interface for translator between domain representations. To let your translator be automatically
+ * discovered by Planning4J, extend {@link IDiscoverableDomainTranslator} instead.
+ * @author Martin Cerny
  */
-public class LAMATest {
-    
-   @Test 
-   public void test() {
-   
-        ItSimplePlannerInformation plannerInfo = PlannersPackUtils.getLAMA2011();
-        
-        File plannersDirectory = new File("/home/martin_cerny/downward");
-
-        
-        IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerInfo,plannersDirectory));            
-        
-        PlannerTestUtils.simpleDomainTest(planner, true);
-
-       
-    }
+public interface IDomainTranslator<SOURCE extends IDomainProvider, DESTINATION extends IDomainProvider> {
+    public Class<SOURCE> getSourceDomainClass();
+    public Class<DESTINATION> getDestinationDomainClass();   
+    public DESTINATION translateDomain(SOURCE domain);
 }

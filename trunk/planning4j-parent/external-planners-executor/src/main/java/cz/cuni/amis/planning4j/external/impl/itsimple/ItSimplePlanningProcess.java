@@ -32,7 +32,7 @@ import cz.cuni.amis.planning4j.external.IExternalPlannerExecutor;
 import cz.cuni.amis.planning4j.external.IExternalPlanningResult;
 import cz.cuni.amis.planning4j.PlanningStatistics;
 import cz.cuni.amis.planning4j.external.IExternalPlanningProcess;
-import cz.cuni.amis.planning4j.utils.PlanningUtils;
+import cz.cuni.amis.planning4j.utils.Planning4JUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,7 +54,7 @@ import org.apache.commons.io.output.NullOutputStream;
 /**
  * Executes a plan using external planners specified with ItSimple XML format.
  * Instance of this class should not be reused for multiplre runs.
- * Identifiers of the returned plan are treated with {@link PlanningUtils#normalizeIdentifier(java.lang.String) }
+ * Identifiers of the returned plan are treated with {@link Planning4JUtils#normalizeIdentifier(java.lang.String) }
  * @author Martin Cerny
  */
 public class ItSimplePlanningProcess implements IExternalPlanningProcess {
@@ -550,13 +550,13 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 // the first token is the action name
                 String actionName = st.nextToken();
 
-                action.setName(PlanningUtils.normalizeIdentifier(actionName));
+                action.setName(Planning4JUtils.normalizeIdentifier(actionName));
 
                 // the other tokens are the parameters
                 List<String> parameterValues = new ArrayList<String>();
                 while (st.hasMoreTokens()) {
                     String parameterStr = st.nextToken();
-                    parameterValues.add(PlanningUtils.normalizeIdentifier(parameterStr));
+                    parameterValues.add(Planning4JUtils.normalizeIdentifier(parameterStr));
                 }
                 action.setParameters(parameterValues);
 

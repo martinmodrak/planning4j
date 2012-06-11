@@ -16,23 +16,19 @@
  */
 package cz.cuni.amis.planning4j.external.plannerspack;
 
-import cz.cuni.amis.planning4j.ActionDescription;
-import cz.cuni.amis.planning4j.IDomainProvider;
-import cz.cuni.amis.planning4j.IPlanner;
-import cz.cuni.amis.planning4j.IPlanningResult;
-import cz.cuni.amis.planning4j.IProblemProvider;
-import cz.cuni.amis.planning4j.PlanningException;
+import cz.cuni.amis.planning4j.*;
 import cz.cuni.amis.planning4j.external.ExternalPlanner;
 import cz.cuni.amis.planning4j.external.impl.itsimple.ItSimplePlannerExecutor;
 import cz.cuni.amis.planning4j.external.impl.itsimple.ItSimplePlannerInformation;
 import cz.cuni.amis.planning4j.external.impl.itsimple.PlannerListManager;
-import cz.cuni.amis.planning4j.impl.PDDLDomainProvider;
-import cz.cuni.amis.planning4j.impl.PDDLProblemProvider;
+import cz.cuni.amis.planning4j.impl.PDDLObjectDomainProvider;
+import cz.cuni.amis.planning4j.impl.PDDLObjectProblemProvider;
 import cz.cuni.amis.planning4j.pddl.PDDLDomain;
 import cz.cuni.amis.planning4j.pddl.PDDLPredicate;
 import cz.cuni.amis.planning4j.pddl.PDDLProblem;
 import cz.cuni.amis.planning4j.pddl.PDDLRequirement;
 import cz.cuni.amis.planning4j.pddl.PDDLSimpleAction;
+import cz.cuni.amis.planning4j.utils.Planning4JUtils;
 import java.io.File;
 import java.util.EnumSet;
 import java.util.List;
@@ -62,8 +58,8 @@ public class Planning4JSimpleExample {
         problem.setInitialLiterals("at_loc1");
         problem.setGoalCondition("at_loc2");
 
-        IDomainProvider domainProvider = new PDDLDomainProvider(domain);
-        IProblemProvider problemProvider = new PDDLProblemProvider(problem);
+        IPDDLObjectDomainProvider domainProvider = new PDDLObjectDomainProvider(domain);
+        IPDDLObjectProblemProvider problemProvider = new PDDLObjectProblemProvider(problem);
 
         /**
          * Get a planner:
@@ -81,8 +77,10 @@ public class Planning4JSimpleExample {
         //let's use the first suggested planner
         ItSimplePlannerInformation plannerInfo = suggestedPlanners.get(0);
 
-        //To use a planner by name uncomment the following line
-        //ItSimplePlannerInformation plannerInfo = plannerManager.getPlannerByName("Metric-FF");
+        //To use a planner by name either call getPlannerByName
+        //   ItSimplePlannerInformation plannerInfo = plannerManager.getPlannerByName("Metric-FF");
+        //Or use one of the PlannerPackUtils.getXXX predefined methods
+        //   ItSimplePlannerInformation plannerInfo = PlannersPackUtils.getBlackBox();
 
        //This is the place to extract the planner
         File plannersDirectory = new File("target");
@@ -90,7 +88,9 @@ public class Planning4JSimpleExample {
         plannerManager.extractAndPreparePlanner(plannersDirectory, plannerInfo);
         
         try {
-            IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerInfo,plannersDirectory));            IPlanningResult result = planner.plan(domainProvider, problemProvider);
+            IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerInfo,plannersDirectory));            
+            //Call to Planning4JUtils.plan gathers domain and problem translators (if needed) and performs the planning
+            IPlanningResult result =  Planning4JUtils.plan(planner, domainProvider, problemProvider);
             if (!result.isSuccess()) {
                 System.out.println("No solution found.");
                 return;

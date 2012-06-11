@@ -16,6 +16,7 @@
  */
 package cz.cuni.amis.planning4j.external.plannerspack;
 
+import cz.cuni.amis.planning4j.PlanningException;
 import cz.cuni.amis.planning4j.external.ExternalPlanner;
 import cz.cuni.amis.planning4j.external.impl.itsimple.*;
 import java.io.File;
@@ -78,6 +79,9 @@ public class PlannersPackUtils {
      */
     public static ItSimplePlannerInformation getFastDownwardIPCConfiguration(String configuratioName){
         ItSimplePlannerInformation info = getFastDownwardTemplate();
+        if(info == null){
+            throw new PlanningException("Fast downward not found");
+        }
         info.getSettings().addAdditionalArgument(new PlannerArgument("ipc",configuratioName));
         return info;
     }
