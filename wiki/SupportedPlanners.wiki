@@ -24,7 +24,7 @@ Following platform specific planners are provided by the external planner connec
   * [http://www.loria.fr/~hoffmanj/ff.html FF 2.3]
   * [http://manip.crhc.uiuc.edu/programs/SGPlan/index.html SGPlan 5.22]
   * [http://manip.crhc.uiuc.edu/programs/SGPlan/index.html SGPlan 6]
-  * Planners based on [http://www.fast-downward.org/ Fast Downward platform].
+  * Planners based on [http://www.fast-downward.org/ Fast Downward platform]. See [UsingFastDownward]
   * [http://andorfer.cs.uni-dortmund.de/~edelkamp/mips/mips-xxl.html Mips XXL 1.0]
   * [http://andorfer.cs.uni-dortmund.de/~edelkamp/mips/mips-xxl.html Mips XXL 2008]
   * [http://ipc.informatik.uni-freiburg.de/Planners/ hspsp]
