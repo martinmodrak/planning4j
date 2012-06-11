@@ -1,4 +1,4 @@
-#Using planners based on Fast Downward.
+#summary Using planners based on Fast Downward.
 
 = Installation =
 
@@ -15,4 +15,3 @@ Example code to obtain LAMA 2011 planner (using external-planners-pack artifact)
         IPlanner planner = new ExternalPlanner(new ItSimplePlannerExecutor(plannerInfo,plannersDirectory));            
 
 }}}
-
