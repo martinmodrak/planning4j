@@ -16,6 +16,7 @@
  */
 package cz.cuni.amis.planning4j.external.plannerspack;
 
+import cz.cuni.amis.planning.javaaiplanningapi.PlannerTestUtils;
 import cz.cuni.amis.planning4j.*;
 import cz.cuni.amis.planning4j.external.ExternalPlanner;
 import cz.cuni.amis.planning4j.external.impl.itsimple.*;
@@ -26,7 +27,7 @@ import org.junit.Test;
  *
  * @author cernm6am
  */
-public class LAMATest {
+public class LAMA2011Test {
     
    @Test 
    public void test() {
