@@ -16,11 +16,6 @@
  */
 package cz.cuni.amis.planning4j;
 
-import cz.cuni.amis.planning4j.IDomainProvider;
-import cz.cuni.amis.planning4j.pddl.PDDLDomain;
-import java.io.IOException;
-import java.io.Writer;
-
 /**
  * A domain provider that encodes the domain as a string in PDDL.
  * @author Martin Cerny

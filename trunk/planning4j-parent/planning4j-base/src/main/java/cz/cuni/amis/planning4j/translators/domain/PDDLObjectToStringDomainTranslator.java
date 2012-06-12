@@ -19,9 +19,10 @@ package cz.cuni.amis.planning4j.translators.domain;
 
 import cz.cuni.amis.planning4j.*;
 import cz.cuni.amis.planning4j.impl.ChainDomainTranslator;
+import cz.cuni.amis.planning4j.pddl.PDDLDomain;
 
 /**
- *
+ * Translator that translates PDDL objects {@link PDDLDomain} to string containing PDDL.
  * @author Martin Cerny
  */
 public class PDDLObjectToStringDomainTranslator extends ChainDomainTranslator<IPDDLObjectDomainProvider, IPDDLWriterDomainProvider, IPDDLStringDomainProvider> {

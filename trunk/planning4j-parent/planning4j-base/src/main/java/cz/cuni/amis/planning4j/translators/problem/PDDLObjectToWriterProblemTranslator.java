@@ -17,7 +17,6 @@
 package cz.cuni.amis.planning4j.translators.problem;
 
 import cz.cuni.amis.planning4j.IPDDLObjectProblemProvider;
-import cz.cuni.amis.planning4j.IProblemTranslator;
 import cz.cuni.amis.planning4j.IPDDLWriterProblemProvider;
 import cz.cuni.amis.planning4j.impl.AbstractProblemTranslator;
 import cz.cuni.amis.planning4j.pddl.PDDLProblem;
@@ -25,7 +24,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- *
+ * Translator that writes PDDL objects {@link PDDLProblem} to a writer in PDDL format.
  * @author Martin Cerny
  */
 public class PDDLObjectToWriterProblemTranslator extends AbstractProblemTranslator<IPDDLObjectProblemProvider, IPDDLWriterProblemProvider> {

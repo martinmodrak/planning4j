@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 /**
- *
+ * A simple translator that stores data written to a writer in a string to be passed to the planner.
  * @author Martin Cerny
  */
 public class PDDLWriterToStringProblemTranslator extends AbstractProblemTranslator<IPDDLWriterProblemProvider, IPDDLStringProblemProvider> {

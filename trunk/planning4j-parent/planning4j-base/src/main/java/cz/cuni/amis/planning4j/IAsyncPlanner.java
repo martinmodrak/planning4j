@@ -17,7 +17,7 @@
 package cz.cuni.amis.planning4j;
 
 /**
- * 
+ * An interface for planners that are able to plan asynchronously.
  * @author Martin Cerny
  */
 public interface IAsyncPlanner<DOMAIN_TYPE extends IDomainProvider, PROBLEM_TYPE extends IProblemProvider> extends IPlanner<DOMAIN_TYPE, PROBLEM_TYPE> {

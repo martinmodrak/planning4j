@@ -20,7 +20,7 @@ package cz.cuni.amis.planning4j.impl;
 import cz.cuni.amis.planning4j.IPDDLStringDomainProvider;
 
 /**
- *
+ * A domain provider that stores it as a string in PDDL
  * @author Martin Cerny
  */
 public class PDDLStringDomainProvider implements IPDDLStringDomainProvider {

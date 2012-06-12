@@ -17,13 +17,23 @@
 
 package cz.cuni.amis.planning4j;
 
+import cz.cuni.amis.planning4j.utils.Planning4JUtils;
+
 /**
- * An interface for translator between domain representations. To let your translator be automatically
- * discovered by Planning4J, extend {@link IDiscoverableDomainTranslator} instead.
+ * An interface for translators between domain representations. Translators should be
+ * advertised with Java SPI to be automatically discovered by methods in {@link Planning4JUtils}.
  * @author Martin Cerny
  */
 public interface IDomainTranslator<SOURCE extends IDomainProvider, DESTINATION extends IDomainProvider> {
     public Class<SOURCE> getSourceDomainClass();
     public Class<DESTINATION> getDestinationDomainClass();   
+    
+    /**
+     * Translates the domain. The resulting domain may (and may not) reflect
+     * changes made in the original domain after the translation has been done i.e. the returned
+     * object might be a kind of proxy to the original domain.
+     * @param domain
+     * @return 
+     */
     public DESTINATION translateDomain(SOURCE domain);
 }
