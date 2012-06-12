@@ -17,7 +17,6 @@
 
 package cz.cuni.amis.planning4j.translators.domain;
 
-import cz.cuni.amis.planning4j.IDomainTranslator;
 import cz.cuni.amis.planning4j.IPDDLObjectDomainProvider;
 import cz.cuni.amis.planning4j.IPDDLWriterDomainProvider;
 import cz.cuni.amis.planning4j.impl.AbstractDomainTranslator;
@@ -27,7 +26,7 @@ import java.io.Writer;
 import java.util.List;
 
 /**
- *
+ * Translator that writes PDDL objects {@link PDDLDomain} to a writer in PDDL format.
  * @author Martin Cerny
  */
 public class PDDLObjectToWriterDomainTranslator extends AbstractDomainTranslator<IPDDLObjectDomainProvider, IPDDLWriterDomainProvider> {

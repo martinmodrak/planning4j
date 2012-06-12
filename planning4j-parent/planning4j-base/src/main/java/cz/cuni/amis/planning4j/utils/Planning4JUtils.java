@@ -24,13 +24,13 @@ import cz.cuni.amis.planning4j.translators.problem.NoTranslationProblemTranslato
 import java.util.ServiceLoader;
 
 /**
- * A collection of utility methods employed by most planners.
+ * A collection of utility methods.
  * @author Martin Cerny
  */
 public class Planning4JUtils {
 
     private static ServiceLoader<IDomainTranslator> domainTranslatorLoader = ServiceLoader.load(IDomainTranslator.class);    
-    private static ServiceLoader<IProblemTranslator> problemTranslatorLoader = ServiceLoader.load(IProblemTranslator.class);    
+    private static ServiceLoader<IProblemTranslator> problemTranslatorLoader = ServiceLoader.load(IProblemTranslator.class);
     
     /**
      * Normalizes an identifier. Some planners modify indentifier names,
@@ -45,6 +45,14 @@ public class Planning4JUtils {
         return identifier.toUpperCase().replace('-', '_');
     }
 
+    /**
+     * Tries to find a domain translator for given pair of domain classes through Java SPI
+     * @param <SOURCE_DOMAIN>
+     * @param <DESTINATION_DOMAIN>
+     * @param sourceDomainClass
+     * @param destinationDomainClass
+     * @return 
+     */
     public static <SOURCE_DOMAIN extends IDomainProvider, DESTINATION_DOMAIN extends IDomainProvider> IDomainTranslator<SOURCE_DOMAIN, DESTINATION_DOMAIN> findDomainTranslator(Class<SOURCE_DOMAIN> sourceDomainClass, Class<DESTINATION_DOMAIN> destinationDomainClass){
         if(destinationDomainClass.isAssignableFrom(sourceDomainClass)){
             return new NoTranslationDomainTranslator(destinationDomainClass);
@@ -64,7 +72,7 @@ public class Planning4JUtils {
     }
 
     /**
-     * Tries to find a translator and throws an exception, if no such translator can be found
+     * Tries to find a translator through Java SPI and throws an exception, if no such translator can be found
      * @param <SOURCE_DOMAIN>
      * @param <DESTINATION_DOMAIN>
      * @param sourceDomainClass
@@ -80,6 +88,14 @@ public class Planning4JUtils {
     }
 
     
+    /**
+     * Tries to find a problem translator for given pair of domain classes through Java SPI
+     * @param <SOURCE_PROBLEM>
+     * @param <DESTINATION_PROBLEM>
+     * @param sourceProblemClass
+     * @param destinationProblemClass
+     * @return 
+     */
     public static <SOURCE_PROBLEM extends IProblemProvider, DESTINATION_PROBLEM extends IProblemProvider> IProblemTranslator<SOURCE_PROBLEM, DESTINATION_PROBLEM> findProblemTranslator(Class<SOURCE_PROBLEM> sourceProblemClass, Class<DESTINATION_PROBLEM> destinationProblemClass){
         if(destinationProblemClass.isAssignableFrom(sourceProblemClass)){
             return new NoTranslationProblemTranslator(destinationProblemClass);
@@ -99,7 +115,7 @@ public class Planning4JUtils {
     }
 
     /**
-     * Tries to find a translator and throws an exception, if no such translator can be found
+     * Tries to find a translator through Java SPI and throws an exception, if no such translator can be found
      * @param <SOURCE_PROBLEM>
      * @param <DESTINATION_PROBLEM>
      * @param sourceProblemClass
@@ -114,6 +130,20 @@ public class Planning4JUtils {
         return problemTranslator;
     }
     
+    /**
+     * Creates a proxy planner that accepts SOURCE_DOMAIN and SOURCE_PROBLEM type input, 
+     * translates the source domain and problem to forms understood by
+     * the given planner and delegates the actual planning to it. The translators are looked up with {@link #findDomainTranslator(java.lang.Class, java.lang.Class) }
+     * and {@link #findProblemTranslator(java.lang.Class, java.lang.Class) }
+     * @param <SOURCE_DOMAIN>
+     * @param <DESTINATION_DOMAIN>
+     * @param <SOURCE_PROBLEM>
+     * @param <DESTINATION_PROBLEM>
+     * @param original
+     * @param sourceDomainClass
+     * @param sourceProblemClass
+     * @return 
+     */
     public static <SOURCE_DOMAIN extends IDomainProvider, DESTINATION_DOMAIN extends IDomainProvider,
             SOURCE_PROBLEM extends IProblemProvider, DESTINATION_PROBLEM extends IProblemProvider>
             IAsyncPlanner<SOURCE_DOMAIN, SOURCE_PROBLEM> getTranslatingAsyncPlanner(IAsyncPlanner<DESTINATION_DOMAIN, DESTINATION_PROBLEM> original,Class<SOURCE_DOMAIN> sourceDomainClass, Class<SOURCE_PROBLEM> sourceProblemClass){
@@ -125,6 +155,20 @@ public class Planning4JUtils {
         return new TranslatingAsyncPlanner<SOURCE_DOMAIN, DESTINATION_DOMAIN, SOURCE_PROBLEM, DESTINATION_PROBLEM>(original, findDomainTranslatorThrowException(sourceDomainClass, original.getDomainClass()), findProblemTranslatorThrowException(sourceProblemClass, original.getProblemClass()));
     }
     
+    /**
+     * Creates a proxy planner that accepts SOURCE_DOMAIN and SOURCE_PROBLEM type input, 
+     * translates the source domain and problem to forms understood by
+     * the given planner and delegates the actual planning to it. The translators are looked up with {@link #findDomainTranslator(java.lang.Class, java.lang.Class) }
+     * and {@link #findProblemTranslator(java.lang.Class, java.lang.Class) }
+     * @param <SOURCE_DOMAIN>
+     * @param <DESTINATION_DOMAIN>
+     * @param <SOURCE_PROBLEM>
+     * @param <DESTINATION_PROBLEM>
+     * @param original
+     * @param sourceDomainClass
+     * @param sourceProblemClass
+     * @return 
+     */
     public static <SOURCE_DOMAIN extends IDomainProvider, DESTINATION_DOMAIN extends IDomainProvider,
             SOURCE_PROBLEM extends IProblemProvider, DESTINATION_PROBLEM extends IProblemProvider>
             IPlanner<SOURCE_DOMAIN, SOURCE_PROBLEM> getTranslatingPlanner(IPlanner<DESTINATION_DOMAIN, DESTINATION_PROBLEM> original,Class<SOURCE_DOMAIN> sourceDomainClass, Class<SOURCE_PROBLEM> sourceProblemClass){
@@ -135,13 +179,55 @@ public class Planning4JUtils {
         }        
         return new TranslatingPlanner<SOURCE_DOMAIN, DESTINATION_DOMAIN, SOURCE_PROBLEM, DESTINATION_PROBLEM>(original, findDomainTranslatorThrowException(sourceDomainClass, original.getDomainClass()), findProblemTranslatorThrowException(sourceProblemClass, original.getProblemClass()));
     }
-    
-    public static IPlanningResult plan(IPlanner planner, IDomainProvider domain, IProblemProvider problem){
-        return getTranslatingPlanner(planner, domain.getClass(), problem.getClass()).plan(domain, problem);
+
+    /**
+     * Creates a proxy planner that accepts given domain and problem input, 
+     * translates the source domain and problem to forms understood by
+     * the given planner and delegates the actual planning to it. The translators are looked up with {@link #findDomainTranslator(java.lang.Class, java.lang.Class) }
+     * and {@link #findProblemTranslator(java.lang.Class, java.lang.Class) }
+     * @param planner
+     * @param domain
+     * @param problem
+     * @return 
+     */
+    public static IPlanner getTranslatingPlanner(IPlanner planner, IDomainProvider domain, IProblemProvider problem) {
+        return getTranslatingPlanner(planner, domain.getClass(), problem.getClass());
     }
     
+    /**
+     * Creates a proxy planner that accepts given domain and problem input, 
+     * translates the source domain and problem to forms understood by
+     * the given planner and delegates the actual planning to it. The translators are looked up with {@link #findDomainTranslator(java.lang.Class, java.lang.Class) }
+     * and {@link #findProblemTranslator(java.lang.Class, java.lang.Class) }
+     * @param planner
+     * @param domain
+     * @param problem
+     * @return 
+     */
+    public static IAsyncPlanner getTranslatingAsyncPlanner(IAsyncPlanner planner, IDomainProvider domain, IProblemProvider problem) {
+        return getTranslatingAsyncPlanner(planner, domain.getClass(), problem.getClass());
+    }    
+    
+    /**
+     * Runs given planner on a domain and a problem spec, translating them if needed.
+     * @param planner
+     * @param domain
+     * @param problem
+     * @return 
+     */
+    public static IPlanningResult plan(IPlanner planner, IDomainProvider domain, IProblemProvider problem){
+        return getTranslatingPlanner(planner, domain, problem).plan(domain, problem);
+    }
+
+    /**
+     * Runs given planner asynchronously on a domain and a problem spec, translating them if needed.
+     * @param planner
+     * @param domain
+     * @param problem
+     * @return 
+     */
     public static IPlanFuture<IPlanningResult> planAsync(IAsyncPlanner planner, IDomainProvider domain, IProblemProvider problem){
-        return getTranslatingAsyncPlanner(planner, domain.getClass(), problem.getClass()).planAsync(domain, problem);
+        return getTranslatingAsyncPlanner(planner, domain, problem).planAsync(domain, problem);
     }
     
 }

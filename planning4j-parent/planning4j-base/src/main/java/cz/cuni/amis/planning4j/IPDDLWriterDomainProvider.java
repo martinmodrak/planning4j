@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * A domain provider that is capable of writing the problem with a Writer.
+ * A domain provider that is capable of writing the problem with a Writer in PDDL form.
  * Writer based implementations will likely perform better
  * with external planners.
  * @author Martin Cerny

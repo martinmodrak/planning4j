@@ -16,10 +16,6 @@
  */
 package cz.cuni.amis.planning4j;
 
-import cz.cuni.amis.planning4j.pddl.PDDLDomain;
-import java.io.IOException;
-import java.io.Writer;
-
 /**
  * Marker interface for all objects, that provide a domain to be solved by a planner.
  * @author Martin Cerny

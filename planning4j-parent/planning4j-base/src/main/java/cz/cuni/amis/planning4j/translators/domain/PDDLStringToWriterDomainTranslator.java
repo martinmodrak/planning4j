@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- *
+ * A simple translator that writes a string in PDDL to a writer.
  * @author Martin Cerny
  */
 public class PDDLStringToWriterDomainTranslator extends AbstractDomainTranslator<IPDDLStringDomainProvider, IPDDLWriterDomainProvider> {

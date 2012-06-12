@@ -21,7 +21,7 @@ import cz.cuni.amis.planning4j.IProblemProvider;
 import cz.cuni.amis.planning4j.IProblemTranslator;
 
 /**
- *
+ * A problem translator stub that keeps track of the classes for translation
  * @author Martin Cerny
  */
 public abstract class AbstractProblemTranslator<SOURCE extends IProblemProvider, DESTINATION extends IProblemProvider> implements IProblemTranslator<SOURCE, DESTINATION> {

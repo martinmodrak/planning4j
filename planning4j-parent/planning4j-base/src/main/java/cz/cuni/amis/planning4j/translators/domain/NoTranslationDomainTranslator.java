@@ -21,7 +21,7 @@ import cz.cuni.amis.planning4j.IDomainProvider;
 import cz.cuni.amis.planning4j.impl.AbstractDomainTranslator;
 
 /**
- * A helper class that provides no translation
+ * A helper class that provides no translation. Not advertised through Java SPI.
  * @author Martin Cerny
  */
 public class NoTranslationDomainTranslator<DOMAIN_TYPE extends IDomainProvider> extends AbstractDomainTranslator<DOMAIN_TYPE, DOMAIN_TYPE> {

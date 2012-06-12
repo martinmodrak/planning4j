@@ -21,7 +21,7 @@ import cz.cuni.amis.planning4j.IDomainProvider;
 import cz.cuni.amis.planning4j.IDomainTranslator;
 
 /**
- *
+ * A domain translator stub that keeps track of the classes for translation.
  * @author Martin Cerny
  */
 public abstract class AbstractDomainTranslator<SOURCE extends IDomainProvider, DESTINATION extends IDomainProvider> implements IDomainTranslator<SOURCE, DESTINATION> {

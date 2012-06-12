@@ -21,7 +21,7 @@ import cz.cuni.amis.planning4j.IProblemProvider;
 import cz.cuni.amis.planning4j.impl.AbstractProblemTranslator;
 
 /**
- * A helper class that provides no translation
+ * A helper class that provides no translation. Not advertised through Java SPI.
  * @author Martin Cerny
  */
 public class NoTranslationProblemTranslator<PROBLEM_TYPE extends IProblemProvider> extends AbstractProblemTranslator<PROBLEM_TYPE, PROBLEM_TYPE> {

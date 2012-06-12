@@ -20,7 +20,7 @@ package cz.cuni.amis.planning4j.impl;
 import cz.cuni.amis.planning4j.IPDDLStringProblemProvider;
 
 /**
- *
+ * A problem provider that stores it as a string in PDDL
  * @author Martin Cerny
  */
 public class PDDLStringProblemProvider implements IPDDLStringProblemProvider{

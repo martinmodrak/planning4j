@@ -20,9 +20,10 @@ package cz.cuni.amis.planning4j.translators.problem;
 import cz.cuni.amis.planning4j.translators.domain.*;
 import cz.cuni.amis.planning4j.*;
 import cz.cuni.amis.planning4j.impl.ChainProblemTranslator;
+import cz.cuni.amis.planning4j.pddl.PDDLProblem;
 
 /**
- *
+ * Translator that translates PDDL objects {@link PDDLProblem} to string containing PDDL.
  * @author Martin Cerny
  */
 public class PDDLObjectToStringProblemTranslator extends ChainProblemTranslator<IPDDLObjectProblemProvider, IPDDLWriterProblemProvider, IPDDLStringProblemProvider> {
