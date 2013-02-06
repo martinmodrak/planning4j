@@ -32,8 +32,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import org.jaxen.JaxenException;
 import org.jaxen.XPath;
 import org.jaxen.jdom.JDOMXPath;
@@ -48,6 +47,8 @@ import org.jdom.output.XMLOutputter;
  */
 public class XMLUtilities {
 
+    private static final Logger logger = Logger.getLogger(XMLUtilities.class);
+    
     /**
      * Read a xml type file and returns its document
      * @param fname the file name
@@ -67,10 +68,10 @@ public class XMLUtilities {
         try {
             doc = sxb.build(stream);
         } catch (JDOMException ex) {
-            Logger.getLogger(XMLUtilities.class.getName()).log(Level.SEVERE, null, ex);
+            logger.warn(ex);
             throw new PlanningException("Unable to read planner list", ex);
         } catch (IOException ex) {
-            Logger.getLogger(XMLUtilities.class.getName()).log(Level.SEVERE, null, ex);
+            logger.warn(ex);
             throw new PlanningException("Unable to read planner list", ex);
         }
         return doc.getRootElement();

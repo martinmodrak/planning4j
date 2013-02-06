@@ -1,8 +1,7 @@
 package cz.cuni.amis.planning4j.sicstus;
 
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import se.sics.jasper.SICStus;
 import se.sics.jasper.SPException;
 
@@ -20,7 +19,7 @@ public class App
             HashMap varMap = new HashMap();
             sp.query("tell('out.tmp'),plan,flush_output,told.", varMap);
         } catch (SPException ex) {
-            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(App.class).warn(ex);
         }
     }
 }

@@ -5,11 +5,11 @@
     <groupId>cz.cuni.amis.planning4j.external</groupId>
     <artifactId>external-planners-pack</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <parent>
         <groupId>cz.cuni.amis.planning4j</groupId>
         <artifactId>planning4j-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>    
   
   
@@ -25,14 +25,14 @@
         <dependency>
             <groupId>cz.cuni.amis.planning4j.external</groupId>
             <artifactId>external-planners-executor</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>cz.cuni.amis.planning4j</groupId>
             <artifactId>planning4j-base</artifactId>
             <classifier>tests</classifier>
             <scope>test</scope>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

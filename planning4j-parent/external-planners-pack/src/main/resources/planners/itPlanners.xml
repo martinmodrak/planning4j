@@ -95,7 +95,8 @@
 						<description>switch on optimization expression (default is plan length)</description>
 					</argument>
 				</arguments>
-                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal>
+                                <!-- <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal> -->
+                                <noPlanFoundSignal type="outputText">proven unsolvable</noPlanFoundSignal> 
 				<timeout enabled="false">600</timeout>
 				<runAllComparison enabled="true" />
 			</settings>

@@ -33,8 +33,6 @@ import cz.cuni.amis.planning4j.external.IExternalPlanningResult;
 import cz.cuni.amis.planning4j.PlanningStatistics;
 import cz.cuni.amis.planning4j.external.IExternalPlanningProcess;
 import cz.cuni.amis.planning4j.utils.Planning4JUtils;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +48,7 @@ import java.util.StringTokenizer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
+import org.apache.log4j.Logger;
 
 /**
  * Executes a plan using external planners specified with ItSimple XML format.
@@ -59,33 +58,21 @@ import org.apache.commons.io.output.NullOutputStream;
  */
 public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
-    private static final Logger logger = Logger.getLogger(ItSimplePlanningProcess.class.getName());
-
+    private static final Logger logger = Logger.getLogger(ItSimplePlanningProcess.class);
     /**
      * Timeout to wait for planning process to spawn to get it's pid
      */
     public static final int PROCESS_SPAWN_TIMEOUT = 50;
-
     protected File plannerExecutableFile;
-
     private ItSimplePlannerInformation chosenPlanner;
-
     private File plannerBinariesDirectory;
-
     private File workingDirectory;
-
     File domainFile;
-
     File problemFile;
-
     long timeInIO;
-
     Process process = null;
-
     private boolean cancelled = false;
-
     private int processPid = -1;
-
     /**
      * Mutex that forces only one child process to be spawned at a time. This let's us 
      * determine the PID of the process.
@@ -132,9 +119,9 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             }
 
             if (newProcesses.isEmpty()) {
-                logger.severe("There is no new planner PID.");
+                logger.warn("There is no new planner PID.");
             } else if (newProcesses.size() > 1) {
-                logger.severe("Multiple new candidate planner PIDs");
+                logger.warn("Multiple new candidate planner PIDs");
             } else {
                 processPid = newProcesses.iterator().next();
             }
@@ -145,7 +132,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
     private void killPlannerByPID() {
         if (processPid < 0) {
-            logger.severe("Cannot kill planner by PID. PID not set.");
+            logger.warn("Cannot kill planner by PID. PID not set.");
             return;
         }
         synchronized (spawnProcessMutex) {
@@ -158,7 +145,6 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
     private static class DirectPlannerChildVisitor implements ProcessVisitor {
 
         Set<Integer> pids = new HashSet<Integer>();
-
         String processNameFragment;
 
         public DirectPlannerChildVisitor(String processNameFragment) {
@@ -216,7 +202,6 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         COUNTING_TO_PLAN_START,
         READING_PLAN,
         END
-
     }
 
     /**
@@ -280,7 +265,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 return null;
             }
             logger.info("\n>> Calling planner " + chosenPlanner.getName() + " in directory: " + workingDirectory.getAbsolutePath());
-            logger.fine("Planner arguments:" + commandArguments);
+            logger.debug("Planner arguments:" + commandArguments);
             //Call the planner
             try {
                 ProcessBuilder builder = new ProcessBuilder(commandArguments);
@@ -298,8 +283,8 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
             Scanner sc = new Scanner(process.getInputStream());
             //Get the planner answer exposed in the console
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Planner console output:");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Planner console output:");
             }
 
             StringBuilder consoleOutputBuilder = new StringBuilder();
@@ -327,15 +312,15 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                     }
                 }
 
-                if (logger.isLoggable(Level.FINE)) {
-                    logger.fine(line);
+                if (logger.isDebugEnabled()) {
+                    logger.debug(line);
                 }
 
                 if (!settings.isHasOutputFile()) {
                     if (!line.trim().isEmpty()) {
-						if(logger.isLoggable(Level.FINE)){
-							logger.fine(consoleParseState + ":" + line);
-						}
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(consoleParseState + ":" + line);
+                        }
                         //the plan is part of console output
                         switch (consoleParseState) {
                             case BEGIN: {
@@ -352,7 +337,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                                         } else {
                                             unprocessedPlan.add(firstLine);
                                         }
-										consoleParseState = EConsoleParseState.READING_PLAN;
+                                        consoleParseState = EConsoleParseState.READING_PLAN;
                                     }
                                 }
                                 break;
@@ -416,15 +401,15 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 if (cancelled) {
                     return null;
                 }
-                Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.INFO, "Waiting for planner execution interrupted", ex);
+                logger.info("Waiting for planner execution interrupted", ex);
                 destroyProcess();
                 return null;
             }
 
             process.destroy();
 
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Planner console output end.");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Planner console output end.");
             }
 
             if (cancelled) {
@@ -542,7 +527,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 } else if (colonIndex >= 0) {
                     actionInstance = line.substring(colonIndex + 1);
                 } else {
-                    logger.severe("Could not determine what is the actual action: " + line);
+                    logger.warn("Could not determine what is the actual action: " + line);
                     continue;
                 }
                 StringTokenizer st = new StringTokenizer(actionInstance);
@@ -573,7 +558,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                     try {
                         action.setStartTime(Double.parseDouble(startTimeStr));
                     } catch (NumberFormatException ex) {
-                        logger.severe("Could not parse action: " + line);
+                        logger.warn("Could not parse action: " + line);
                         continue;
                     }
                 }
@@ -589,7 +574,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
                 result.add(action);
             } catch (RuntimeException ex) {
-                logger.log(Level.SEVERE, "Could not parse action: " + line, ex);
+                logger.warn("Could not parse action: " + line, ex);
             }
 
         }
@@ -707,7 +692,7 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                     IOUtils.copy(is, new NullOutputStream());
                     IOUtils.copy(es, new NullOutputStream());
                 } catch (IOException ex) {
-                    Logger.getLogger(ItSimplePlanningProcess.class.getName()).log(Level.FINE, "Error consuming output:" + ex.getMessage(), ex);
+                    logger.debug("Error consuming output:" + ex.getMessage(), ex);
                 }
             }
 
@@ -719,11 +704,8 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
     protected static class UnprocessedPlanningResult {
 
         List<String> plan;
-
         List<String> statistics;
-
         String consoleOuptut;
-
         boolean planningSuccesful;
 
         public UnprocessedPlanningResult(List<String> plan, List<String> statistics, String consoleOuptut, boolean planningSuccesful) {
