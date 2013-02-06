@@ -27,9 +27,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 /**
@@ -41,6 +40,8 @@ import org.jdom.Element;
 public class PlannerListManager extends SimplePlannerListManager {
     
     private final Object fileOperationsMutex = new Object();
+    
+    private final Logger logger = Logger.getLogger(PlannerListManager.class);
     
     public PlannerListManager(Element plannersXml) {
         super(plannersXml);
@@ -114,7 +115,7 @@ public class PlannerListManager extends SimplePlannerListManager {
         try {
             Runtime.getRuntime().exec(new String[] { "chmod", "+x", plannerFile.getAbsolutePath()});
         } catch (IOException ex) {
-            Logger.getLogger(PlannerListManager.class.getName()).log(Level.SEVERE, "Could not set planner file permissions", ex);
+            logger.warn("Could not set planner file permissions", ex);
         }
             
         }

@@ -28,8 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import se.sics.jasper.Query;
 import se.sics.jasper.SPException;
 import se.sics.jasper.Term;
@@ -42,6 +41,8 @@ import se.sics.jasper.Term;
  */
 public class RelaxPlan extends AbstractSicstusPlanner {
 
+    private final Logger logger = Logger.getLogger(RelaxPlan.class);
+    
     private long timeout;
 
     boolean debug;
