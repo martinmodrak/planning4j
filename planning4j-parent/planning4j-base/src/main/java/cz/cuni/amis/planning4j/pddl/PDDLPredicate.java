@@ -57,5 +57,21 @@ public class PDDLPredicate {
         return name + "/" + parameters.size();
     }
     
-    
+    public String stringAfterSubstitution(String ... substituents){
+        if(substituents.length != getParameters().size()){
+            throw new IllegalArgumentException("Predicate " + getName() + " requires " + getParameters().size() + " parameters, got " + substituents.length);
+        }
+        StringBuilder sb = new StringBuilder(getName());
+        if(getParameters().size() > 0){
+            sb.append("(");
+            for(int i = 0; i < substituents.length; i++){
+                if(i > 0){
+                    sb.append(",");
+                }
+                sb.append(substituents[i]);
+            }
+            sb.append(")");
+        }
+        return sb.toString();
+    }
 }
