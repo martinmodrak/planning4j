@@ -66,10 +66,13 @@ public class PDDLObjectToWriterDomainTranslator extends AbstractDomainTranslator
 
         protected void writeOneType(Writer writer, PDDLType type) throws IOException
         {
+            String ancestorString;
             if(type.getAncestor() == null){
-                throw new NullPointerException("User defined types must have a non-null ancestor");
+                ancestorString = "";
+            } else {
+                ancestorString = " - " + type.getAncestor();
             }
-            writer.write(" " + type.getTypeName() + " - " + type.getAncestor().getTypeName());
+            writer.write(" " + type.getTypeName() + ancestorString);
         }
 
         protected void writeTypes(Writer writer) throws IOException{
@@ -81,13 +84,13 @@ public class PDDLObjectToWriterDomainTranslator extends AbstractDomainTranslator
         }
 
 
-        protected void writeOneConstant(Writer writer, PDDLConstant constant) throws IOException {
+        protected void writeOneConstant(Writer writer, PDDLObjectInstance constant) throws IOException {
             writer.write("\t\t(" + constant.getStringForPDDL() + ")\n");       
         }
 
         protected void writeConstants(Writer writer) throws IOException {
             writer.write("\t(:constants \n");
-            for(PDDLConstant constant: getDomain().getConstants()){
+            for(PDDLObjectInstance constant: getDomain().getConstants()){
                 writeOneConstant(writer, constant);
             }
             writer.write("\t)\n");
