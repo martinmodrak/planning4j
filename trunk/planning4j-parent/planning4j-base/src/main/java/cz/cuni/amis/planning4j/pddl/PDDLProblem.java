@@ -16,6 +16,7 @@
  */
 package cz.cuni.amis.planning4j.pddl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +29,7 @@ public class PDDLProblem {
     String problemName;
     String domainName;
     
+    List<PDDLObjectInstance> objects;
     List<String> initialLiterals;
     List<String> goalConditions;
 
@@ -35,6 +37,7 @@ public class PDDLProblem {
         this.problemName = problemName;
         this.domainName = domainName;
         initialLiterals = Collections.EMPTY_LIST;       
+        objects = new ArrayList<PDDLObjectInstance>();
     }
 
     public void setGoalCondition(String goalCondition) {
@@ -79,7 +82,13 @@ public class PDDLProblem {
         this.goalConditions = goalConditions;
     }
 
+    public List<PDDLObjectInstance> getObjects() {
+        return objects;
+    }   
     
+    public void addObject(PDDLObjectInstance object){
+        objects.add(object);
+    }
     
     
     

@@ -45,5 +45,11 @@ public interface IPlanFuture<RESULT extends IPlanningResult> extends Future<RESU
 	 * @return
 	 */
 	public boolean isListening(IFutureListener<RESULT> listener);
+        
+        /**
+         * Gets excetption (if any) that terminated the computation of this future 
+         * @return 
+         */
+        public Exception getException();
     
 }

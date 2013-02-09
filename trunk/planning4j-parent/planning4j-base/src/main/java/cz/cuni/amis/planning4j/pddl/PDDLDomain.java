@@ -29,7 +29,7 @@ public class PDDLDomain {
     String domainName;
     Set<PDDLRequirement> requirements;
     List<PDDLType> types = new ArrayList<PDDLType>();
-    List<PDDLConstant> constants = new ArrayList<PDDLConstant>();
+    List<PDDLObjectInstance> constants = new ArrayList<PDDLObjectInstance>();
     List<PDDLPredicate> predicates = new ArrayList<PDDLPredicate>();
     List<PDDLAction> actions = new ArrayList<PDDLAction>();
 
@@ -48,7 +48,7 @@ public class PDDLDomain {
         types.add(type);
     }
     
-    public void addConstant(PDDLConstant constant){
+    public void addConstant(PDDLObjectInstance constant){
         constants.add(constant);
     }
     
@@ -64,7 +64,7 @@ public class PDDLDomain {
         return actions;
     }
 
-    public List<PDDLConstant> getConstants() {
+    public List<PDDLObjectInstance> getConstants() {
         return constants;
     }
 

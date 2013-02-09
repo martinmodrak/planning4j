@@ -19,6 +19,7 @@ package cz.cuni.amis.planning4j.translators.problem;
 import cz.cuni.amis.planning4j.IPDDLObjectProblemProvider;
 import cz.cuni.amis.planning4j.IPDDLWriterProblemProvider;
 import cz.cuni.amis.planning4j.impl.AbstractProblemTranslator;
+import cz.cuni.amis.planning4j.pddl.PDDLObjectInstance;
 import cz.cuni.amis.planning4j.pddl.PDDLProblem;
 import java.io.IOException;
 import java.io.Writer;
@@ -54,6 +55,13 @@ public class PDDLObjectToWriterProblemTranslator extends AbstractProblemTranslat
         @Override
         public void writeProblem(Writer writer) throws IOException {
             writer.write("(define (problem " + getProblem().getProblemName() + ") (:domain " + getProblem().getDomainName() + ")\n");
+            if (!getProblem().getObjects().isEmpty()){
+                writer.write("\t(:objects \n");
+                for(PDDLObjectInstance object : getProblem().getObjects()){
+                    writer.write("\t\t" + object.getStringForPDDL() + "\n");                    
+                }
+                writer.write("\t)\n");
+            }
             if (!getProblem().getInitialLiterals().isEmpty()) {
                 writer.write("\t(:init \n");
                 for (String literal : getProblem().getInitialLiterals()) {

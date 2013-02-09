@@ -20,13 +20,13 @@ package cz.cuni.amis.planning4j.pddl;
  * An object corresponding to a PDDL constant.
  * @author Martin Cerny
  */
-public class PDDLConstant extends PDDLTypedObject{
+public class PDDLObjectInstance extends PDDLTypedObject{
 
-    public PDDLConstant(String name, PDDLType type) {
+    public PDDLObjectInstance(String name, PDDLType type) {
         super(name, type);
     }
 
-    public PDDLConstant(String name) {
+    public PDDLObjectInstance(String name) {
         super(name);
     }
     

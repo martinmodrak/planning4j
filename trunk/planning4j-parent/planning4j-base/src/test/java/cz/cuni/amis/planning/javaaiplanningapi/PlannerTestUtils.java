@@ -57,8 +57,8 @@ public class PlannerTestUtils
         domain.addType(locationType);
         
         domain.addPredicate(new PDDLPredicate("at",new PDDLParameter("loc", locationType)));
-        domain.addConstant(new PDDLConstant("loc1", locationType));
-        domain.addConstant(new PDDLConstant("loc2", locationType));
+        domain.addConstant(new PDDLObjectInstance("loc1", locationType));
+        domain.addConstant(new PDDLObjectInstance("loc2", locationType));
 
         PDDLSimpleAction moveAction = new PDDLSimpleAction("move", new PDDLParameter("l1", locationType), new PDDLParameter("l2", locationType));        
         moveAction.setPreconditionList("at(l1)"); //TODO - rewrite to our objects
