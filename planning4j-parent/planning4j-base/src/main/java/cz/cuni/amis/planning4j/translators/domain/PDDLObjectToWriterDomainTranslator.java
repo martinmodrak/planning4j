@@ -70,7 +70,7 @@ public class PDDLObjectToWriterDomainTranslator extends AbstractDomainTranslator
             if(type.getAncestor() == null){
                 ancestorString = "";
             } else {
-                ancestorString = " - " + type.getAncestor();
+                ancestorString = " - " + type.getAncestor().getTypeName();
             }
             writer.write(" " + type.getTypeName() + ancestorString);
         }
@@ -85,7 +85,7 @@ public class PDDLObjectToWriterDomainTranslator extends AbstractDomainTranslator
 
 
         protected void writeOneConstant(Writer writer, PDDLObjectInstance constant) throws IOException {
-            writer.write("\t\t(" + constant.getStringForPDDL() + ")\n");       
+            writer.write("\t\t" + constant.getStringForPDDL() + "\n");       
         }
 
         protected void writeConstants(Writer writer) throws IOException {

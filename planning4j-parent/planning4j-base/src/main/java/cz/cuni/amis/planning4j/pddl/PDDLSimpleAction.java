@@ -108,7 +108,11 @@ public class PDDLSimpleAction extends PDDLAction{
                 return PDDLOperators.makeAnd(positiveEffects);
             }
         } else {
-            String negativeEffExpression = PDDLOperators.makeNot(PDDLOperators.makeAnd(negativeEffects));
+            List<String> negativeEffectsNegated = new ArrayList<String>(negativeEffects.size());
+            for(String negEff : negativeEffects){
+                negativeEffectsNegated.add(PDDLOperators.makeNot(negEff));
+            }
+            String negativeEffExpression = PDDLOperators.makeAnd(negativeEffectsNegated);
             if(positiveEffects.isEmpty()){
                 return negativeEffExpression;
             } else {
