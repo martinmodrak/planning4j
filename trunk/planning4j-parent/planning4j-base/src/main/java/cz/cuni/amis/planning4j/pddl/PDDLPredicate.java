@@ -57,7 +57,7 @@ public class PDDLPredicate {
         return name + "/" + parameters.size();
     }
     
-    public String stringAfterSubstitution(String ... substituents){
+    public String stringAfterSubstitution(Object ... substituents){
         if(substituents.length != getParameters().size()){
             throw new IllegalArgumentException("Predicate " + getName() + " requires " + getParameters().size() + " parameters, got " + substituents.length);
         }
@@ -65,7 +65,13 @@ public class PDDLPredicate {
         if(getParameters().size() > 0){
             for(int i = 0; i < substituents.length; i++){
                 sb.append(" ");
-                sb.append(substituents[i]);
+                if(substituents[i] instanceof String){
+                    sb.append(substituents[i]);
+                } else if (substituents[i] instanceof PDDLTypedObject){
+                    sb.append(((PDDLObjectInstance)substituents[i]).getNameForPDDL());
+                } else {
+                    throw new IllegalArgumentException("Unsupported substituent type: " + substituents[i].getClass());
+                }
             }
         }
         return sb.toString();
