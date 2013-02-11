@@ -18,9 +18,6 @@ package cz.cuni.amis.planning4j.external;
 
 import cz.cuni.amis.planning4j.*;
 import cz.cuni.amis.planning4j.impl.AbstractAsyncPlanner;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 /**
  * An implementation of {@link IPlanner} that writes the domain and problem to

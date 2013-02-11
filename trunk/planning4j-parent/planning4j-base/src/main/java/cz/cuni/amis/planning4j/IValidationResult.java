@@ -24,5 +24,5 @@ import java.util.List;
  */
 public interface IValidationResult {
     boolean isValid();
-    List<String> getValidationOutput();
+    String getValidationOutput();
 }

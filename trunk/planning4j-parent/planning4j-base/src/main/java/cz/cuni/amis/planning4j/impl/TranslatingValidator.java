@@ -46,7 +46,7 @@ public class TranslatingValidator
 
     
     
-    public TranslatingValidator(IValidator<DESTINATION_DOMAIN, DESTINATION_PROBLEM> originalPlanner, IDomainTranslator<SOURCE_DOMAIN, DESTINATION_DOMAIN> domainTranslator, IProblemTranslator<SOURCE_PROBLEM, DESTINATION_PROBLEM> problemTranslator) {
+    public TranslatingValidator(IValidator<DESTINATION_DOMAIN, DESTINATION_PROBLEM> originalValidator, IDomainTranslator<SOURCE_DOMAIN, DESTINATION_DOMAIN> domainTranslator, IProblemTranslator<SOURCE_PROBLEM, DESTINATION_PROBLEM> problemTranslator) {
         this.originalValidator = originalValidator;
         this.domainTranslator = domainTranslator;
         this.problemTranslator = problemTranslator;
