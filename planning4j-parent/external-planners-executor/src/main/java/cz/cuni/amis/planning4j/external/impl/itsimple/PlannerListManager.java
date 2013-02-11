@@ -38,9 +38,7 @@ import org.jdom.Element;
  * @author Matheus, Martin Cerny
  */
 public class PlannerListManager extends SimplePlannerListManager {
-    
-    private final Object fileOperationsMutex = new Object();
-    
+        
     private final Logger logger = Logger.getLogger(PlannerListManager.class);
     
     public PlannerListManager(Element plannersXml) {
@@ -55,28 +53,6 @@ public class PlannerListManager extends SimplePlannerListManager {
         extractAndPreparePlanner(new File("."), selectedPlanner);
     }
     
-    protected void extractFileIfNotExists(File targetFile, String resourcePath){
-        synchronized(fileOperationsMutex){
-            if(!targetFile.exists()){        
-                InputStream inputStream = getClass().getResourceAsStream(resourcePath);
-                if(inputStream == null){
-                    throw new ItSimplePlanningException("Could not find planner resource on classpath. Resource path:" + resourcePath);
-                }
-                if(!targetFile.getParentFile().exists() && !targetFile.getParentFile().mkdirs()){
-                    throw new ItSimplePlanningException("Could not create parent dirs for planner resource " + targetFile);                
-                }
-                try {
-                    FileOutputStream outputfilestream = new FileOutputStream(targetFile);
-                    IOUtils.copy(inputStream, outputfilestream);
-                    outputfilestream.close();
-                } catch (IOException ex){
-                    throw new ItSimplePlanningException("Could not extract planner resource to " + targetFile, ex);
-                }
-            }
-        }
-        
-        
-    }
     
     /**
      * If the planner does not exist in specified location, it is extracted from the planners pack,
@@ -95,7 +71,7 @@ public class PlannerListManager extends SimplePlannerListManager {
         final String plannerRelativeFileName = selectedPlanner.getSettings().getExecutableFilePath();
         String plannerResourcePath = "/" + plannerRelativeFileName;
         
-        extractFileIfNotExists(binaryFile, plannerResourcePath);                
+        ItSimpleUtils.extractFileIfNotExists(binaryFile, plannerResourcePath);                
         preparePlanner(targetDirectory, selectedPlanner);        
         
     }
@@ -110,14 +86,8 @@ public class PlannerListManager extends SimplePlannerListManager {
     @Override
     public void preparePlanner(File plannersDirectory, ItSimplePlannerInformation selectedPlanner){
         super.preparePlanner(plannersDirectory, selectedPlanner);
-        if(ItSimpleUtils.getOperatingSystem().equals(EPlannerPlatform.LINUX)){
         File plannerFile = ItSimpleUtils.getPlannerExecutableFile(plannersDirectory, selectedPlanner);
-        try {
-            Runtime.getRuntime().exec(new String[] { "chmod", "+x", plannerFile.getAbsolutePath()});
-        } catch (IOException ex) {
-            logger.warn("Could not set planner file permissions", ex);
-        }
-            
-        }
+        ItSimpleUtils.prepareExecutableForExecution(plannerFile);
     }
+
 }

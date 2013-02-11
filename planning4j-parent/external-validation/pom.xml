@@ -1,0 +1,30 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>cz.cuni.amis.planning4j.external</groupId>
+    <artifactId>external-validation</artifactId>
+    <packaging>jar</packaging>
+    <version>1.1-SNAPSHOT</version>
+    <parent>
+        <groupId>cz.cuni.amis.planning4j</groupId>
+        <artifactId>planning4j-parent</artifactId>
+        <version>1.1-SNAPSHOT</version>
+    </parent>    
+  
+  
+    <name>Planning4J - External plan validation</name>       
+    
+    <dependencies>
+        <dependency>
+            <groupId>cz.cuni.amis.planning4j</groupId>
+            <artifactId>planning4j-base</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cz.cuni.amis.planning4j.external</groupId>
+            <artifactId>external-planners-executor</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+</project>

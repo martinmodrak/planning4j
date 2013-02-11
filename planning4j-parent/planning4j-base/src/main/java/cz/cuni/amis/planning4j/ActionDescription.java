@@ -93,7 +93,18 @@ public class ActionDescription {
         this.startTime = startTime;
     }
 
-    
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(getStartTime()).append(":");
+        sb.append("(");
+        sb.append(name);
+        for(String param : parameters){
+            sb.append(" ").append(param);
+        }
+        sb.append(")");
+        return sb.toString();
+    }
     
     
 }

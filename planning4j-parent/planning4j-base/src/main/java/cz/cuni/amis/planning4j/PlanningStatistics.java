@@ -25,7 +25,7 @@ import java.util.List;
  * @author Martin Cerny
  */
 public class PlanningStatistics {
-    Double time;
+    Double time;    
     Double parsingTime;
     Integer numberOfActions;
     Double makeSpan;

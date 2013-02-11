@@ -28,58 +28,23 @@ import java.io.IOException;
  * 
  * @author Martin Cerny
  */
-public class ExternalPlanner extends AbstractAsyncPlanner<IPDDLWriterDomainProvider, IPDDLWriterProblemProvider>{
+public class ExternalPlanner extends AbstractAsyncPlanner<IPDDLFileDomainProvider, IPDDLFileProblemProvider>{
     
     
     private IExternalPlannerExecutor externalPlannerExecutor;
-    private File domainTempFile;
-    private File problemTempFile;
-
-    /**
-     * Creates a temp file and wraps the checked IOException.
-     * @param prefix
-     * @param suffix
-     * @param tempDirectory
-     * @throws PlanningIOException if the creation of temp file failed
-     * @return 
-     */
-    private static File silentCreateTempFile(String prefix, String suffix, File tempDirectory){
-        try {
-            return File.createTempFile(prefix, suffix, tempDirectory);            
-        } catch (IOException ex){
-            throw new PlanningIOException(ex);
-        }
-    }
     
     /**
      * Create a planner with the specified executor. Input files are created in default temp directory.
      * @param externalPlannerExecutor 
      */
     public ExternalPlanner(IExternalPlannerExecutor externalPlannerExecutor) {
-        this(externalPlannerExecutor, new File(System.getProperty("java.io.tmpdir")));
+        super(IPDDLFileDomainProvider.class,  IPDDLFileProblemProvider.class);
+        this.externalPlannerExecutor = externalPlannerExecutor;
     }
     
-    /**
-     * Create a planner with the specified executor. Input files are created in specified temp directory.
-     * @param externalPlannerExecutor 
-     */
-    public ExternalPlanner(IExternalPlannerExecutor externalPlannerExecutor, File tempDirectory) {
-        this(externalPlannerExecutor, silentCreateTempFile("domain_", ".pddl", tempDirectory), silentCreateTempFile("problem_", ".pddl", tempDirectory));
-    }
-
-    /**
-     * Create a planner with the specified executor. Location of input files is fully specified.
-     * @param externalPlannerExecutor 
-     */
-    public ExternalPlanner(IExternalPlannerExecutor externalPlannerExecutor, File domainTempFile, File problemTempFile) {
-        super(IPDDLWriterDomainProvider.class, IPDDLWriterProblemProvider.class);
-        this.externalPlannerExecutor = externalPlannerExecutor;
-        this.domainTempFile = domainTempFile;
-        this.problemTempFile = problemTempFile;
-    }
 
     @Override
-    public IExternalPlanningResult plan(IPDDLWriterDomainProvider domainProvider, IPDDLWriterProblemProvider problemProvider) {
+    public IExternalPlanningResult plan(IPDDLFileDomainProvider domainProvider, IPDDLFileProblemProvider problemProvider) {
         //this conversion is safe, since the super implementation just calls planAsync
         return (IExternalPlanningResult)super.plan(domainProvider, problemProvider);
     }
@@ -94,33 +59,8 @@ public class ExternalPlanner extends AbstractAsyncPlanner<IPDDLWriterDomainProvi
      * @throws PlanningException if the planner execution failed or the domain and problem files could not be generated
      */
     @Override
-    public IPlanFuture<IExternalPlanningResult> planAsync(IPDDLWriterDomainProvider domainProvider, IPDDLWriterProblemProvider problemProvider) {
-        FileWriter domainFileWriter = null;
-        FileWriter problemFileWriter = null;
-        try {
-            long start_time = System.currentTimeMillis();
-            domainFileWriter = new FileWriter(domainTempFile);
-            domainProvider.writeDomain(domainFileWriter);
-            domainFileWriter.close();
-             problemFileWriter = new FileWriter(problemTempFile);
-            problemProvider.writeProblem(problemFileWriter);
-            problemFileWriter.close();
-            long io_time = System.currentTimeMillis() - start_time;
-            return externalPlannerExecutor.executePlanner(domainTempFile, problemTempFile, io_time);
-        } catch(IOException ex){
-            try {
-                if(domainFileWriter != null){
-                    domainFileWriter.close();                
-                }
-                if(problemFileWriter != null){
-                    problemFileWriter.close();
-                }
-            } catch (IOException ignored){
-                //ignore
-            }            
-            throw new PlanningIOException(ex);
-        }
-        
+    public IPlanFuture<IExternalPlanningResult> planAsync(IPDDLFileDomainProvider domainProvider, IPDDLFileProblemProvider problemProvider) {
+        return externalPlannerExecutor.executePlanner(domainProvider.getDomainFile(), problemProvider.getProblemFile(), 0);        
     }
     
     

@@ -19,8 +19,10 @@ package cz.cuni.amis.planning4j.utils;
 import cz.cuni.amis.planning4j.*;
 import cz.cuni.amis.planning4j.impl.TranslatingAsyncPlanner;
 import cz.cuni.amis.planning4j.impl.TranslatingPlanner;
+import cz.cuni.amis.planning4j.impl.TranslatingValidator;
 import cz.cuni.amis.planning4j.translators.domain.NoTranslationDomainTranslator;
 import cz.cuni.amis.planning4j.translators.problem.NoTranslationProblemTranslator;
+import java.util.List;
 import java.util.ServiceLoader;
 
 /**
@@ -230,4 +232,51 @@ public class Planning4JUtils {
         return getTranslatingAsyncPlanner(planner, domain, problem).planAsync(domain, problem);
     }
     
+
+    /**
+     * Creates a proxy validator that accepts SOURCE_DOMAIN and SOURCE_PROBLEM type input, 
+     * translates the source domain and problem to forms understood by
+     * the given validator and delegates the actual validation to it. The translators are looked up with {@link #findDomainTranslator(java.lang.Class, java.lang.Class) }
+     * and {@link #findProblemTranslator(java.lang.Class, java.lang.Class) }
+     * @param <SOURCE_DOMAIN>
+     * @param <DESTINATION_DOMAIN>
+     * @param <SOURCE_PROBLEM>
+     * @param <DESTINATION_PROBLEM>
+     * @param original
+     * @param sourceDomainClass
+     * @param sourceProblemClass
+     * @return 
+     */
+    public static <SOURCE_DOMAIN extends IDomainProvider, DESTINATION_DOMAIN extends IDomainProvider,
+            SOURCE_PROBLEM extends IProblemProvider, DESTINATION_PROBLEM extends IProblemProvider>
+            IValidator<SOURCE_DOMAIN, SOURCE_PROBLEM> getTranslatingValidator(IValidator<DESTINATION_DOMAIN, DESTINATION_PROBLEM> original,Class<SOURCE_DOMAIN> sourceDomainClass, Class<SOURCE_PROBLEM> sourceProblemClass){
+        
+        if(original.getDomainClass().isAssignableFrom(sourceDomainClass) && original.getProblemClass().isAssignableFrom(sourceProblemClass)){
+            //no translation required
+            return (IValidator<SOURCE_DOMAIN, SOURCE_PROBLEM>)original;
+        }        
+        return new TranslatingValidator<SOURCE_DOMAIN, DESTINATION_DOMAIN, SOURCE_PROBLEM, DESTINATION_PROBLEM>(original, findDomainTranslatorThrowException(sourceDomainClass, original.getDomainClass()), findProblemTranslatorThrowException(sourceProblemClass, original.getProblemClass()));
+    }
+
+    /**
+     * Creates a proxy validator that accepts SOURCE_DOMAIN and SOURCE_PROBLEM type input, 
+     * translates the source domain and problem to forms understood by
+     * the given validator and delegates the actual validation to it. The translators are looked up with {@link #findDomainTranslator(java.lang.Class, java.lang.Class) }
+     * and {@link #findProblemTranslator(java.lang.Class, java.lang.Class) }
+     * @param validator
+     * @param domain
+     * @param problem
+     * @return 
+     */
+    public static IValidator getTranslatingValidator(IValidator validator, IDomainProvider domain, IProblemProvider problem) {
+        return getTranslatingValidator(validator, domain.getClass(), problem.getClass());
+    }
+    
+
+    /**
+     * Runs given validator on a domain and a problem spec, translating them if needed.
+     */
+    public static IValidationResult validate(IValidator validator, IDomainProvider domain, IProblemProvider problem, List<ActionDescription> plan){
+        return getTranslatingValidator(validator, domain, problem).validate(domain, problem, plan);
+    }
 }
