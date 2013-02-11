@@ -22,9 +22,12 @@ import cz.cuni.amis.planning4j.external.impl.itsimple.ItSimpleUtils;
 import cz.cuni.amis.planning4j.impl.AbstractValidator;
 import cz.cuni.amis.planning4j.impl.ValidationResult;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import org.apache.log4j.Logger;
 
 /**
  * A validator that uses external executable validator VAL 
@@ -35,6 +38,7 @@ import java.util.Scanner;
  */
 public class ValValidator extends AbstractValidator<IPDDLFileDomainProvider, IPDDLFileProblemProvider> {
 
+    private final Logger logger = Logger.getLogger(ValValidator.class);
 
     protected File validatorDirectory;
     
@@ -44,8 +48,12 @@ public class ValValidator extends AbstractValidator<IPDDLFileDomainProvider, IPD
      */
     private static final String LINUX_FOLDER_NAME = "validate-unix";
     private static final String WIN32_FOLDER_NAME = "validate-win32";
+    
     private static final String LINUX_EXECUTABLE_NAME = "validate";
     private static final String WIN32_EXECUTABLE_NAME = "validate.exe";
+    
+    private static final String[] LINUX_AUXILIARY_FILES = new String[]{};
+    private static final String[] WINDOWS_AUXILIARY_FILES = new String[]{"cyggcc_s-1.dll", "cygstdc++-6.dll","cygwin1.dll"};
     
     public ValValidator() {
         this(new File("."));
@@ -69,20 +77,32 @@ public class ValValidator extends AbstractValidator<IPDDLFileDomainProvider, IPD
     }
 
     /**
-     * Returns validator executable name (including the validator folder).
+     * Returns validator executable name 
      * @return
      * @throws ValidationException 
      */
     protected static String getValidatorExecutableName() throws ValidationException {
         switch(ItSimpleUtils.getOperatingSystem()){
             case LINUX: 
-                return LINUX_FOLDER_NAME + File.pathSeparator + LINUX_EXECUTABLE_NAME;
+                return LINUX_EXECUTABLE_NAME;
             case WINDOWS : 
-                return WIN32_FOLDER_NAME + File.pathSeparator + WIN32_EXECUTABLE_NAME;
+                return WIN32_EXECUTABLE_NAME;
             default: 
                 throw new ValidationException("VAL validator is not supported on platform " + ItSimpleUtils.getOperatingSystem());
         }
     }
+
+    protected static String[] getAuxiliaryFiles() throws ValidationException {
+        switch(ItSimpleUtils.getOperatingSystem()){
+            case LINUX: 
+                return LINUX_AUXILIARY_FILES;
+            case WINDOWS : 
+                return WINDOWS_AUXILIARY_FILES;
+            default: 
+                throw new ValidationException("VAL validator is not supported on platform " + ItSimpleUtils.getOperatingSystem());
+        }
+    }
+    
     
     public static void extractAndPrepareValidator(){
         extractAndPrepareValidator(new File("."));
@@ -91,12 +111,14 @@ public class ValValidator extends AbstractValidator<IPDDLFileDomainProvider, IPD
     public static void extractAndPrepareValidator(File targetDirectory) {
         String folderName = getValidatorFolderName();
         try {
-            for (String fileToExtractName : ItSimpleUtils.getResourceListing(ValValidator.class, "/" + folderName)) {
-                File binaryFile = new File(targetDirectory, folderName + File.pathSeparator + fileToExtractName);
+            for (String fileToExtractName : getAuxiliaryFiles()) {
+                File binaryFile = new File(targetDirectory, folderName + File.separatorChar + fileToExtractName);
 
                 ItSimpleUtils.extractFileIfNotExists(binaryFile, "/" + folderName + "/" + fileToExtractName);
             }
-            File mainExecutable = new File(targetDirectory, getValidatorExecutableName());
+            String validatorExecutableName = getValidatorExecutableName();
+            File mainExecutable = new File(targetDirectory, folderName + File.separatorChar + validatorExecutableName);
+            ItSimpleUtils.extractFileIfNotExists(mainExecutable, "/" + folderName + "/" + validatorExecutableName);            
             mainExecutable.setExecutable(true, false);
         } catch (Exception ex) {
             throw new ValidationException("Could not extract VAL binaries.", ex);
@@ -105,35 +127,79 @@ public class ValValidator extends AbstractValidator<IPDDLFileDomainProvider, IPD
     
     @Override
     public IValidationResult validate(IPDDLFileDomainProvider domainProvider, IPDDLFileProblemProvider problemProvider, List<ActionDescription> plan) {
-        File mainExecutable = new File(validatorDirectory, getValidatorExecutableName());
+        File mainExecutable = new File(validatorDirectory,  getValidatorFolderName() + File.separatorChar + getValidatorExecutableName());
         if(!mainExecutable.exists()){
             String toolMessage = "Could not find validator executable '" + getValidatorExecutableName() + "' in directory " + validatorDirectory.getAbsolutePath();
             throw new ValidationException(toolMessage);
         }
+        FileWriter planWriter = null;
         try {
+            
+            /**
+             * Write the plan to a temp file
+             */
+            File planTempFile = File.createTempFile("plan", "soln");
+            planWriter = new FileWriter(planTempFile);
+            for(ActionDescription action : plan){
+                planWriter.write(action.getStartTime() + ": (" + action.getName() + " ");
+                for(String param : action.getParameters()){
+                    planWriter.write(param + " ");                    
+                }
+                planWriter.write(") [" + action.getDuration() + "]\n");
+            }
+            
+            planWriter.close();
+            planWriter = null;
+            /**
+             * Invoke the validator
+             */
             ProcessBuilder processBuilder = new ProcessBuilder(mainExecutable.getAbsolutePath(), 
                     "-s", //silent mode for simple parsing - only errors are printed to the stdout
                     domainProvider.getDomainFile().getAbsolutePath(), 
-                    problemProvider.getProblemFile().getAbsolutePath());
-            
+                    problemProvider.getProblemFile().getAbsolutePath(),
+                    planTempFile.getAbsolutePath());
+        
+            logger.info("Starting VAL validator.");
+            if(logger.isDebugEnabled()){
+                logger.debug("The command: " + processBuilder.command());
+            }
             Process process = processBuilder.start();
             
             Scanner outputScanner = new Scanner(process.getInputStream());
             
-            List<String> consoleOutput = new ArrayList<String>();
+            StringBuilder consoleOutputBuilder = new StringBuilder();
             
             boolean hasNonEmptyLines = false;
+            if(logger.isTraceEnabled()){
+                logger.trace("Validator output:");
+            }
             while(outputScanner.hasNextLine()) {
                 String line = outputScanner.nextLine();
+                if(!consoleOutputBuilder.toString().isEmpty()){
+                    consoleOutputBuilder.append("\n");
+                }
                 if(!line.trim().isEmpty()){
                     hasNonEmptyLines = true;
                 }
-                consoleOutput.add(line);
+                consoleOutputBuilder.append(line);
+                if(logger.isTraceEnabled()){
+                    logger.trace(line);
+                }
             }
+            if(logger.isTraceEnabled()){
+                logger.trace("Validator output end.");
+            }            
             process.waitFor();
             boolean valid = !hasNonEmptyLines; //validator is run in silent mode, so any output means plan is not valid.
-            return new ValidationResult(valid, consoleOutput);
+            logger.info("Validation finished. Result is: " + valid);
+            return new ValidationResult(valid, consoleOutputBuilder.toString());
         } catch (Exception ex){
+            if(planWriter != null){
+                try {
+                    planWriter.close();
+                } catch(Exception ignored){
+                }
+            }
             throw new ValidationException("Error during validation", ex);
         }
     }

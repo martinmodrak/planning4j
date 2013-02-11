@@ -26,15 +26,15 @@ import java.util.List;
  */
 public class ValidationResult implements IValidationResult {
     private boolean valid;
-    private List<String> validationOutput;
+    private String validationOutput;
 
-    public ValidationResult(boolean valid, List<String> validationOutput) {
+    public ValidationResult(boolean valid, String validationOutput) {
         this.valid = valid;
         this.validationOutput = validationOutput;
     }
 
     @Override
-    public List<String> getValidationOutput() {
+    public String getValidationOutput() {
         return validationOutput;
     }
 
