@@ -18,6 +18,6 @@ There is a separate artifact for VAL validator (> 11 MB!)
 
 = Usage =
 
-Either use ValValidator class directly, or use Planning4JUtils.validate helper method (supports domain and problem provider translation). Before using the validator, it has to be extracted with ValValidator.extractAndPrepareValidator()
+Either use {{{ValValidator}}} class directly, or use {{{Planning4JUtils.validate()}}} helper method (supports domain and problem provider translation). Before using the validator, it has to be extracted with {{{ValValidator.extractAndPrepareValidator()}}}
 
-More documention will be (hopefully) added in the future.
+More documention will be (hopefully) added in the future, meanwhile see JavaDoc.
