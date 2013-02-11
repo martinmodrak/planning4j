@@ -23,10 +23,12 @@ import cz.cuni.amis.planning4j.impl.AbstractValidator;
 import cz.cuni.amis.planning4j.impl.ValidationResult;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -133,12 +135,13 @@ public class ValValidator extends AbstractValidator<IPDDLFileDomainProvider, IPD
             throw new ValidationException(toolMessage);
         }
         FileWriter planWriter = null;
+        Process process = null;
         try {
             
             /**
              * Write the plan to a temp file
              */
-            File planTempFile = File.createTempFile("plan", "soln");
+            File planTempFile = File.createTempFile("plan", ".soln");
             planWriter = new FileWriter(planTempFile);
             for(ActionDescription action : plan){
                 planWriter.write(action.getStartTime() + ": (" + action.getName() + " ");
@@ -163,7 +166,7 @@ public class ValValidator extends AbstractValidator<IPDDLFileDomainProvider, IPD
             if(logger.isDebugEnabled()){
                 logger.debug("The command: " + processBuilder.command());
             }
-            Process process = processBuilder.start();
+            process = processBuilder.start();
             
             Scanner outputScanner = new Scanner(process.getInputStream());
             
@@ -188,7 +191,15 @@ public class ValValidator extends AbstractValidator<IPDDLFileDomainProvider, IPD
             }
             if(logger.isTraceEnabled()){
                 logger.trace("Validator output end.");
-            }            
+            }          
+            
+            try {
+                //clean the error stream. Otherwise this might prevent the process from being terminated / cleared from the process table
+                IOUtils.toString(process.getErrorStream());
+            } catch (IOException ex) {
+                logger.warn("Could not clear error stream." , ex);
+            }
+            
             process.waitFor();
             boolean valid = !hasNonEmptyLines; //validator is run in silent mode, so any output means plan is not valid.
             logger.info("Validation finished. Result is: " + valid);
@@ -198,6 +209,16 @@ public class ValValidator extends AbstractValidator<IPDDLFileDomainProvider, IPD
                 try {
                     planWriter.close();
                 } catch(Exception ignored){
+                }
+            }
+            if(process != null){
+                process.destroy();
+                try {
+                    //clean the streams so that the process does not hang in the process table
+                    IOUtils.toString(process.getErrorStream());
+                    IOUtils.toString(process.getInputStream());
+                } catch(Exception ignored){
+                    logger.warn("Could not clear output/error stream." , ignored);
                 }
             }
             throw new ValidationException("Error during validation", ex);
