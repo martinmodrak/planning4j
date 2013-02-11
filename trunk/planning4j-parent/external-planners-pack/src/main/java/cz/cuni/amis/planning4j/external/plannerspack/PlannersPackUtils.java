@@ -114,7 +114,7 @@ public class PlannersPackUtils {
             super.extractAndPreparePlanner(targetDirectory, selectedPlanner);
             if(ItSimpleUtils.getOperatingSystem() == EPlannerPlatform.WINDOWS){
                 //On windows, some planners need cygwin...
-                extractFileIfNotExists(new File(targetDirectory,"planners/cygwin1.dll"), "/planners/cygwin1.dll");
+                ItSimpleUtils.extractFileIfNotExists(new File(targetDirectory,"planners/cygwin1.dll"), "/planners/cygwin1.dll");
             }
         }
         

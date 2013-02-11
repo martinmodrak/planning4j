@@ -2,3 +2,6 @@ cz.cuni.amis.planning4j.translators.problem.PDDLObjectToStringProblemTranslator
 cz.cuni.amis.planning4j.translators.problem.PDDLObjectToWriterProblemTranslator
 cz.cuni.amis.planning4j.translators.problem.PDDLStringToWriterProblemTranslator
 cz.cuni.amis.planning4j.translators.problem.PDDLWriterToStringProblemTranslator
+cz.cuni.amis.planning4j.translators.problem.PDDLObjectToFileProblemTranslator
+cz.cuni.amis.planning4j.translators.problem.PDDLStringToFileProblemTranslator
+cz.cuni.amis.planning4j.translators.problem.PDDLWriterToFileProblemTranslator

@@ -22,6 +22,7 @@
         <module>planning4j-base</module>
         <module>external-planners-executor</module>
         <module>external-planners-pack</module>
+        <module>external-validation</module>
         <!-- <module>sicstus-planners</module> Removed temporarily to allow automatic builds to run --> 
   </modules>
   
