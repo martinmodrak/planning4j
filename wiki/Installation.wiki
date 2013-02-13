@@ -61,4 +61,4 @@ The artifacts have quite a few dependencies (consider using Maven, it handles th
 Currently the most dependencies are connected to the external-planners part and those can be seen at http://diana.ms.mff.cuni.cz:8080/job/Planning4J/site/external-planners-executor/dependencies.html
 
 Sorry it's not more user friendly. 
-However, if you want to use Planning4J without Maven, you may also try to ask nicely at cerny.m@gmail.com and it is very likely I will fix a single-jar (or zip) distribution for you.
+However, if you want to use Planning4J without Maven, you may also try to ask nicely at [http://groups.google.com/group/planning4j-support Planning4J forum] and it is very likely I will fix a single-jar (or zip) distribution for you.
