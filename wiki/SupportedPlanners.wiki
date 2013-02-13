@@ -18,13 +18,16 @@ Following platform specific planners are provided by the external planner connec
   * [http://www.loria.fr/~hoffmanj/metric-ff.html Metric-FF]
   * [http://www.cs.rochester.edu/~kautz/satplan/blackbox/ BlackBox]
 
-== For Linux ==
+=== For Linux ===
+
+== Binaries included in external-planners-pack ==
+Those can be extracted either as a part of Maven build (see [ExtractingPlannersWithMaven] ) or
+directly from Java Code with {{{PlannersPackUtils.getPlannerListManager().extractAndPreparePlanner()}}}  (see [http://diana.ms.mff.cuni.cz:8080/job/Planning4J/javadoc/cz/cuni/amis/planning4j/external/plannerspack/PlannersPackUtils.html PlannersPackUtils javadoc])
   * [http://www.loria.fr/~hoffmanj/metric-ff.html Metric-FF]
   * [http://www.cs.rochester.edu/~kautz/satplan/blackbox/ BlackBox]
   * [http://www.loria.fr/~hoffmanj/ff.html FF 2.3]
   * [http://manip.crhc.uiuc.edu/programs/SGPlan/index.html SGPlan 5.22]
   * [http://manip.crhc.uiuc.edu/programs/SGPlan/index.html SGPlan 6]
-  * Planners based on [http://www.fast-downward.org/ Fast Downward platform]. See [UsingFastDownward]
   * [http://andorfer.cs.uni-dortmund.de/~edelkamp/mips/mips-xxl.html Mips XXL 1.0]
   * [http://andorfer.cs.uni-dortmund.de/~edelkamp/mips/mips-xxl.html Mips XXL 2008]
   * [http://ipc.informatik.uni-freiburg.de/Planners/ hspsp]
@@ -32,4 +35,9 @@ Following platform specific planners are provided by the external planner connec
   * [http://www.cse.wustl.edu/~chen/maxplan/ MaxPlan]
   * [http://planning.cis.strath.ac.uk/LPRPG/ LPRPG]
   * [http://planning.cis.strath.ac.uk/Marvin/ Marvin]
- 
+
+== Binaries not included ==
+See [UsingPlannersWithExternalBineries]
+  * Planners based on [http://www.fast-downward.org/ Fast Downward platform]. See [UsingFastDownward]
+  * [http://www.tecn.upf.es/~nlipovet/ Probe].
+  * Possibly any IPC-compliant planner.
