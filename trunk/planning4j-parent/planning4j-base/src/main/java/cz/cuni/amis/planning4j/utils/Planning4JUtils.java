@@ -17,11 +17,12 @@
 package cz.cuni.amis.planning4j.utils;
 
 import cz.cuni.amis.planning4j.*;
-import cz.cuni.amis.planning4j.impl.TranslatingAsyncPlanner;
-import cz.cuni.amis.planning4j.impl.TranslatingPlanner;
-import cz.cuni.amis.planning4j.impl.TranslatingValidator;
+import cz.cuni.amis.planning4j.impl.*;
+import cz.cuni.amis.planning4j.pddl.PDDLDomain;
+import cz.cuni.amis.planning4j.pddl.PDDLProblem;
 import cz.cuni.amis.planning4j.translators.domain.NoTranslationDomainTranslator;
 import cz.cuni.amis.planning4j.translators.problem.NoTranslationProblemTranslator;
+import java.io.File;
 import java.util.List;
 import java.util.ServiceLoader;
 
@@ -221,6 +222,40 @@ public class Planning4JUtils {
         return getTranslatingPlanner(planner, domain, problem).plan(domain, problem);
     }
 
+    /**
+     * Runs given planner on a domain and a problem spec, translating them if needed.
+     * @param planner
+     * @param domain
+     * @param problem
+     * @return 
+     */
+    public static IPlanningResult plan(IPlanner planner, PDDLDomain domain, PDDLProblem problem){
+        return plan(planner, new PDDLObjectDomainProvider(domain), new PDDLObjectProblemProvider(problem));
+    }
+
+    /**
+     * Runs given planner on a domain and a problem spec from specified files (in PDDL), translating them if needed.
+     * @param planner
+     * @param domain
+     * @param problem
+     * @return 
+     */
+    public static IPlanningResult planPDDL(IPlanner planner, File domainFile, File problemFile){
+        return plan(planner, new PDDLFileDomainProvider(domainFile), new PDDLFileProblemProvider(problemFile));
+    }
+
+    /**
+     * Runs given planner on a domain and a problem spec (in PDDL), translating them if needed.
+     * @param planner
+     * @param domain
+     * @param problem
+     * @return 
+     */
+    public static IPlanningResult planPDDL(IPlanner planner, String domain, String problem){
+        return plan(planner, new PDDLStringDomainProvider(domain), new PDDLStringProblemProvider(problem));
+    }
+    
+    
     /**
      * Runs given planner asynchronously on a domain and a problem spec, translating them if needed.
      * @param planner

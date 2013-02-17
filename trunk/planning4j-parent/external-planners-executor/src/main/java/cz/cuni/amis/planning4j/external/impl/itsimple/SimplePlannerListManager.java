@@ -158,20 +158,21 @@ public class SimplePlannerListManager {
             }
         }
         
-        Element noPlanSignalElement = settingsElement.getChild("noPlanFoundSignal");
-        if(noPlanSignalElement != null){
-            String type = noPlanSignalElement.getAttributeValue("type");
-            if(type.equals("emptyPlan")){
-                settings.setNoPlanFoundSignalType(ENoPlanFoundSignalType.EMPTY_PLAN);
-            } else if(type.equals("outputText")){
-                settings.setNoPlanFoundSignalType(ENoPlanFoundSignalType.OUTPUT_TEXT);
-                settings.setNoPlanFoundOutputText(noPlanSignalElement.getText());
-            } else if(type.equals("errorCode")){
-                settings.setNoPlanFoundSignalType(ENoPlanFoundSignalType.ERROR_CODE);
-                settings.setNoPlanFoundErrorCode(Integer.parseInt(noPlanSignalElement.getText()));
+        List<Element> noPlanSignalElements = settingsElement.getChildren("noPlanFoundSignal");
+        if (!noPlanSignalElements.isEmpty()) {
+            for (Element noPlanSignalElement : noPlanSignalElements) {
+                String type = noPlanSignalElement.getAttributeValue("type");
+                if (type.equals("emptyPlan")) {
+                    settings.addNoPlanFoundChecker(new EmptyPlanChecker());
+                } else if (type.equals("outputText")) {
+                    settings.addNoPlanFoundChecker(new OutputTextNoPlanFoundChecker(noPlanSignalElement.getText()));
+                } else if (type.equals("errorCode")) {
+                    settings.addNoPlanFoundChecker(new ExitCodeNoPlanFoundChecker(Integer.parseInt(noPlanSignalElement.getText())));
+                }
             }
+
         } else {
-            settings.setNoPlanFoundSignalType(ENoPlanFoundSignalType.EMPTY_PLAN);
+            settings.addNoPlanFoundChecker(new EmptyPlanChecker());
         }
         
         return settings;

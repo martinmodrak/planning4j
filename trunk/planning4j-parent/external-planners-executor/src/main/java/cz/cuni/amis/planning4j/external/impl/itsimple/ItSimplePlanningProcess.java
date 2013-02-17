@@ -280,7 +280,6 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
         try {
             boolean plannerFoundNoSolution = false;
 
-
             Scanner sc = new Scanner(process.getInputStream());
             //Get the planner answer exposed in the console
             if (logger.isDebugEnabled()) {
@@ -306,11 +305,12 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 String line = sc.nextLine();
                 consoleOutputBuilder.append(line).append("\n");
 
-                if (settings.getNoPlanFoundSignalType() == ENoPlanFoundSignalType.OUTPUT_TEXT) {
-                    if (line.contains(settings.getNoPlanFoundOutputText())) {
+                for(INoPlanFoundChecker checker : settings.getNoPlanFoundCheckers()){
+                    if(checker.processOutputLine(line)){
                         plannerFoundNoSolution = true;
                     }
                 }
+                
 
                 if (logger.isDebugEnabled()) {
                     logger.debug(line);
@@ -417,12 +417,18 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
             }
 
 
-            if (process.exitValue() != 0) {
-                if (settings.noPlanFoundSignalType == ENoPlanFoundSignalType.ERROR_CODE && settings.noPlanFoundErrorCode == process.exitValue()) {
+            int exitCode = process.exitValue();
+            
+            boolean checkersHandledExitCode = false;
+            for(INoPlanFoundChecker checker : settings.getNoPlanFoundCheckers()){
+                if(checker.processExitCode(exitCode)){
                     plannerFoundNoSolution = true;
-                } else {
-                    throw new PlanningException("Planner terminated with an error - exit code: " + process.exitValue() + ". Planner output:\n " + consoleOutputBuilder.toString() + "\nError output:\n" + errorOuput);
+                    checkersHandledExitCode = true;
                 }
+            }
+            
+            if (exitCode != 0 && !checkersHandledExitCode) {
+                throw new PlanningException("Planner terminated with an error - exit code: " + exitCode + ". Planner output:\n " + consoleOutputBuilder.toString() + "\nError output:\n" + errorOuput);
             }
 
 
@@ -487,8 +493,10 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 return null;
             }
 
-            if (settings.getNoPlanFoundSignalType() == ENoPlanFoundSignalType.EMPTY_PLAN) {
-                plannerFoundNoSolution = unprocessedPlan.isEmpty();
+            for(INoPlanFoundChecker checker : settings.getNoPlanFoundCheckers()){
+                if(checker.processUnprocessedPlan(unprocessedPlan)){
+                    plannerFoundNoSolution = true;
+                }
             }
 
             return new UnprocessedPlanningResult(unprocessedPlan, unprocessedStatistics, consoleOutputBuilder.toString(), !plannerFoundNoSolution);

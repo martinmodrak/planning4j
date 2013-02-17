@@ -94,8 +94,9 @@
 						<enable>true</enable>
 						<description>switch on optimization expression (default is plan length)</description>
 					</argument>
-				</arguments>
-                                <!-- <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal> -->
+				</arguments>                                
+                                <!-- If more than one signal type specified, they are effectively ORed -->
+                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal> 
                                 <noPlanFoundSignal type="outputText">proven unsolvable</noPlanFoundSignal> 
 				<timeout enabled="false">600</timeout>
 				<runAllComparison enabled="true" />
@@ -876,7 +877,9 @@
 						<description>switch on optimization expression (default is plan length)</description>
 					</argument>
 				</arguments>
-                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal>
+                                <!-- If more than one signal type specified, they are effectively ORed -->
+                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal> 
+                                <noPlanFoundSignal type="outputText">proven unsolvable</noPlanFoundSignal> 
 				<timeout enabled="false">600</timeout>                                
 				<runAllComparison enabled="true" />
 			</settings>
@@ -945,7 +948,9 @@
 						<description>run-time information level</description>
 					</argument>
 				</arguments>
-                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal>
+                                <!-- If more than one signal type specified, they are effectively ORed -->
+                                <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal> 
+                                <noPlanFoundSignal type="outputText">proven unsolvable</noPlanFoundSignal> 
 				<timeout enabled="false">600</timeout>
 				<runAllComparison enabled="true" />
 			</settings>
