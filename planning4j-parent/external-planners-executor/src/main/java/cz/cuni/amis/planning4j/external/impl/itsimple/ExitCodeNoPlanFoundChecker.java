@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 AMIS research group, Faculty of Mathematics and Physics, Charles University in Prague, Czech Republic
+ * Copyright (C) 2013 AMIS research group, Faculty of Mathematics and Physics, Charles University in Prague, Czech Republic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package cz.cuni.amis.planning4j.external.impl.itsimple;
 
 /**
  *
- * @author cernm6am
+ * @author Martin Cerny
  */
-public enum ENoPlanFoundSignalType {
-    EMPTY_PLAN, ERROR_CODE, OUTPUT_TEXT
+public class ExitCodeNoPlanFoundChecker extends NoPlanFoundCheckerAdapter{
+    private int code;
+
+    public ExitCodeNoPlanFoundChecker(int code) {
+        this.code = code;
+    }
+
+    @Override
+    public boolean processExitCode(int exitCode) {
+        if(exitCode == code){
+            return true;
+        } else {
+            return super.processExitCode(exitCode);
+        }
+    }
+    
+    
 }

@@ -48,15 +48,16 @@ public class ItSimplePlannerSettings {
     String problemArgumentName;
     
     List<PlannerArgument> additionalArguments;
-    
-    ENoPlanFoundSignalType noPlanFoundSignalType;
-    
-    String noPlanFoundOutputText;
-    int noPlanFoundErrorCode;
+
+    /**
+     * Ways to check for the no solution found situation. All of the results are ORed.
+     */
+    List<INoPlanFoundChecker> noPlanFoundCheckers;
 
     public ItSimplePlannerSettings() {
         additionalArguments = new ArrayList<PlannerArgument>();                
         additionalGeneratedFiles = new ArrayList<String>();
+        noPlanFoundCheckers = new ArrayList<INoPlanFoundChecker>();
     }
     
 
@@ -95,17 +96,6 @@ public class ItSimplePlannerSettings {
         return hasOutputFile;
     }
 
-    public int getNoPlanFoundErrorCode() {
-        return noPlanFoundErrorCode;
-    }
-
-    public String getNoPlanFoundOutputText() {
-        return noPlanFoundOutputText;
-    }
-
-    public ENoPlanFoundSignalType getNoPlanFoundSignalType() {
-        return noPlanFoundSignalType;
-    }
 
     public String getOutputFile() {
         return outputFile;
@@ -122,6 +112,12 @@ public class ItSimplePlannerSettings {
     public String getProblemArgumentName() {
         return problemArgumentName;
     }
+
+    public List<INoPlanFoundChecker> getNoPlanFoundCheckers() {
+        return noPlanFoundCheckers;
+    }
+    
+    
 
     public void setConsoleOutputPlanEndIdentifier(String consoleOutputPlanEndIdentifier) {
         this.consoleOutputPlanEndIdentifier = consoleOutputPlanEndIdentifier;
@@ -157,17 +153,6 @@ public class ItSimplePlannerSettings {
         this.hasOutputFile = hasOutputFile;
     }
 
-    public void setNoPlanFoundErrorCode(int noPlanFoundErrorCode) {
-        this.noPlanFoundErrorCode = noPlanFoundErrorCode;
-    }
-
-    public void setNoPlanFoundOutputText(String noPlanFoundOutputText) {
-        this.noPlanFoundOutputText = noPlanFoundOutputText;
-    }
-
-    public void setNoPlanFoundSignalType(ENoPlanFoundSignalType noPlanFoundSignalType) {
-        this.noPlanFoundSignalType = noPlanFoundSignalType;
-    }
 
     public void setOutputFile(String outputFile) {
         this.outputFile = outputFile;
@@ -191,5 +176,9 @@ public class ItSimplePlannerSettings {
     
     public void addAdditionalGeneratedFile(String file){
         additionalGeneratedFiles.add(file);
+    }
+    
+    public void addNoPlanFoundChecker(INoPlanFoundChecker noPlanFoundChecker){
+        noPlanFoundCheckers.add(noPlanFoundChecker);
     }
 }
