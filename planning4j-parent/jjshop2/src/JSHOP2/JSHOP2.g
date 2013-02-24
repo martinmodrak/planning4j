@@ -68,7 +68,7 @@ prob throws IOException :
     {
       //-- Set the problem and domain names.
       domain.setProbName(new String(pn.getText().toLowerCase()));
-      domain.setName(new String(dn.getText().toLowerCase()));
+      domain.setName(new String(dn.getText()));
 
       //-- Initialize the necessary data structures to compile the command,
       //-- e.g. read the names from the text file associated with this domain.
@@ -138,7 +138,7 @@ domain throws IOException :
   LP DEFDOMAIN dn:ID
     {
       //-- Set the domain name.
-      domain.setName(new String(dn.getText().toLowerCase()));
+      domain.setName(new String(dn.getText()));
     }
     LP (pde)+
       {

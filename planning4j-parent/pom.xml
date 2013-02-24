@@ -23,6 +23,7 @@
         <module>external-planners-executor</module>
         <module>external-planners-pack</module>
         <module>external-validation</module>
+        <module>jjshop2</module>
         <!-- <module>sicstus-planners</module> Removed temporarily to allow automatic builds to run --> 
   </modules>
   

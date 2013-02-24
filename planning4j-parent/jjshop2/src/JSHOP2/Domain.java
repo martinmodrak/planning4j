@@ -86,6 +86,14 @@ public abstract class Domain
     return problemConstants[idx - constants.length];
   }
 
+  public int getDomainConstantCount(){
+      return constants.length;
+  }
+  
+  public String getDomainConstant(int idx){
+      return constants[idx];
+  }
+  
   /** This function returns an array of the <code>String</code> representations
    *  of all the primitive tasks in the domain description. This list is used
    *  to print the plans after they are found.
@@ -99,6 +107,12 @@ public abstract class Domain
     return primitiveTasks;
   }
 
+    public String[] getCompoundTasks() {
+        return compoundTasks;
+    }
+
+  
+  
   /** This function sets the array of <code>String</code> representations of
    *  constant symbols that do not appear in the domain description but in the
    *  planning problem that is being solved.

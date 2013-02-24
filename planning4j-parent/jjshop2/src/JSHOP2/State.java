@@ -1,5 +1,6 @@
 package JSHOP2;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -87,7 +88,8 @@ public class State
 
     return true;
   }
-
+  
+ 
   /** To protect a given predicate in the current state of the world.
    *
    *  @param p

@@ -79,6 +79,16 @@ public class Plan
     cost -= opCost;
   }
 
+    public double getCost() {
+        return cost;
+    }
+
+    public java.util.List<Predicate> getOps() {
+        return ops;
+    }
+  
+  
+
   /** This function returns a printable <code>String</code> representation of
    *  this plan.
    *

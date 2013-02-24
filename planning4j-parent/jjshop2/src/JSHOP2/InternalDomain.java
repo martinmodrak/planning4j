@@ -64,6 +64,8 @@ public class InternalDomain
   /** The <code>String</code> name of the domain.
   */
   private String name;
+  
+  private String packageName;
 
   /** A <code>Vector</code> of operators seen so far in the domain description.
    *  Each member is of type <code>InternalOperator</code>.
@@ -83,6 +85,11 @@ public class InternalDomain
   */
   private String probName;
 
+  private File inputDirectory;
+  private File outputDirectory;
+  private File txtOutputDirectory;
+  private boolean generateTxt = true;
+  
   /** To initialize this domain.
    *
    *  @param fin
@@ -115,6 +122,42 @@ public class InternalDomain
 
     primitiveTasks = new Vector();
   }
+
+    public File getInputDirectory() {
+        return inputDirectory;
+    }
+
+    public void setInputDirectory(File inputDirectory) {
+        this.inputDirectory = inputDirectory;
+    }
+
+    public File getOutputDirectory() {
+        return outputDirectory;
+    }
+
+    public void setOutputDirectory(File outputDirectory) {
+        this.outputDirectory = outputDirectory;
+    }
+
+    public File getTxtOutputDirectory() {
+        return txtOutputDirectory;
+    }
+
+    public void setTxtOutputDirectory(File txtOutputDirectory) {
+        this.txtOutputDirectory = txtOutputDirectory;
+    }
+
+    public boolean isGenerateTxt() {
+        return generateTxt;
+    }
+
+    public void setGenerateTxt(boolean generateTxt) {
+        this.generateTxt = generateTxt;
+    }
+    
+    
+  
+  
 
   /** To add an axiom to the list of axioms read from the file.
    *
@@ -244,10 +287,14 @@ public class InternalDomain
   public void close(int varsMaxSize) throws IOException
   {
     //-- To hold the String to be written.
-    String s;
+    String s = "";
 
+    if(packageName != null && !packageName.isEmpty()){
+        s += "package " + packageName + ";" + endl + endl;
+    }
+    
     //-- JSHOP2 classes should be imported first.
-    s = "import JSHOP2.*;" + endl + endl;
+    s += "import JSHOP2.*;" + endl + endl;
 
     //-- Produce the classes that represent the operators.
     for (int i = 0; i < operators.size(); i++)
@@ -260,7 +307,8 @@ public class InternalDomain
     //-- Produce the classes that represent the axioms.
     for (int i = 0; i < axioms.size(); i++)
       s += ((InternalAxiom)axioms.get(i)).toCode();
-
+    
+    
     //-- Produce the class that represents the domain itself.
     s += "public class " + name + " extends Domain" + endl + "{" + endl;
 
@@ -429,7 +477,20 @@ public class InternalDomain
     s += "\t}" + endl + "}";
 
     //-- Open the file with the appropriate name.
-    BufferedWriter dest = new BufferedWriter(new FileWriter(name + ".java"));
+    String fullFileName;
+    if(packageName == null){
+        fullFileName = name;
+    } else {
+        fullFileName = packageName.replace('.', File.separatorChar) + File.separatorChar + name;
+    }
+    File javaOutputFile;
+    if(outputDirectory != null){
+        javaOutputFile = new File(outputDirectory, fullFileName + ".java");
+    } else {
+        javaOutputFile = new File(fullFileName + ".java");
+    }
+    javaOutputFile.getParentFile().mkdirs();
+    BufferedWriter dest = new BufferedWriter(new FileWriter(javaOutputFile));
 
     //-- Write the String.
     dest.write(s, 0, s.length());
@@ -437,23 +498,35 @@ public class InternalDomain
     //-- Close the file.
     dest.close();
 
-    //-- Open another file with extension '.txt' to store the String names of
-    //-- the constant symbols, the compound tasks and the primitive tasks in
-    //-- the domain description. This data will be used when compiling planning
-    //-- problems in this domain.
-    dest = new BufferedWriter(new FileWriter(name + ".txt"));
+    if(generateTxt){
+        //-- Open another file with extension '.txt' to store the String names of
+        //-- the constant symbols, the compound tasks and the primitive tasks in
+        //-- the domain description. This data will be used when compiling planning
+        //-- problems in this domain.
+        File txtOutputFile;
+        if(txtOutputDirectory != null){        
+            txtOutputFile = new File(txtOutputDirectory, fullFileName + ".txt");
+        }
+        else if(outputDirectory != null){
+            txtOutputFile = new File(outputDirectory, fullFileName + ".txt");
+        } else {
+            txtOutputFile = new File(fullFileName + ".txt");
+        }    
+        txtOutputFile.getParentFile().mkdirs();;
+        dest = new BufferedWriter(new FileWriter(txtOutputFile));
 
-    //-- Store the constant symbols.
-    dumpStringArray(dest, constants);
+        //-- Store the constant symbols.
+        dumpStringArray(dest, constants);
 
-    //-- Store the compound tasks.
-    dumpStringArray(dest, compoundTasks);
+        //-- Store the compound tasks.
+        dumpStringArray(dest, compoundTasks);
 
-    //-- Store the primitive tasks.
-    dumpStringArray(dest, primitiveTasks);
+        //-- Store the primitive tasks.
+        dumpStringArray(dest, primitiveTasks);
 
-    //-- Close the file.
-    dest.close();
+        //-- Close the file.
+        dest.close();
+    }
   }
 
   /** This function performs some necessary initialization when a problem file
@@ -739,33 +812,124 @@ public class InternalDomain
   {
     //-- The number of solution plans to be returned.
     int planNo = -1;
+    
+    boolean error = false;
+    String errorText = null;
+    boolean isDomain = true;
+    boolean generateTxt = true;
+    File outputDirectory = null;
+    File inputDirectory = null;
+    File txtOutputDirectory = null;
+    
+    File inputFile = null;
+    String packageName = null;
+    
+    if(args.length == 0){
+        error = true;
+    } else {
+        for(int argIndex = 0; argIndex < args.length - 1; argIndex++){
+            String arg = args[argIndex];
+            if (arg.startsWith("-r")) {
+                if (arg.equals("-r")) {
+                    planNo = 1;
+                } else if (arg.equals("-ra")) {
+                    planNo = Integer.MAX_VALUE;
+                } else {
+                    try {
+                        planNo = Integer.parseInt(arg.substring(2));
+                    } catch (NumberFormatException e) {
+                        error = true;
+                        errorText = "Invalid plan count";
+                        break;
+                    }
+                }
+                isDomain = false;
+            }
+            else if(arg.equals("-o") || arg.equals("--output-dir")){
+                if(argIndex >= args.length - 2){ //no directory after this one
+                    errorText = "-o or --output-dir must be followed by a directory name";
+                    error = true;
+                    break;
+                } else {
+                    argIndex++;
+                    outputDirectory = new File(args[argIndex]);
+                }
+            }
+            else if(arg.equals("-i") || arg.equals("--input-dir")){
+                if(argIndex >= args.length - 2){ //no directory after this one
+                    errorText = "-i or --input-dir must be followed by a directory name";
+                    error = true;
+                    break;
+                } else {
+                    argIndex++;
+                    inputDirectory = new File(args[argIndex]);
+                }
+            }
+            else if(arg.equals("-t") || arg.equals("--tct-output-dir")){
+                if(argIndex >= args.length - 2){ //no directory after this one
+                    errorText = "-t or --txtoutput-dir must be followed by a directory name";
+                    error = true;
+                    break;
+                } else {
+                    argIndex++;
+                    txtOutputDirectory = new File(args[argIndex]);
+                }
+            } else if(arg.equals("--no-txt")){
+                generateTxt = false;                
+            } else {
+                error = true;
+                errorText = "Unrecognized argument " + arg;
+                break;
+            }
+        }
+            
+        String inputFileName = args[args.length - 1].replace('\\', File.separatorChar).replace('/', File.separatorChar);
+            
+        int endOfDirs = inputFileName.lastIndexOf(File.separatorChar);
 
-    //-- Handle the number of solution plans the user wants to be returned.
-    if (args.length == 2 || args[0].substring(0, 2).equals("-r")) {
-      if (args[0].equals("-r"))
-        planNo = 1;
-      else if (args[0].equals("-ra"))
-        planNo = Integer.MAX_VALUE;
-      else try {
-        planNo = Integer.parseInt(args[0].substring(2));
-      } catch (NumberFormatException e) {
-      }
+        if(endOfDirs > 0){
+            packageName = inputFileName.substring(0, endOfDirs).replace(File.separatorChar, '.');
+        }
+        if(inputDirectory == null){
+            inputFile = new File(inputFileName);
+        } else {
+            inputFile = new File(inputDirectory, inputFileName);            
+        }
+        
+        
     }
+    
+    //-- Handle the number of solution plans the user wants to be returned.
+      
 
     //-- Check the number of arguments.
-    if (((args.length != 2) || planNo <= 0) && (args.length != 1))
+    if (error)
     {
-      System.err.println("usage: java JSHOP2Parser " +
-                         "[-r|-ra|-rSomePositiveInteger] input");
+        if(errorText != null){
+            System.err.println(errorText);
+        }
+      System.err.println("usage: java InternalDomain " +
+                         "[-r|-ra|-rSomePositiveInteger] [-i|--input-dir INPUT_DIRECTORY] \n"
+              + "[-o|--output-dir OUTPUT_DIRECTORY] [-t|--txt-output-dir OUTPUT_DIRECTORY_FOR_TXT_FILES] [--no-txt] input");
       System.exit(1);
     }
 
+    
+    
+    InternalDomain internalDomain = new InternalDomain(inputFile, planNo);
+    internalDomain.setOutputDirectory(outputDirectory);
+    internalDomain.setInputDirectory(inputDirectory);
+    internalDomain.setTxtOutputDirectory(txtOutputDirectory);
+    internalDomain.setGenerateTxt(generateTxt);
+    internalDomain.setPackageName(packageName);
+    
     //-- If this is a planning problem, call the 'command' rule in the parser.
-    if (args.length == 2)
-      (new InternalDomain(new File(args[1]), planNo)).parser.command();
+    if (!isDomain){
+      internalDomain.parser.command();
     //-- If this is a planning domain, call the 'domain' rule in the parser.
-    else
-      (new InternalDomain(new File(args[0]), -1)).parser.domain();
+    } else {
+      internalDomain.parser.domain();
+    }
   }
 
   /** This function reads a <code>Vector</code> of <code>String</code>s from
@@ -807,6 +971,12 @@ public class InternalDomain
   {
     name = nameIn;
   }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+  
+  
 
   /** To set the name of this planning problem.
    *
