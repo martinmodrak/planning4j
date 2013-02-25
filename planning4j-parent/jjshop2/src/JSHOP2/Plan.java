@@ -95,13 +95,13 @@ public class Plan
    *  @return
    *          the <code>String</code> representation of this plan.
   */
-  public String toString()
+  public String toString(JSHOP2 context)
   {
     //-- The value to be returned.
     String retVal = "Plan cost: " + cost + endl + endl;
 
     //-- Get the names of the operators in this domain.
-    String[] primitiveTasks = JSHOP2.getDomain().getPrimitiveTasks();
+    String[] primitiveTasks = context.getDomain().getPrimitiveTasks();
 
     //-- Iterate over the operator instances in the plan and print them.
     Iterator e = ops.iterator();

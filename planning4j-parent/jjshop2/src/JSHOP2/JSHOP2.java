@@ -93,30 +93,40 @@ class InternalVars
 */
 public class JSHOP2
 {
+    
+    
   /** The plan currently being constructed.
   */
-  private static Plan currentPlan;
+  private Plan currentPlan;
 
   /** The domain description for the planning problem.
   */
-  private static Domain domain;
+  private Domain domain;
 
   /** The maximum number of plans to be returned.
   */
-  private static int planNo;
+  private int planNo;
 
   /** The plans are stored in this variable as a list of type
    *  <code>Plan</code>.
   */
-  private static LinkedList plans;
+  private LinkedList plans;
 
   /** The current state of the world.
   */
-  private static State state;
+  private State state;
 
   /** The task list to be achieved.
   */
-  private static TaskList tasks;
+  private TaskList tasks;
+  
+    /**
+     * To represent the constant symbols that we already know exist, so that
+     * there will be no duplicate copies of those symbols. In other words, all
+     * constant symbols that represent the same thing in different places point
+     * to the corresponding element in this array at run time.
+     */
+    private TermConstant[] constants;  
 
   /** This function finds plan(s) for a given initial task list.
    *
@@ -127,7 +137,7 @@ public class JSHOP2
    *  @return
    *          0 or more plans that achieve the given task list.
   */
-  public static LinkedList findPlans(TaskList tasksIn, int planNoIn)
+  public LinkedList findPlans(TaskList tasksIn, int planNoIn)
   {
     //-- Initialize the plan list to an empty one.
     plans = new LinkedList();
@@ -160,7 +170,7 @@ public class JSHOP2
    *          <code>true</code> if a plan is found, <code>false</code>
    *          otherwise.
   */
-  private static boolean findPlanHelper(TaskList chosenTask)
+  private boolean findPlanHelper(TaskList chosenTask)
   {
     //-- The local variables we need every time this function is called.
     InternalVars v = new InternalVars();
@@ -352,7 +362,7 @@ public class JSHOP2
    *  @return
    *          the current planning domain.
   */
-  public static Domain getDomain()
+  public Domain getDomain()
   {
     return domain;
   }
@@ -362,21 +372,42 @@ public class JSHOP2
    *  @return
    *          the current state of the world.
   */
-  public static State getState()
+  public State getState()
   {
     return state;
   }
 
+    /**
+     * To return the correponding existing constant symbol.
+     *
+     * @param index the index of the constant symbol to be returned.
+     * @return the corresponding existing constant symbol.
+     */
+    public TermConstant getConstant(int index) {
+        return constants[index];
+    }
+  
   /** This function is used to initialize the planning algorithm.
    *
-   *  @param domainIn
-   *          the planning domain.
+   *  @param context 
+   *          the planning context (domain and other posssible stuff).
    *  @param stateIn
    *          the initial state of the world.
   */
-  public static void initialize(Domain domainIn, State stateIn)
+  public void initialize(Domain d,  int numConstants)
   {
-    domain = domainIn;
-    state = stateIn;
+      constants = new TermConstant[numConstants];
+
+      for (int i = 0; i < numConstants; i++) {
+          constants[i] = new TermConstant(i);
+      }
+
+    domain = d;
   }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+  
+  
 }

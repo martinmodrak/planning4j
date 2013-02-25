@@ -106,4 +106,11 @@ public class TermCall extends Term
   {
     return "(CALL " + func + " " + args.toString() + ")";
   }
+
+    @Override
+    public String toString(JSHOP2 context) {
+        return "(CALL " + func + " " + args.toString(context) + ")";
+    }
+  
+  
 }

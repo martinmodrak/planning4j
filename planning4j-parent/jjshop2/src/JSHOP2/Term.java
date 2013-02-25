@@ -122,12 +122,7 @@ public abstract class Term extends CompileTimeObject
     System.out.println(this);
   }
 
-  /** This function is used to produce a printable <code>String</code> showing
-   *  the value of this term.
-   *
-   *  @return
-   *          the printable <code>String</code> that shows the value of this
-   *          term.
-  */
-  public abstract String toString();
+    public abstract String toString(JSHOP2 context);
+    public abstract String toString();
+
 }

@@ -191,24 +191,25 @@ public class List extends CompileTimeObject
    *          the printable <code>String</code> that shows the value of this
    *          list.
   */
-  public String toString()
+  public String toString(JSHOP2 context)
   {
     //-- If tail is a list itself,
     if (tail instanceof TermList)
     {
-      if (tail.isNil())
-        //-- Converting "(a . NIL) to "(a)"
-        return head.toString();
+      if (tail.isNil()) {
+            return head.toString(context);
+        }
       else
       {
         //-- Converting "(a . (b)) to "(a b)"
-        String s = tail.toString();
+        String s = tail.toString(context);
 
-        return head.toString() + " " + s.substring(1, s.length() - 1);
+        return head.toString(context) + " " + s.substring(1, s.length() - 1);
       }
     }
     //-- If tail is not a list,
-    else
-      return head.toString() + " . " + tail.toString();
+    else {
+          return head.toString(context) + " . " + tail.toString(context);
+      }
   }
 }

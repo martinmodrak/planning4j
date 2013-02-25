@@ -135,4 +135,11 @@ public class TermVariable extends Term
   {
     return "VAR" + index;
   }
+
+    @Override
+    public String toString(JSHOP2 context) {
+        return toString();
+    }
+  
+  
 }

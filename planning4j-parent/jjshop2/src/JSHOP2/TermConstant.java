@@ -9,12 +9,6 @@ package JSHOP2;
 */
 public class TermConstant extends Term
 {
-  /** To represent the constant symbols that we already know exist, so that
-   *  there will be no duplicate copies of those symbols. In other words, all
-   *  constant symbols that represent the same thing in different places point
-   *  to the corresponding element in this array at run time.
-  */
-  private static TermConstant[] constants;
 
   /** Constant symbols are mapped to integers at compile time, and these
    *  integers are used thereafter to represent the constant symbols.
@@ -60,17 +54,7 @@ public class TermConstant extends Term
     return ((t instanceof TermVariable) || equals(t));
   }
 
-  /** To return the correponding existing constant symbol.
-   *
-   *  @param index
-   *          the index of the constant symbol to be returned.
-   *  @return
-   *          the corresponding existing constant symbol.
-  */
-  public static TermConstant getConstant(int index)
-  {
-    return constants[index];
-  }
+
 
   /** To get the index for this constant symbol.
    *
@@ -82,21 +66,7 @@ public class TermConstant extends Term
     return index;
   }
 
-  /** To initialize an array of constant symbols that we already know exist, so
-   *  that there will be no duplicate copies of those symbols. In other words,
-   *  all constant symbols that represent the same thing in different places
-   *  point to the corresponding element in this array at run time.
-   *
-   *  @param size
-   *          the number of existing constant symbols.
-  */
-  public static void initialize(int size)
-  {
-    constants = new TermConstant[size];
 
-    for (int i = 0; i < size; i++)
-      constants[i] = new TermConstant(i);
-  }
 
   /** This function always returns <code>true</code> because a constant symbol
    *  is always ground by definition.
@@ -114,11 +84,19 @@ public class TermConstant extends Term
     return "TermConstant.getConstant(" + index + ")";
   }
 
+    @Override
+    public String toString() {
+        return "Const_" + Integer.toString(index);
+    }
+
+  
+  
   /** Constant symbols are mapped at compile time to integers, this function,
    *  for printing purposes, maps them back to the strings they were before.
   */
-  public String toString()
+  @Override
+  public String toString(JSHOP2 context)  
   {
-    return JSHOP2.getDomain().getConstant(index);
+    return context.getDomain().constants[index];
   }
 }

@@ -296,18 +296,6 @@ public class InternalDomain
     //-- JSHOP2 classes should be imported first.
     s += "import JSHOP2.*;" + endl + endl;
 
-    //-- Produce the classes that represent the operators.
-    for (int i = 0; i < operators.size(); i++)
-      s += ((InternalOperator)operators.get(i)).toCode();
-
-    //-- Produce the classes that represent the methods.
-    for (int i = 0; i < methods.size(); i++)
-      s += ((InternalMethod)methods.get(i)).toCode();
-
-    //-- Produce the classes that represent the axioms.
-    for (int i = 0; i < axioms.size(); i++)
-      s += ((InternalAxiom)axioms.get(i)).toCode();
-    
     
     //-- Produce the class that represents the domain itself.
     s += "public class " + name + " extends Domain" + endl + "{" + endl;
@@ -318,18 +306,30 @@ public class InternalDomain
     {
       String imp = (String)calcs.get(i);
 
-      s += "\tpublic static " + imp + " calculate" + imp +
+      s += "\tpublic " + imp + " calculate" + imp +
            " = new " + imp + "();" + endl + endl;
     }
 
-    //-- Produce the constructor for the class that represents this domain.
-    s += "\tpublic " + name + "()" + endl + "\t{" + endl;
+    s += "\tprivate JSHOP2 context;" +endl + endl;
 
+    //-- Produce constants.
+    s += "\tpublic static final int NUM_CONSTANTS = " + constants.size() + ";" + endl;
+    s += "\tpublic static final int NUM_METHODS = " + compoundTasks.size() + ";" + endl;
+    s += "\tpublic static final int NUM_PRIMITIVES = " + primitiveTasks.size() + ";" + endl;
+    s += vectorToConstantDefinition(constants, "CONST");
+    s += vectorToConstantDefinition(compoundTasks, "METHOD");
+    s += vectorToConstantDefinition(primitiveTasks, "PRIMITIVE");
+    
+    
+    //-- Produce the constructor for the class that represents this domain.
+    s += "\tpublic " + name + "(JSHOP2 context)" + endl + "\t{" + endl;
+
+    s += "\t\tthis.context = context;" + endl;
     //-- To initialize an array of the variable symbols the size of which is
     //-- equal to the maximum number of variables seen in any scope in the
     //-- domain. This way, all the variable symbols that have the same index
     //-- will point to the same thing rather than pointing to duplicate copies.
-    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;
+    //s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;
 
     //-- Produce the array that maps constant symbols to integers.
     s += vectorToCode(constants, "constants");
@@ -473,8 +473,25 @@ public class InternalDomain
       s += endl;
     }
 
-    //-- Close the constructor and the class.
-    s += "\t}" + endl + "}";
+    //-- Close the constructor 
+    s += "\t}" + endl;
+    
+    //-- Produce the classes that represent the operators as internal classess.
+    for (int i = 0; i < operators.size(); i++)
+      s += ((InternalOperator)operators.get(i)).toCode();
+
+    //-- Produce the classes that represent the methods.
+    for (int i = 0; i < methods.size(); i++)
+      s += ((InternalMethod)methods.get(i)).toCode();
+
+    //-- Produce the classes that represent the axioms.
+    for (int i = 0; i < axioms.size(); i++)
+      s += ((InternalAxiom)axioms.get(i)).toCode();
+    
+    
+    
+    //close the class
+    s += endl + "}";
 
     //-- Open the file with the appropriate name.
     String fullFileName;
@@ -631,15 +648,14 @@ public class InternalDomain
     s += "\tpublic static void main(String[] args) throws InterruptedException"
          + endl + "\t{" + endl;
 
-    //-- To initialize an array of the constant symbols that we already know
-    //-- exist so that there will be no duplicate copies of those constant
-    //-- symbols.
-    s += "\t\tTermConstant.initialize(" + constants.size() + ");" + endl +
-         endl;
-
     //-- Instantiate an object of the class that represents the planning
     //-- domain.
     s += "\t\tDomain d = new " + name + "();" + endl + endl;
+
+    //-- Initialize the planning context
+    s += "\t\tJSHOP2 context = new JSHOP2();" + endl +
+         endl;
+
 
     //-- Call the function that passes this array to the the object that
     //-- represents the domain.
@@ -652,7 +668,8 @@ public class InternalDomain
 
     //-- Pass the domain description and the initial state of the world to the
     //-- JSHOP2 algorithm.
-    s += endl + "\t\tJSHOP2.initialize(d, s);" + endl + endl;
+    s += endl + "\t\tjshop.initialize(context, " + constants.size() + ");" + endl;
+    s += "\t\tjshop.setState(s);" + endl + endl;
 
     //-- Define the task list variable and the thread that solves the problems.
     s += "\t\tTaskList tl;" + endl + "\t\tThread thread;" + endl + endl;
@@ -680,7 +697,7 @@ public class InternalDomain
       s += endl + tl.getInitCode("tl") + endl;
 
       //-- Define the thread that will solve this planning problem.
-      s += "\t\tthread = new SolverThread(tl, " + planNo + ");" + endl;
+      s += "\t\tthread = new SolverThread(context, tl, " + planNo + ");" + endl;
 
       //-- Start the thread that will solve this planning problem.
       s += "\t\tthread.start();" + endl;
@@ -1014,4 +1031,33 @@ public class InternalDomain
 
     return retVal + endl;
   }
+  
+  private String translateConstantNameToJavaConstantIndetifier(String constantName){
+      return constantName.replace("!", "").toUpperCase();
+  }
+  
+  /** This function produces the Java code needed to access a given <code>Vector</code> of
+   *  <code>String</code>s by their ids from outside the domain.
+   *
+   *  @param list
+   *          the <code>Vector</code> the elements of which are to be stored in
+   *          the resulting array.
+   *  @param prefix
+   *          the prefix of the constants created for this array
+   *          <code>Vector</code> are to be stored.
+   *  @return
+   *          the produced Java code.
+  */
+  public String vectorToConstantDefinition(Vector list, String prefix)
+  {
+    StringBuilder retVal = new StringBuilder();
+
+
+    //-- Then, assign the elements of the array one by one.
+    for (int i = 0; i < list.size(); i++){
+        retVal.append("\tpublic static final int ").append(prefix).append("_").append(translateConstantNameToJavaConstantIndetifier((String)list.get(i))).append(" = ").append(i).append(";").append(endl);
+    }
+
+    return retVal.append(endl).toString();
+  }  
 }
