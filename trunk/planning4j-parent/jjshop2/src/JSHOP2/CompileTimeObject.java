@@ -20,4 +20,5 @@ public abstract class CompileTimeObject
    *          the produced code as a <code>String</code>.
   */
   public abstract String toCode();
+
 }

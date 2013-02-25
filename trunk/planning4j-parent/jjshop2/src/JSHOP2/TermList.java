@@ -131,13 +131,22 @@ public class TermList extends Term
                          list.getTail());
   }
 
-  /** This function is used to print this list term.
-  */
+  
   public String toString()
   {
     if (list == null)
       return "NIL";
 
     return "(" + list.toString() + ")";
+  }
+  
+  /** This function is used to print this list term.
+  */
+  public String toString(JSHOP2 context)
+  {
+    if (list == null)
+      return "NIL";
+
+    return "(" + list.toString(context) + ")";
   }
 }

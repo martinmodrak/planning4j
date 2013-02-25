@@ -103,14 +103,14 @@ public class TaskAtom extends CompileTimeObject
    *          the printable <code>String</code> that shows the value of this
    *          task atom.
   */
-  public String toString()
+  public String toString(JSHOP2 context)
   {
     String s;
 
     if (primitive)
-      s = head.toString(JSHOP2.getDomain().primitiveTasks);
+      s = head.toString(context.getDomain().primitiveTasks);
     else
-      s = head.toString(JSHOP2.getDomain().compoundTasks);
+      s = head.toString(context.getDomain().compoundTasks);
 
     if (immediate)
       return "(:immediate " + s.substring(1);

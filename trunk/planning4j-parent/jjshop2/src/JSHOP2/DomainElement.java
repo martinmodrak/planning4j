@@ -47,7 +47,7 @@ public abstract class DomainElement
    *          an object of type Precondition which can be used later on to get
    *          the bindings one by one.
   */
-  public abstract Precondition getIterator(Term[] binding, int which);
+  public abstract Precondition getIterator( Term[] binding, int which);
 
   /** This function returns the substitution that unifies the head of this
    *  element with a given predicate.

@@ -12,13 +12,13 @@ public class LogicalExpressionAtomic extends LogicalExpression
   /** The logical atom.
   */
   private Predicate logicalAtom;
-
+  
   /** To initialize this atomic logical expression.
    *
    *  @param logicalAtomIn
    *          the logical atom this class represents.
   */
-  public LogicalExpressionAtomic(Predicate logicalAtomIn)
+  public LogicalExpressionAtomic( Predicate logicalAtomIn)
   {
     logicalAtom = logicalAtomIn;
   }
@@ -45,6 +45,6 @@ public class LogicalExpressionAtomic extends LogicalExpression
   */
   public String toCode()
   {
-    return "new PreconditionAtomic(" + logicalAtom.toCode() + ", unifier)";
+    return "new PreconditionAtomic(context, " + logicalAtom.toCode() + ", unifier)";
   }
 }

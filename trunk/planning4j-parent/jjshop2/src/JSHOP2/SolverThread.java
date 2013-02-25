@@ -23,6 +23,8 @@ public class SolverThread extends Thread
   */
   private TaskList tl;
 
+  JSHOP2 jshop;
+  
   /** To initialize this thread.
    *
    *  @param tlIn
@@ -30,8 +32,9 @@ public class SolverThread extends Thread
    *  @param planNoIn
    *          the maximum number of plans allowed.
   */
-  public SolverThread(TaskList tlIn, int planNoIn)
+  public SolverThread(JSHOP2 jshop, TaskList tlIn, int planNoIn)
   {
+      this.jshop = jshop;
     tl = tlIn;
     planNo = planNoIn;
   }
@@ -44,7 +47,7 @@ public class SolverThread extends Thread
     long t1 = new GregorianCalendar().getTimeInMillis();
 
     //-- Solve the planning problem.
-    LinkedList p = JSHOP2.findPlans(tl, planNo);
+    LinkedList p = jshop.findPlans(tl, planNo);
 
     //-- Get the current time again, to calculate the time used.
     long t2 = new GregorianCalendar().getTimeInMillis();
@@ -59,7 +62,7 @@ public class SolverThread extends Thread
     while (e.hasNext())
     {
       System.out.println("Plan #" + ++i + ":");
-      System.out.println((Plan)e.next());
+      System.out.println(((Plan)e.next()).toString(jshop));
     }
 
     System.out.println("Time Used = " + (t2 - t1) / 1000.0);

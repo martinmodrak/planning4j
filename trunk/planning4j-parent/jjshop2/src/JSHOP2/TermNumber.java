@@ -84,4 +84,9 @@ public class TermNumber extends Term
   {
     return String.valueOf(number);
   }
+  
+  public String toString(JSHOP2 context)
+  {
+    return String.valueOf(number);
+  }
 }

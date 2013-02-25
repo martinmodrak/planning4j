@@ -240,15 +240,14 @@ public class Predicate extends CompileTimeObject
    *  @return
    *          the <code>String</code> representation of this predicate.
   */
-  public String toString()
+  public String toString(JSHOP2 context)
   {
     //-- If this predicate is a variable symbol, just print it as a variable.
     if (isVar())
       return "VAR" + varIdx;
 
-    //-- Find out what the String representation of the head of this predicate
-    //-- is.
-    String s = "(" + JSHOP2.getDomain().getConstant(head);
+    //-- First, make up the head of the predicate.
+    String s = "(" + context.getDomain().constants[head];
 
     //-- If the argument list is a list term (which it should be usually):
     if (param instanceof TermList)
@@ -257,10 +256,10 @@ public class Predicate extends CompileTimeObject
         return  s + ")";
       else
         //-- Converting (a . (b)) to (a b).
-        return s + " " + ((TermList)param).getList() + ")";
+        return s + " " + ((TermList)param).getList().toString(context) + ")";
+    else
     //-- If the argument list is not a list term (which should not happen
     //-- usually, but there is no reason to assume that it will not happen.
-    else
       return s + "." + param + ")";
   }
 
@@ -290,7 +289,7 @@ public class Predicate extends CompileTimeObject
         return  s + ")";
       else
         //-- Converting (a . (b)) to (a b).
-        return s + " " + ((TermList)param).getList() + ")";
+        return s + " " + ((TermList)param).getList().toString() + ")";
     else
     //-- If the argument list is not a list term (which should not happen
     //-- usually, but there is no reason to assume that it will not happen.
