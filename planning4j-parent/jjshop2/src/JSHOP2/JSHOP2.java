@@ -128,6 +128,16 @@ public class JSHOP2
      */
     private TermConstant[] constants;  
 
+    /**
+     * To represent the variable symbols that we know occur in the domain
+     * description, so that there will be no duplicate copies of those symbols.
+     * In other words, all variable symbols that represent the same thing in
+     * different places point to the corresponding element in this array at run
+     * time.
+     */
+    private TermVariable[] variables;
+    
+    
   /** This function finds plan(s) for a given initial task list.
    *
    *  @param tasksIn
@@ -386,24 +396,48 @@ public class JSHOP2
     public TermConstant getConstant(int index) {
         return constants[index];
     }
+    
+  /** To return the correponding existing variable symbol.
+   *
+   *  @param index
+   *          the index of the variable symbol to be returned.
+   *  @return
+   *          the corresponding existing variable symbol.
+  */
+  public TermVariable getVariable(int index)
+  {
+    return variables[index];
+  }
+    
+
+  /**
+   * Called by domain initialization to ensure enough space for variable instances.
+   * @param varsMaxSize 
+   */
+  public void initializeVars(int varsMaxSize){
+        variables = new TermVariable[varsMaxSize];
+        for (int i = 0; i < varsMaxSize; i++) {
+            variables[i] = new TermVariable(i);
+        }
+      
+  }
   
   /** This function is used to initialize the planning algorithm.
    *
    *  @param context 
    *          the planning context (domain and other posssible stuff).
-   *  @param stateIn
-   *          the initial state of the world.
+   *  @param numConstants 
+   *          the number of constants in the domain and problem (or an uppper bound)
   */
-  public void initialize(Domain d,  int numConstants)
-  {
-      constants = new TermConstant[numConstants];
+    public void initialize(Domain d, int numConstants) {
+        constants = new TermConstant[numConstants];
 
-      for (int i = 0; i < numConstants; i++) {
-          constants[i] = new TermConstant(i);
-      }
+        for (int i = 0; i < numConstants; i++) {
+            constants[i] = new TermConstant(i);
+        }
 
-    domain = d;
-  }
+        domain = d;
+    }
 
     public void setState(State state) {
         this.state = state;

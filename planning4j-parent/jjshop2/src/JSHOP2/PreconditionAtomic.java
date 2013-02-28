@@ -40,6 +40,7 @@ public class PreconditionAtomic extends Precondition
     setFirst(false);
 
     p = pIn.applySubstitution(unifier);
+    this.context = context;
   }
 
   /** To bind the assignment logical expression to some binding.

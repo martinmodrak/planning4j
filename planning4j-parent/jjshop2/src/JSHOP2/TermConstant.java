@@ -81,7 +81,7 @@ public class TermConstant extends Term
   */
   public String toCode()
   {
-    return "TermConstant.getConstant(" + index + ")";
+    return "context.getConstant(" + index + ")";
   }
 
     @Override

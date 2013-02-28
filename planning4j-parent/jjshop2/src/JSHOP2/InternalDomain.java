@@ -219,6 +219,15 @@ public class InternalDomain
     return index;
   }
 
+  /**
+   * Gets the domain member name corresponding to a particular user-defined function.
+   * @param func
+   * @return 
+   */
+  public String memberNameFromUserFunctionName(String func){
+      return "calculate" + func.substring(0, 1).toUpperCase() + func.substring(1);      
+  }
+  
   /** To add the <code>String</code> name of an external code call to the list
    *  of such code calls.
    *
@@ -300,16 +309,14 @@ public class InternalDomain
     //-- Produce the class that represents the domain itself.
     s += "public class " + name + " extends Domain" + endl + "{" + endl;
 
-    //-- Take care of the user-defined external code calls first by
-    //-- instantiating an  object of that class to do the calculations.
+    //-- Members representing external function call implementations
     for (int i = 0; i < calcs.size(); i++)
     {
       String imp = (String)calcs.get(i);
-
-      s += "\tpublic " + imp + " calculate" + imp +
-           " = new " + imp + "();" + endl + endl;
+      s += "\tprotected final Calculate " + memberNameFromUserFunctionName(imp) + ";" + endl;
     }
 
+    s += endl;
     s += "\tprivate JSHOP2 context;" +endl + endl;
 
     //-- Produce constants.
@@ -320,15 +327,31 @@ public class InternalDomain
     s += vectorToConstantDefinition(compoundTasks, "METHOD");
     s += vectorToConstantDefinition(primitiveTasks, "PRIMITIVE");
     
+    //-- Produce the constructor for the class that represents this domain without any user defined functions
+    s += "\tpublic " + name + "(JSHOP2 context)" + endl + "\t{" + endl;
+    s += "\t\tthis(context, java.util.Collections.EMPTY_MAP);" + endl;
+    s += "\t}" + endl + endl;
     
     //-- Produce the constructor for the class that represents this domain.
-    s += "\tpublic " + name + "(JSHOP2 context)" + endl + "\t{" + endl;
+    s += "\tpublic " + name + "(JSHOP2 context, java.util.Map<String, Calculate> userFunctionImplementations)" + endl + "\t{" + endl;
+    s += "\t\tthis.context = context;" + endl + endl;
 
-    s += "\t\tthis.context = context;" + endl;
     //-- To initialize an array of the variable symbols the size of which is
     //-- equal to the maximum number of variables seen in any scope in the
     //-- domain. This way, all the variable symbols that have the same index
-    //-- will point to the same thing rather than pointing to duplicate copies.
+    //-- will point to the same thing rather than pointing to duplicate copies.        
+    s += "\t\tcontext.initializeVars(" + varsMaxSize + ");" + endl;
+    
+    
+    //Initialize user function implementations
+    for (int i = 0; i < calcs.size(); i++)
+    {
+      String imp = (String)calcs.get(i);
+      String memberName = memberNameFromUserFunctionName(imp);
+      s += "\t\t" + memberName + " = getFunctionImplementation(\"" + imp + "\", userFunctionImplementations);" + endl;
+    }    
+    s += endl;
+    
     //s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;
 
     //-- Produce the array that maps constant symbols to integers.
