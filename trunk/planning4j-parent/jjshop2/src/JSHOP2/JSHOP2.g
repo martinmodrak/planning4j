@@ -909,6 +909,10 @@ fid returns [String retVal] :
     {
       retVal = "StdLib.power";
     }
+| STDLIB DOT id2:ID
+    {
+      retVal = "StdLib." + id2.getText();
+    }
 ;
 
 //------------------------------- Lexer -----------------------------
