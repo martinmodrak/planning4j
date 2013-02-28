@@ -97,6 +97,6 @@ public class TermConstant extends Term
   @Override
   public String toString(JSHOP2 context)  
   {
-    return context.getDomain().constants[index];
+    return context.getDomain().getConstant(index);
   }
 }
