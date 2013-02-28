@@ -1,5 +1,7 @@
 package JSHOP2;
 
+import java.util.Map;
+
 /** Each domain at run time is represented as a class derived from this
  *  abstract class.
  *
@@ -124,5 +126,20 @@ public abstract class Domain
   public void setProblemConstants(String[] inp)
   {
     problemConstants = inp;
+  }
+  
+  protected Calculate getFunctionImplementation(String functionName, Map<String, Calculate> userFunctionImplementations){
+      if(userFunctionImplementations.containsKey(functionName)){
+          return userFunctionImplementations.get(functionName);
+      } else {
+          try {
+              //The old implementation just instantiated a class of given name, so we need to do so as well.
+              Class calculateClass = Class.forName(functionName);
+              Calculate implementation = (Calculate)calculateClass.newInstance();
+              return implementation;
+          } catch (Exception ex) {
+              throw new JSHOPException("No implementation supplied for function " + functionName + " and class of this name cannot be instantiated.", ex);
+          }
+      }
   }
 }

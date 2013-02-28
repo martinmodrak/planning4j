@@ -706,7 +706,7 @@ le returns [LogicalExpression retVal]
       if (!func.startsWith("StdLib."))
       {
         domain.addCalc(func);
-        func = domain.getName() + ".calculate" + func;
+        func = domain.memberNameFromUserFunctionName(func);
       }
 
       //-- A call logical expression.
@@ -835,7 +835,7 @@ term returns [Term retVal]
       if (!func.startsWith("StdLib."))
       {
         domain.addCalc(func);
-        func = domain.getName() + ".calculate" + func;
+        func = domain.memberNameFromUserFunctionName(func);
       }
 
       //-- Create the object that represents this call term.

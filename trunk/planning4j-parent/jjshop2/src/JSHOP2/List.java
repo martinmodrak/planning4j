@@ -12,7 +12,7 @@ import java.util.LinkedList;
  *  @author <a href="http://www.cs.umd.edu/~okhtay">http://www.cs.umd.edu/~okhtay</a>
  *  @version 1.0.3
 */
-public class List extends CompileTimeObject
+public class List extends CompileTimeObject implements Iterable<Term>
 {
   /** The head of this list, a term.
   */
@@ -212,4 +212,76 @@ public class List extends CompileTimeObject
           return head.toString(context) + " . " + tail.toString(context);
       }
   }
+
+  /**
+   * Gets the term at given index.
+   * Note: linear-time complexity;
+   * @param index
+   * @return Term at given index in the list
+   * @throws IndexOutOfBoundsException if there is no such term
+   */
+    public Term get(int index){
+        if(index < 0){
+            throw new IndexOutOfBoundsException("Index cannot be negative");
+        }
+        Iterator<Term> it = iterator();
+        Term toReturn = null;
+        for(int i = 0; i < index + 1; i++){
+            if(!it.hasNext()){
+                throw new IndexOutOfBoundsException("No term at index " + index + " list size is " + i);
+            }
+            toReturn = it.next();
+        }
+        return toReturn;
+    }
+  
+  
+    @Override
+    public Iterator<Term> iterator() {
+        return new TermListIterator(this);
+    }
+  
+    private static class TermListIterator implements java.util.Iterator<Term> {
+
+        Term head;
+        
+        List rest;
+        
+        public TermListIterator(List list) {
+            head = list.head;
+            if(list.tail.isNil()){
+                rest = null;
+            } else {
+                rest = list.getRest();
+            }
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return head != null ;
+        }
+
+        @Override
+        public Term next() {
+            Term oldHead = head;
+            if(rest == null){
+                head = null;
+            } else {
+                head = rest.getHead();
+                if(rest.tail.isNil()){
+                    rest = null;
+                } else {
+                    rest = rest.getRest();
+                }
+                
+            }
+            return oldHead;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Removal not supported.");
+        }
+        
+    }  
 }
