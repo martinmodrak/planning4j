@@ -370,6 +370,52 @@ class Power implements Calculate
   }
 }
 
+
+/**
+ * Separates head from a list.
+ * Usage (call stdlib.head ?list), returns the head of the list or nil,
+ * if ?list is not a list term,
+ * if 
+ * @author Martin Cerny
+ */
+class Head implements Calculate 
+{
+
+    @Override
+    public Term call(List l) {
+        Term firstTerm = l.getHead();
+        if(firstTerm instanceof TermList){
+            return ((TermList)firstTerm).getList().getHead();
+        } else {
+            return TermList.NIL;
+        }
+    }
+    
+}
+
+/**
+ * Separates rest from a list.
+ * Usage (call stdlib.tail ?list), returns the rest of the list or nil,
+ * if ?list is not a list term,
+ * if 
+ * @author Martin Cerny
+ */
+class Tail implements Calculate 
+{
+
+    @Override
+    public Term call(List l) {
+        Term firstTerm = l.getHead();
+        if(firstTerm instanceof TermList){
+            return ((TermList)firstTerm).getList().getTail();
+        } else {
+            return TermList.NIL;
+        }
+    }
+    
+}
+
+
 /** This class bundles all the code calls that are implemented in the standard
  *  library of JSHOP2 in one class. As opposed to user-defined code calls that
  *  will be mapped at compile-time to an object of the corresponding class,
@@ -429,4 +475,8 @@ public class StdLib
   /** For code call of the form <code>(call ^ &#46;&#46;&#46;)</code>.
   */
   public static Power power = new Power();
+  
+  public static Head head = new Head();
+  
+  public static Tail tail = new Tail();
 }
