@@ -137,8 +137,12 @@ public class JSHOP2
      */
     private TermVariable[] variables;
     
+    private boolean cancelled = false;
+    
     
   /** This function finds plan(s) for a given initial task list.
+   * Only single instance of this method can run on a given JSHOP2 instance - this
+   * class is everything but thread-safe
    *
    *  @param tasksIn
    *          the initial task list to be achieved.
@@ -149,6 +153,7 @@ public class JSHOP2
   */
   public LinkedList findPlans(TaskList tasksIn, int planNoIn)
   {
+    cancelled = false;
     //-- Initialize the plan list to an empty one.
     plans = new LinkedList();
 
@@ -162,6 +167,10 @@ public class JSHOP2
 
     //-- Call the helper function.
     findPlanHelper(tasks);
+
+    if(cancelled){
+        return null;
+    }
 
     //-- Return the found plan(s).
     return plans;
@@ -182,6 +191,9 @@ public class JSHOP2
   */
   private boolean findPlanHelper(TaskList chosenTask)
   {
+    if(cancelled){
+        return false;
+    }
     //-- The local variables we need every time this function is called.
     InternalVars v = new InternalVars();
 
@@ -279,6 +291,9 @@ public class JSHOP2
                 if (findPlanHelper(tasks) && plans.size() >= planNo)
                   return true;
 
+                if(cancelled){
+                    return false;
+                }
                 //-- Remove the operator from the current plan.
                 currentPlan.removeOperator(cost);
               }
@@ -345,6 +360,10 @@ public class JSHOP2
                 if (findPlanHelper(v.tl) && plans.size() >= planNo)
                   //-- A full plan is found, return true.
                   return true;
+
+                if(cancelled){
+                    return false;
+                }
 
                 //-- The further branches of this method must NOT be considered
                 //-- even if this branch fails because there has been at least
@@ -437,11 +456,15 @@ public class JSHOP2
         }
 
         domain = d;
+        cancelled = false;
     }
 
     public void setState(State state) {
         this.state = state;
     }
   
+    public void cancel(){
+        cancelled = true;
+    }
   
 }
