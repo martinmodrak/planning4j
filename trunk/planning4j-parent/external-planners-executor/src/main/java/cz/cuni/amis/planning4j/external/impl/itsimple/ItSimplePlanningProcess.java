@@ -419,15 +419,13 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
 
             int exitCode = process.exitValue();
             
-            boolean checkersHandledExitCode = false;
             for(INoPlanFoundChecker checker : settings.getNoPlanFoundCheckers()){
                 if(checker.processExitCode(exitCode)){
                     plannerFoundNoSolution = true;
-                    checkersHandledExitCode = true;
                 }
             }
             
-            if (exitCode != 0 && !checkersHandledExitCode) {
+            if (exitCode != 0 && !plannerFoundNoSolution) {
                 throw new PlanningException("Planner terminated with an error - exit code: " + exitCode + ". Planner output:\n " + consoleOutputBuilder.toString() + "\nError output:\n" + errorOuput);
             }
 
@@ -698,9 +696,13 @@ public class ItSimplePlanningProcess implements IExternalPlanningProcess {
                 //should read and discard all output
                 try {
                     IOUtils.copy(is, new NullOutputStream());
-                    IOUtils.copy(es, new NullOutputStream());
                 } catch (IOException ex) {
                     logger.debug("Error consuming output:" + ex.getMessage(), ex);
+                }
+                try {
+                    IOUtils.copy(es, new NullOutputStream());
+                } catch (IOException ex) {
+                    logger.debug("Error consuming error output:" + ex.getMessage(), ex);
                 }
             }
 
