@@ -30,6 +30,10 @@ public class State
   */
   private Vector[] protections;
 
+  public State(Domain d){
+      this(d.getAxioms().length, d.getAxioms());
+  }
+  
   /** To initialize the state of the world.
    *
    *  @param size
