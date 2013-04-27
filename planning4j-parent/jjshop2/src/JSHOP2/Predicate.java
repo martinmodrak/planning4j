@@ -36,7 +36,7 @@ public class Predicate extends CompileTimeObject
    *  @param paramIn
    *          the argument list of the predicate.
   */
-  public Predicate(int headIn, int varCountIn, Term paramIn)
+   public Predicate(int headIn, int varCountIn, Term paramIn)
   {
     head = headIn;
     varCount = varCountIn;

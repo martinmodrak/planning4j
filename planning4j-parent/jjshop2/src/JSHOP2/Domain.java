@@ -1,5 +1,6 @@
 package JSHOP2;
 
+import java.util.Comparator;
 import java.util.Map;
 
 /** Each domain at run time is represented as a class derived from this
@@ -141,5 +142,20 @@ public abstract class Domain
               throw new JSHOPException("No implementation supplied for function " + functionName + " and class of this name cannot be instantiated.", ex);
           }
       }
+  }
+  
+  protected Comparator createComparatorImplementation(String comparatorName, int varIndex, Map<String, Comparator<Term>> userComparatorImplementations){
+      if(userComparatorImplementations.containsKey(comparatorName)){
+          return new TermIndexComparator(userComparatorImplementations.get(comparatorName), varIndex);
+      } else {
+          Class comparatorClass;
+          try {
+              //The old implementation just instantiated a class of given name, so we need to do so as well.
+              comparatorClass = Class.forName(comparatorName);
+              return (Comparator) comparatorClass.getConstructor(Integer.class).newInstance(varIndex);
+          } catch (Exception ex) {
+                throw new JSHOPException("Could not instantiate class for compartor "+ comparatorName + ". Make sure the class has a single int-arg constructor.", ex);
+          }
+      }            
   }
 }
