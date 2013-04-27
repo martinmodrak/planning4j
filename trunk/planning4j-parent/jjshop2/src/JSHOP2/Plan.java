@@ -56,9 +56,10 @@ public class Plan
   public double addOperator(Operator op, Term[] binding)
   {
     ops.addLast(op.getHead().applySubstitution(binding));
-    cost += op.getCost(binding);
+    double newOperatorCost = op.getCost(binding);
+    cost += newOperatorCost;
 
-    return op.getCost(binding);
+    return newOperatorCost;
   }
 
   /** To clone an object of this class.
