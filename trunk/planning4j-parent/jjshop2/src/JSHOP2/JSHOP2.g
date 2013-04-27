@@ -568,8 +568,9 @@ lp returns [LogicalPrecondition retVal]
         func = "new CompLess(" + vars.indexOf(s) + ")";
       else if (func.equals("StdLib.more"))
         func = "new CompMore(" + vars.indexOf(s) + ")";
-      else
-        func = "new " + func + "(" + vars.indexOf(s) + ")";
+      else {
+        func = domain.addComparatorInstance(func, vars.indexOf(s));
+      }
 
       //-- Create the object that represents this logical precondition.
       retVal = new LogicalPrecondition(lExp, func);

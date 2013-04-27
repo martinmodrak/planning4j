@@ -7,8 +7,10 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Vector;
 
 /** Each domain at compile time is represented as an instance of this class.
@@ -72,6 +74,11 @@ public class InternalDomain
   */
   private Vector operators;
 
+  /**
+   * Counts of comparators registerd so far for a given signature
+   */
+  private Map<ComparatorSignature, Integer> numRegisteredComparators ;
+  
   /** The parser object that will parse this domain.
   */
   private JSHOP2Parser parser;
@@ -89,6 +96,7 @@ public class InternalDomain
   private File outputDirectory;
   private File txtOutputDirectory;
   private boolean generateTxt = true;
+
   
   /** To initialize this domain.
    *
@@ -114,6 +122,8 @@ public class InternalDomain
     methods = new Vector();
 
     operators = new Vector();
+    
+    numRegisteredComparators = new HashMap<ComparatorSignature, Integer>();
 
     //-- Initialize the lexer and the parser associated with this object.
     JSHOP2Lexer lexer = new JSHOP2Lexer(new FileInputStream(fin));
@@ -284,6 +294,19 @@ public class InternalDomain
     //-- Otherwise, just return its index.
     return index;
   }
+  
+  public String addComparatorInstance(String comparatorName, int varIndex){
+      int previousComparatorCount;
+      ComparatorSignature comparatorSignature = new ComparatorSignature(comparatorName, varIndex);
+      
+      if(numRegisteredComparators.containsKey(comparatorSignature)){
+          previousComparatorCount = numRegisteredComparators.get(comparatorSignature);
+      } else {
+          previousComparatorCount = 0;
+      }
+      numRegisteredComparators.put(comparatorSignature, previousComparatorCount + 1);
+      return getComparatorFieldName(comparatorSignature, previousComparatorCount);
+  }
 
   /** This function writes the Java code necessary to produce this domain at
    *  run time in the appropriate file.
@@ -303,7 +326,8 @@ public class InternalDomain
     }
     
     //-- JSHOP2 classes should be imported first.
-    s += "import JSHOP2.*;" + endl + endl;
+    s += "import JSHOP2.*;" + endl;
+    s += "import java.util.Comparator;" + endl + endl;
 
     
     //-- Produce the class that represents the domain itself.
@@ -327,13 +351,21 @@ public class InternalDomain
     s += vectorToConstantDefinition(compoundTasks, "METHOD");
     s += vectorToConstantDefinition(primitiveTasks, "PRIMITIVE");
     
+    //-- Produce fields for comparators
+    for(ComparatorSignature comparatorSignature : numRegisteredComparators.keySet()){
+        int numComparators = numRegisteredComparators.get(comparatorSignature);
+        for(int id = 0; id < numComparators; id++){
+            s += "\tpublic Comparator " + getComparatorFieldName(comparatorSignature, id) + ";" + endl;
+        }
+    }
+    
     //-- Produce the constructor for the class that represents this domain without any user defined functions
     s += "\tpublic " + name + "(JSHOP2 context)" + endl + "\t{" + endl;
-    s += "\t\tthis(context, java.util.Collections.EMPTY_MAP);" + endl;
+    s += "\t\tthis(context, java.util.Collections.EMPTY_MAP, java.util.Collections.EMPTY_MAP);" + endl;
     s += "\t}" + endl + endl;
     
     //-- Produce the constructor for the class that represents this domain.
-    s += "\tpublic " + name + "(JSHOP2 context, java.util.Map<String, Calculate> userFunctionImplementations)" + endl + "\t{" + endl;
+    s += "\tpublic " + name + "(JSHOP2 context, java.util.Map<String, Calculate> userFunctionImplementations, java.util.Map<String, Comparator<Term>> userComparatorImplementations)" + endl + "\t{" + endl;
     s += "\t\tthis.context = context;" + endl + endl;
 
     //-- To initialize an array of the variable symbols the size of which is
@@ -361,6 +393,14 @@ public class InternalDomain
     //-- Produce the array that maps primitive tasks to integers.
     s += vectorToCode(primitiveTasks, "primitiveTasks");
 
+    //-- Fill fields for comparators
+    for(ComparatorSignature comparatorSignature : numRegisteredComparators.keySet()){
+        int numComparators = numRegisteredComparators.get(comparatorSignature);
+        for(int id = 0; id < numComparators; id++){
+            s += "\t\t" + getComparatorFieldName(comparatorSignature, id) + " = createComparatorImplementation(\"" + comparatorSignature.getComparatorName() + "\", " + comparatorSignature.getVarIndex() + ", userComparatorImplementations);" + endl;
+        }
+    }
+    
     //-- Allocate an array of type 'Method[]'. The size of the array is the
     //-- number of compound tasks in the domain, and each element of the array
     //-- represents all the methods that can be used to decompose the
@@ -1059,6 +1099,16 @@ public class InternalDomain
       return constantName.replace("!", "").toUpperCase();
   }
   
+  /**
+   * Gets a field name for a comparator with given signature and id (order).
+   * @param signature
+   * @param id
+   * @return 
+   */
+  private String getComparatorFieldName(ComparatorSignature signature, int id){
+      return "comparator_" + signature.getComparatorName() + "_var" + signature.varIndex + "_" + id;
+  }
+  
   /** This function produces the Java code needed to access a given <code>Vector</code> of
    *  <code>String</code>s by their ids from outside the domain.
    *
@@ -1083,4 +1133,51 @@ public class InternalDomain
 
     return retVal.append(endl).toString();
   }  
+  
+    private static class ComparatorSignature {
+        private String comparatorName;
+        private int varIndex;
+
+        public ComparatorSignature(String comparatorName, int varIndex) {
+            this.comparatorName = comparatorName;
+            this.varIndex = varIndex;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final ComparatorSignature other = (ComparatorSignature) obj;
+            if ((this.comparatorName == null) ? (other.comparatorName != null) : !this.comparatorName.equals(other.comparatorName)) {
+                return false;
+            }
+            if (this.varIndex != other.varIndex) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 59 * hash + (this.comparatorName != null ? this.comparatorName.hashCode() : 0);
+            hash = 59 * hash + this.varIndex;
+            return hash;
+        }
+
+        public String getComparatorName() {
+            return comparatorName;
+        }
+
+        public int getVarIndex() {
+            return varIndex;
+        }
+        
+        
+    }
+  
 }
