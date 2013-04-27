@@ -139,6 +139,22 @@ public class JSHOP2
     
     private boolean cancelled = false;
     
+    private boolean branchAndBound = false;
+    
+    private double costBound;
+    
+    /**
+     * Finds unique optimal plan using branch and bound
+     * @return the plan or null, if no solution is found
+     */
+    public Plan branchAndBound(TaskList taskIn) {
+        LinkedList planList = findPlans(taskIn, 2 /*So that we do not stop with the first plan. And two plans are never added, if branch and bound is on.*/, true /*Branch and bound on*/);
+        if(planList == null || planList.isEmpty()){
+            return null;
+        } else {
+            return (Plan)planList.get(0);
+        }
+    }
     
   /** This function finds plan(s) for a given initial task list.
    * Only single instance of this method can run on a given JSHOP2 instance - this
@@ -151,7 +167,24 @@ public class JSHOP2
    *  @return
    *          0 or more plans that achieve the given task list.
   */
-  public LinkedList findPlans(TaskList tasksIn, int planNoIn)
+  public LinkedList findPlans(TaskList tasksIn, int planNoIn){
+      return findPlans(tasksIn, planNoIn, false);
+  }
+    
+  /** This function finds plan(s) for a given initial task list.
+   * Only single instance of this method can run on a given JSHOP2 instance - this
+   * class is everything but thread-safe
+   *
+   *  @param tasksIn
+   *          the initial task list to be achieved.
+   *  @param planNoIn
+   *          the maximum number of plans to be returned.
+   *  @param branchAndBound 
+   *          if true, the whole plan space is searched for optimal plan, using branch and bound
+   *  @return
+   *          0 or more plans that achieve the given task list.
+  */
+  protected LinkedList findPlans(TaskList tasksIn, int planNoIn, boolean branchAndBoundIn)
   {
     cancelled = false;
     //-- Initialize the plan list to an empty one.
@@ -164,6 +197,9 @@ public class JSHOP2
     tasks = tasksIn;
 
     planNo = planNoIn;
+    
+    branchAndBound = branchAndBoundIn;
+    costBound = Double.POSITIVE_INFINITY;
 
     //-- Call the helper function.
     findPlanHelper(tasks);
@@ -220,11 +256,21 @@ public class JSHOP2
       //-- rather than the current plan itself since the current plan will be
       //-- changed during the look for other plans.
       else {
-        if (planNo != 1)
-          plans.addLast(currentPlan.clone());
-        else
-          plans.addLast(currentPlan);
-
+        if(branchAndBound)  {
+            //-- For branch and bound, only single plan is kept. The one with the lowest cost.
+            if (plans.isEmpty()){
+                plans.addLast(currentPlan.clone());
+            } else {
+                if(((Plan)plans.getFirst()).getCost() > currentPlan.getCost()){
+                    plans.set(0, currentPlan.clone());
+                }
+            }
+        } else {
+            if (planNo != 1)
+                plans.addLast(currentPlan.clone());
+            else
+                plans.addLast(currentPlan);
+        }
         return true;
       }
     }
@@ -283,13 +329,20 @@ public class JSHOP2
                 //-- to the beginning of the plan, remembering how much it
                 //-- cost.
                 double cost = currentPlan.addOperator(v.o[v.j], v.nextB);
-
-                //-- Recursively call the same function to achieve the
-                //-- remaining tasks. If a plan is found for the remaining
-                //-- tasks and we have found the maximum number of plans we are
-                //-- allowed, return true.
-                if (findPlanHelper(tasks) && plans.size() >= planNo)
-                  return true;
+                
+                //-- If branch and bound is active, 
+                //-- only solve the rest of the plan, if the cost bound has not been
+                //-- Exceeded
+                if(!branchAndBound || currentPlan.getCost() < costBound){                    
+                    
+                    
+                    //-- Recursively call the same function to achieve the
+                    //-- remaining tasks. If a plan is found for the remaining
+                    //-- tasks and we have found the maximum number of plans we are
+                    //-- allowed, return true.
+                    if (findPlanHelper(tasks) && plans.size() >= planNo)
+                    return true;
+                }
 
                 if(cancelled){
                     return false;
