@@ -1,10 +1,11 @@
 package JSHOP2;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Vector;
 
-/** This class represents all the variables that JSHOP2 needs every time it
+/** <p>This class represents all the variables that JSHOP2 needs every time it
  *  calls itself recursively. The reason all these variables are bundled
  *  together in one class rather than having them locally defined is to save
  *  stack space. Right now, the only thing that is stored in the stack is a
@@ -12,8 +13,11 @@ import java.util.Vector;
  *  heap memory, while if these variables were just locally defined, all of
  *  them would be stored in the stack, resulting in very fast stack overflow
  *  errors.
- *
- *  @author Okhtay Ilghami
+ * </p>
+ * <p>
+ *  It follows, that only single search can be run with a single instance of this class.
+ *</p>
+ *  @author Okhtay Ilghami, modified by Martin Cerny
  *  @author <a href="http://www.cs.umd.edu/~okhtay">http://www.cs.umd.edu/~okhtay</a>
  *  @version 1.0.3
 */
@@ -111,6 +115,18 @@ public class JSHOP2
    *  <code>Plan</code>.
   */
   private LinkedList plans;
+  
+  /**
+   * The best plan found so far (lowest cost)
+   */
+  private Plan bestPlan;
+  
+  private int numPlansFound;
+  
+  /**
+   * If true, only the best plan is kept for return
+   */
+  private boolean keepOnlyBestPlan;
 
   /** The current state of the world.
   */
@@ -148,12 +164,18 @@ public class JSHOP2
      * @return the plan or null, if no solution is found
      */
     public Plan branchAndBound(TaskList taskIn) {
-        LinkedList planList = findPlans(taskIn, 2 /*So that we do not stop with the first plan. And two plans are never added, if branch and bound is on.*/, true /*Branch and bound on*/);
-        if(planList == null || planList.isEmpty()){
-            return null;
-        } else {
-            return (Plan)planList.get(0);
-        }
+        findPlans(taskIn, 0, true /*Branch and bound on*/, true);
+        return bestPlan;
+    }
+
+    /**
+     * Finds plan using branch and bound, evaluating at most given number of solutions.
+     * @param planNoIn maximum number of plans (improving on previous plans) to be evaluated.
+     * @return the plan or null, if no solution is found
+     */
+    public Plan branchAndBound(TaskList taskIn, int planNoIn) {
+        findPlans(taskIn, planNoIn, true /*Branch and bound on*/, true);
+        return bestPlan;
     }
     
   /** This function finds plan(s) for a given initial task list.
@@ -163,33 +185,39 @@ public class JSHOP2
    *  @param tasksIn
    *          the initial task list to be achieved.
    *  @param planNoIn
-   *          the maximum number of plans to be returned.
+   *          the maximum number of plans to be returned or 0 for no limit (all plans] - use iwth caution.
    *  @return
    *          0 or more plans that achieve the given task list.
   */
   public LinkedList findPlans(TaskList tasksIn, int planNoIn){
-      return findPlans(tasksIn, planNoIn, false);
+      findPlans(tasksIn, planNoIn, false, false);
+      return plans;
   }
     
   /** This function finds plan(s) for a given initial task list.
    * Only single instance of this method can run on a given JSHOP2 instance - this
-   * class is everything but thread-safe
+   * class is everything but thread-safe. The plans are stored in {@link #plans} and {@link #bestPlan}
+   * variables.
    *
    *  @param tasksIn
    *          the initial task list to be achieved.
    *  @param planNoIn
-   *          the maximum number of plans to be returned.
+   *          the maximum number of plans to be evaluated or 0 for no limit (all plans] - use with caution
    *  @param branchAndBound 
-   *          if true, the whole plan space is searched for optimal plan, using branch and bound
-   *  @return
-   *          0 or more plans that achieve the given task list.
+   *          if true, branch and bound is used to prune the search space after first plan has been found
+   *  @param keepOnlyBestIn 
+   *         if true, only the best plan is kept - the {@link #plans} list is kept empty
   */
-  protected LinkedList findPlans(TaskList tasksIn, int planNoIn, boolean branchAndBoundIn)
+  public void findPlans(TaskList tasksIn, int planNoIn, boolean branchAndBoundIn, boolean keepOnlyBestIn)
   {
     cancelled = false;
     //-- Initialize the plan list to an empty one.
     plans = new LinkedList();
 
+    bestPlan = null;
+    numPlansFound = 0;
+    keepOnlyBestPlan = keepOnlyBestIn;
+    
     //-- Initialize the current plan to an empty one.
     currentPlan = new Plan();
 
@@ -204,12 +232,6 @@ public class JSHOP2
     //-- Call the helper function.
     findPlanHelper(tasks);
 
-    if(cancelled){
-        return null;
-    }
-
-    //-- Return the found plan(s).
-    return plans;
   }
 
   /** This is the helper function that finds a plan.
@@ -256,20 +278,27 @@ public class JSHOP2
       //-- rather than the current plan itself since the current plan will be
       //-- changed during the look for other plans.
       else {
+        
+        numPlansFound++;
+          
         if(branchAndBound)  {
-            //-- For branch and bound, only single plan is kept. The one with the lowest cost.
-            if (plans.isEmpty()){
+            //-- For branch and bound, record the cost bound
+            if(currentPlan.getCost() <  costBound){
+                costBound = currentPlan.getCost();
+                System.out.println("Cost bound improved: " + costBound);
+            }
+        } 
+        
+        if(bestPlan == null || currentPlan.getCost() < bestPlan.getCost()){
+            bestPlan = (Plan)currentPlan.clone();
+        }
+        
+        if(!keepOnlyBestPlan){
+            if (planNo != 1) {
                 plans.addLast(currentPlan.clone());
             } else {
-                if(((Plan)plans.getFirst()).getCost() > currentPlan.getCost()){
-                    plans.set(0, currentPlan.clone());
-                }
-            }
-        } else {
-            if (planNo != 1)
-                plans.addLast(currentPlan.clone());
-            else
                 plans.addLast(currentPlan);
+            }      
         }
         return true;
       }
@@ -340,7 +369,7 @@ public class JSHOP2
                     //-- remaining tasks. If a plan is found for the remaining
                     //-- tasks and we have found the maximum number of plans we are
                     //-- allowed, return true.
-                    if (findPlanHelper(tasks) && plans.size() >= planNo)
+                    if (findPlanHelper(tasks) && planNo > 0 && numPlansFound >= planNo)
                     return true;
                 }
 
@@ -410,7 +439,7 @@ public class JSHOP2
                 //-- decomposed, till an operator is seen and applied, or this
                 //-- whole task is achieved without seeing an operator (i.e.,
                 //-- this task was decomposed to an empty task list).
-                if (findPlanHelper(v.tl) && plans.size() >= planNo)
+                if (findPlanHelper(v.tl) && planNo > 0 && numPlansFound >= planNo)
                   //-- A full plan is found, return true.
                   return true;
 
@@ -519,5 +548,34 @@ public class JSHOP2
     public void cancel(){
         cancelled = true;
     }
+
+    /**
+     * Check the best plan found so far. Might be called even during planning.
+     * @return 
+     */
+    public Plan getBestPlan() {
+        return bestPlan;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    /**
+     * Get the number of plans evaluated so far. Might be called even during planning.
+     * @return 
+     */
+    public int getNumPlansFound() {
+        return numPlansFound;
+    }
+
+    /**
+     * Get copy of the plans found so far. Might be called even during planning. If {@link #keepOnlyBestPlan} is set,
+     * this is always empty.
+     */
+    public java.util.List<Plan> getPlansCopy() {
+        return new ArrayList<Plan>(plans);
+    }
   
+    
 }
