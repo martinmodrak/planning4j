@@ -205,6 +205,31 @@ public class SimplePlannerListManager {
         }
         return null;
     }
+    
+    /**
+     * Get a planner for current platform by its name in XML.
+     * @param name
+     * @return The information for planner 
+     * @throws ItSimplePlanningException if no such planner was found for given platform
+     */
+    public ItSimplePlannerInformation getPlannerByNameChecked(String name) {
+        boolean foundForDifferentPlatform = false;
+        for (ItSimplePlannerInformation plannerInfo : getPlannersList()) {
+            if (plannerInfo.getName().equals(name)) {
+                if(runsOnOperatingSystem(plannerInfo)){
+                    return plannerInfo;
+                } else {
+                    foundForDifferentPlatform = true;
+                }
+            }
+        }
+        if(foundForDifferentPlatform){
+            throw new ItSimplePlanningException("Planner '" + name + "' does not support platform " + ItSimpleUtils.getOperatingSystem());
+        } else {
+            throw new ItSimplePlanningException("Planner '" + name + "' not found.");
+        }
+    }
+    
 
     protected List<ItSimplePlannerInformation> getPlannersList() {
         List<ItSimplePlannerInformation> info = new ArrayList<ItSimplePlannerInformation>();

@@ -49,17 +49,17 @@ public class PlannersPackUtils {
     public static SimplePlannerListManager getInstalledPlannerListManager(){
         return installedPlannerListManager;                
     }
-    
+        
     public static ItSimplePlannerInformation getBlackBox(){
-        return getPlannerListManager().getPlannerByName("Blackbox");
+        return getPlannerListManager().getPlannerByNameChecked("Blackbox");
     }
     
     public static ItSimplePlannerInformation getMetricFF(){
-        return getPlannerListManager().getPlannerByName("Metric-FF");        
+        return getPlannerListManager().getPlannerByNameChecked("Metric-FF");        
     }
     
     public static ItSimplePlannerInformation getSGPlan6(){
-        return getPlannerListManager().getPlannerByName("SGPlan 6");
+        return getPlannerListManager().getPlannerByNameChecked("SGPlan 6");
     }
     
     /**
@@ -68,7 +68,7 @@ public class PlannersPackUtils {
      * Note that fast downward is not bundled in this pack - it needs to be already installed.
      */
     public static ItSimplePlannerInformation getFastDownwardTemplate(){
-        return installedPlannerListManager.getPlannerByName("Fast Downward");
+        return installedPlannerListManager.getPlannerByNameChecked("Fast Downward");
     }
 
     /**
@@ -101,7 +101,7 @@ public class PlannersPackUtils {
      * @return 
      */
     public static ItSimplePlannerInformation getProbe(){
-        return installedPlannerListManager.getPlannerByName("PROBE");
+        return installedPlannerListManager.getPlannerByNameChecked("PROBE");
     }
 
     private static class PlannerPackListManager extends PlannerListManager {
