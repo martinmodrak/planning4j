@@ -60,6 +60,26 @@ public class State
 
     axioms = axiomsIn;
   }
+  
+  /**
+   * A constructor that creates a copy of the state. 
+   * Axioms are copied shallowly. The protections and atoms instances are not copied, but the collections
+   * are created afresh.
+   * @param original 
+   */
+  public State(State original){
+      this.atoms = new Vector[original.atoms.length];
+      for(int i = 0; i < original.atoms.length; i++){
+          atoms[i] = new Vector(original.atoms[i]);
+      }
+      
+      this.protections = new Vector[original.protections.length];
+      for(int i = 0; i < original.protections.length; i++){
+          protections[i] = new Vector(original.protections[i]);
+      }
+      
+      this.axioms = original.axioms;
+  }
 
   /** To add a predicate to the current state of the world.
    *
@@ -437,5 +457,5 @@ public class State
     e = delAdd[2].iterator();
     while (e.hasNext())
       addProtection((Predicate)e.next());
-  }
+  }  
 }
