@@ -116,10 +116,10 @@
 						<description>specifies the file of (init/goal) facts</description>
 					</problem>
 				</arguments>
+                                <!-- If more than one signal type specified, they are effectively ORed -->
                                 <noPlanFoundSignal type="errorCode">1</noPlanFoundSignal>                                
-                                <!-- The no plan found is signalled by text "ff: goal can be simplified to FALSE. No plan will solve it" as well
-                                but error code checking yields better behaviour
-                                -->
+                                <noPlanFoundSignal type="outputText">Planning task not solvable</noPlanFoundSignal> 
+                                <noPlanFoundSignal type="outputText">goal can be simplified to FALSE. No plan will solve it</noPlanFoundSignal> 
 			</settings>
 		</planner>
 	</planners>
