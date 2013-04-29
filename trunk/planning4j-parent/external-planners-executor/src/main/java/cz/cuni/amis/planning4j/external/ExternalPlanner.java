@@ -64,6 +64,11 @@ public class ExternalPlanner extends AbstractAsyncPlanner<IPDDLFileDomainProvide
     public String toString() {
         return "ExternalPlanner{" + "executor=" + externalPlannerExecutor + '}';
     }
+
+    @Override
+    public String getName() {
+        return externalPlannerExecutor.getPlannerName();
+    }
     
 
     

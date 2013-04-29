@@ -60,6 +60,11 @@ public class AsyncPlannerWrapper<DOMAIN_TYPE extends IDomainProvider, PROBLEM_TY
         new Thread(operation,"AsyncPlanningWrapper").start();
         return future;
     }
+
+    @Override
+    public String getName() {
+        return this.planner.getName();
+    }
     
     
     
