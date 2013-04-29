@@ -282,7 +282,6 @@ public class JSHOP2
       //-- changed during the look for other plans.
       else {
         
-        numPlansFound++;
           
         if(branchAndBound)  {
             //-- For branch and bound, record the cost bound
@@ -305,6 +304,8 @@ public class JSHOP2
                 plans.addLast(currentPlan);
             }      
         }
+        numPlansFound++;
+        
         return true;
       }
     }
