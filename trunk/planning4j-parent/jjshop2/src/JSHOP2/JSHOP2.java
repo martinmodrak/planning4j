@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Vector;
+import org.apache.log4j.Logger;
 
 /** <p>This class represents all the variables that JSHOP2 needs every time it
  *  calls itself recursively. The reason all these variables are bundled
@@ -98,6 +99,8 @@ class InternalVars
 public class JSHOP2
 {
     
+    
+  private final Logger logger = Logger.getLogger(JSHOP2.class);
     
   /** The plan currently being constructed.
   */
@@ -285,7 +288,9 @@ public class JSHOP2
             //-- For branch and bound, record the cost bound
             if(currentPlan.getCost() <  costBound){
                 costBound = currentPlan.getCost();
-                System.out.println("Cost bound improved: " + costBound);
+                if(logger.isDebugEnabled()){
+                    logger.debug("Cost bound improved: " + costBound);
+                }
             }
         } 
         
