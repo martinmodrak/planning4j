@@ -37,4 +37,6 @@ public interface IExternalPlannerExecutor {
      * @return a future that will hold the result
      */
     IPlanFuture<IExternalPlanningResult> executePlanner(File domainFile, File problemFile, long timeSpentInIO);
+    
+    public String getPlannerName();
 }

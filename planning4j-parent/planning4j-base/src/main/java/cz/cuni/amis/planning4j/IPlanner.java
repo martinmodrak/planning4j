@@ -37,4 +37,6 @@ public interface IPlanner<DOMAIN_TYPE extends IDomainProvider, PROBLEM_TYPE exte
      * @throws PlanningException if the planner could not be executed (ie. wrong domain specification, IO error,...)
      */
     public IPlanningResult plan(DOMAIN_TYPE domainProvider, PROBLEM_TYPE problemProvider);
+    
+    public String getName();
 }

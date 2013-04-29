@@ -55,5 +55,17 @@ public class TranslatingPlanner
     public IPlanningResult plan(SOURCE_DOMAIN domainProvider, SOURCE_PROBLEM problemProvider) {
         return originalPlanner.plan(domainTranslator.translateDomain(domainProvider), problemTranslator.translateProblem(problemProvider));        
     }
+
+    @Override
+    public String toString() {
+        return "TranslatingPlanner{" + "originalPlanner=" + originalPlanner + ", domainTranslator=" + domainTranslator + ", problemTranslator=" + problemTranslator + '}';
+    }
+
+    @Override
+    public String getName() {
+        return originalPlanner.getName();
+    }
+    
+    
     
 }

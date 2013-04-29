@@ -68,6 +68,11 @@ public class ItSimplePlannerExecutor extends AbstractExternalPlannerExecutor{
     public String toString() {
         return "ItSimplePlannerExecutor{" + "chosenPlanner=" + chosenPlanner + ", plannerBinariesDirectory=" + plannerBinariesDirectory + ", workingDirectory=" + workingDirectory + '}';
     }
+
+    @Override
+    public String getPlannerName() {
+        return chosenPlanner.getName() + "_" + chosenPlanner.getVersion();
+    }
     
     
     
