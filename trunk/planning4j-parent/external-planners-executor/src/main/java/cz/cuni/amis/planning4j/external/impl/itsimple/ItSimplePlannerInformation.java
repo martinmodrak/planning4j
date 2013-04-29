@@ -113,6 +113,11 @@ public class ItSimplePlannerInformation {
     public void setVersion(String version) {
         this.version = version;
     }
+
+    @Override
+    public String toString() {
+        return "ItSimplePlannerInfo{" + name + " " + version + '}';
+    }
     
     
 }

@@ -63,5 +63,12 @@ public class ItSimplePlannerExecutor extends AbstractExternalPlannerExecutor{
     protected IExternalPlanningProcess createProcess(File domainFile, File problemFile, long timeSpentInIO) {
         return new ItSimplePlanningProcess(chosenPlanner, plannerBinariesDirectory, workingDirectory, domainFile, problemFile, timeSpentInIO);
     }
+
+    @Override
+    public String toString() {
+        return "ItSimplePlannerExecutor{" + "chosenPlanner=" + chosenPlanner + ", plannerBinariesDirectory=" + plannerBinariesDirectory + ", workingDirectory=" + workingDirectory + '}';
+    }
+    
+    
     
 }
