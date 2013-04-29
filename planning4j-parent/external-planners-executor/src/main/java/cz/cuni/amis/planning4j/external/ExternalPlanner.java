@@ -59,6 +59,12 @@ public class ExternalPlanner extends AbstractAsyncPlanner<IPDDLFileDomainProvide
     public IPlanFuture<IExternalPlanningResult> planAsync(IPDDLFileDomainProvider domainProvider, IPDDLFileProblemProvider problemProvider) {
         return externalPlannerExecutor.executePlanner(domainProvider.getDomainFile(), problemProvider.getProblemFile(), 0);        
     }
+
+    @Override
+    public String toString() {
+        return "ExternalPlanner{" + "executor=" + externalPlannerExecutor + '}';
+    }
     
+
     
 }
