@@ -67,9 +67,16 @@ public class PDDLObjectToWriterProblemTranslator extends AbstractProblemTranslat
                 for (String literal : getProblem().getInitialLiterals()) {
                     writer.write("\t\t(" + literal + ")\n");
                 }
+                if(getProblem().isMinimizeActionCosts()){
+                    writer.write("\t(= (total-cost) 0)\n");
+                }
+                
                 writer.write("\t)\n");
             }
             writer.write("\t(:goal (" + getProblem().getGoalConditionAsString() + "))\n");
+            if(getProblem().isMinimizeActionCosts()){
+                writer.write("\t(:metric minimize (total-cost))\n");
+            }
             writer.write(")\n");
         }
 

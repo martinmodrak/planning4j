@@ -102,7 +102,7 @@ public class PDDLObjectToWriterDomainTranslator extends AbstractDomainTranslator
             }
         }
 
-        protected void writeOnePredicate(Writer writer, PDDLPredicate predicate) throws IOException {
+        protected void writeElementWithParameters(Writer writer, PDDLElementWithParameters predicate) throws IOException {
             writer.write("\t\t(" + predicate.getName());
             writeParameters(writer, predicate.getParameters());
             writer.write(")\n");
@@ -111,7 +111,15 @@ public class PDDLObjectToWriterDomainTranslator extends AbstractDomainTranslator
         protected void writePredicates(Writer writer)throws IOException{
             writer.write("\t(:predicates \n");
             for(PDDLPredicate predicate: getDomain().getPredicates()){
-                writeOnePredicate(writer, predicate);
+                writeElementWithParameters(writer, predicate);
+            }
+            writer.write("\t)\n");
+        }
+
+        protected void writeFunctions(Writer writer)throws IOException{
+            writer.write("\t(:functions \n");
+            for(PDDLFunction function: getDomain().getFunctions()){
+                writeElementWithParameters(writer, function);
             }
             writer.write("\t)\n");
         }
@@ -151,6 +159,9 @@ public class PDDLObjectToWriterDomainTranslator extends AbstractDomainTranslator
             }
             if(!getDomain().getPredicates().isEmpty()){
                 writePredicates(writer);
+            }
+            if(!getDomain().getFunctions().isEmpty()){
+                writeFunctions(writer);
             }
             if(!getDomain().getActions().isEmpty()){
                 writeActions(writer);

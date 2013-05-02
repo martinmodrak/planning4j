@@ -48,9 +48,9 @@ public class PDDLSimpleAction extends PDDLAction{
     }
     
     private void init(){
-        preconditionList = Collections.EMPTY_LIST;
-        positiveEffects = Collections.EMPTY_LIST;
-        negativeEffects = Collections.EMPTY_LIST;;
+        preconditionList = new ArrayList<String>();
+        positiveEffects =  new ArrayList<String>();
+        negativeEffects =  new ArrayList<String>();
     }
     
 
@@ -63,7 +63,11 @@ public class PDDLSimpleAction extends PDDLAction{
     }
     
     public void setNegativeEffects(String ... negativeEffects){
-        setNegativeEffects(Arrays.asList(negativeEffects));        
+        setNegativeEffects(new ArrayList(Arrays.asList(negativeEffects)));        
+    }
+    
+    public void addNegativeEffect(String negativeEffect){
+        this.negativeEffects.add(negativeEffect);
     }
 
     public List<String> getPositiveEffects() {
@@ -75,7 +79,11 @@ public class PDDLSimpleAction extends PDDLAction{
     }
 
     public void setPositiveEffects(String ... positiveEffects){
-        setPositiveEffects(Arrays.asList(positiveEffects));        
+        setPositiveEffects(new ArrayList(Arrays.asList(positiveEffects)));        
+    }
+    
+    public void addPositiveEffect(String positiveEffect){
+        this.positiveEffects.add(positiveEffect);
     }
 
     public List<String> getPreconditionList() {
@@ -87,9 +95,12 @@ public class PDDLSimpleAction extends PDDLAction{
     }
 
     public void setPreconditionList(String ... preconditionList){
-        setPreconditionList(Arrays.asList(preconditionList));
+        setPreconditionList(new ArrayList(Arrays.asList(preconditionList)));
     }
     
+    public void addPrecondition(String precondition){
+        this.preconditionList.add(precondition);
+    }
 
     @Override
     public String getPreconditionAsString() {
