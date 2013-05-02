@@ -32,6 +32,7 @@ public class PDDLProblem {
     List<PDDLObjectInstance> objects;
     List<String> initialLiterals;
     List<String> goalConditions;
+    private boolean minimizeActionCosts = false;
 
     public PDDLProblem(String problemName, String domainName) {
         this.problemName = problemName;
@@ -51,6 +52,15 @@ public class PDDLProblem {
     public void setInitialLiterals(String ... initialLiterals) {
         this.initialLiterals = Arrays.asList(initialLiterals);
     }
+
+    public boolean isMinimizeActionCosts() {
+        return minimizeActionCosts;
+    }
+
+    public void setMinimizeActionCosts(boolean minimizeActionCosts) {
+        this.minimizeActionCosts = minimizeActionCosts;
+    }
+    
 
     public String getDomainName() {
         return domainName;

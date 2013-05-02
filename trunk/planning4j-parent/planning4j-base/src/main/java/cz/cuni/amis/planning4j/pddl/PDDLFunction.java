@@ -25,18 +25,18 @@ import java.util.List;
  * An object correspoding to a predicate in PDDL.
  * @author Martin Cerny
  */
-public class PDDLPredicate extends PDDLElementWithParameters {
+public class PDDLFunction extends PDDLElementWithParameters {
 
-    public PDDLPredicate(String name) {
+    public PDDLFunction(String name) {
         super(name, Collections.EMPTY_LIST);
     }
     
     
-    public PDDLPredicate(String name, List<PDDLParameter> parameters) {
+    public PDDLFunction(String name, List<PDDLParameter> parameters) {
         super(name, parameters);
     }
     
-    public PDDLPredicate(String name, PDDLParameter ... parameters ){
+    public PDDLFunction(String name, PDDLParameter ... parameters ){
         this(name,Arrays.asList(parameters));        
     }
 }

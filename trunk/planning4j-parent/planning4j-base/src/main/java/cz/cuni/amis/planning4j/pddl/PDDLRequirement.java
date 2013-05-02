@@ -55,6 +55,10 @@ public enum PDDLRequirement {
     DURATIVE_ACTIONS("durative-actions"),
     NEGATIVE_PRECONDITIONS("negative-preconditions"),
     NUMERIC_FLUENTS("numeric-fluents"),
+    /**
+     * see http://ipc.informatik.uni-freiburg.de/PddlActionCosts
+     */
+    ACTION_COSTS("action-costs"),
     PROBABILISTIC_EFFECTS("probabilistic-effects"),
     CONSTRAINTS("constraints"),
     OBJECT_FLUENTS("object-fluents"),
