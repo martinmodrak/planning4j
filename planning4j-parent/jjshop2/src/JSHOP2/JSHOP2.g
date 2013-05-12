@@ -215,7 +215,7 @@ method :
 
       //-- Create the object that represents the method, and add it to the list
       //-- of the methods in the domain.
-      domain.addMethod(new InternalMethod(p, labels, pres, subs));
+      domain.addMethod(new InternalMethod(mn.getText(), p, labels, pres, subs));
 
       //-- The scope for the variables in a method is within that method, so as
       //-- soon as we get out of the method body we should empty our list of

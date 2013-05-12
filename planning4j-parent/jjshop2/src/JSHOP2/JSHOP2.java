@@ -528,20 +528,36 @@ public class JSHOP2
         }
       
   }
+
+    public void initializeConstants(int numConstants) {
+        TermConstant [] oldConstants;
+        if(constants != null) {
+            oldConstants = constants;
+        } else {
+            oldConstants = new TermConstant[0];
+        }
+        constants = new TermConstant[numConstants];
+
+        for (int i = 0; i < numConstants; i++) {
+            if(i < oldConstants.length){
+                constants[i] = oldConstants[i];
+            } else {
+                constants[i] = new TermConstant(i);
+            }
+        }
+    }
+
+  
   
   /** This function is used to initialize the planning algorithm.
-   *
+   *  If called repeatedly, the constant instances are reused, if possible.
    *  @param context 
    *          the planning context (domain and other posssible stuff).
    *  @param numConstants 
    *          the number of constants in the domain and problem (or an uppper bound)
   */
     public void initialize(Domain d, int numConstants) {
-        constants = new TermConstant[numConstants];
-
-        for (int i = 0; i < numConstants; i++) {
-            constants[i] = new TermConstant(i);
-        }
+        initializeConstants(numConstants);
 
         domain = d;
         cancelled = false;

@@ -108,9 +108,9 @@ public class TaskAtom extends CompileTimeObject
     String s;
 
     if (primitive)
-      s = head.toString(context.getDomain().primitiveTasks);
+      s = head.toString(context.getDomain().primitiveTasks, context);
     else
-      s = head.toString(context.getDomain().compoundTasks);
+      s = head.toString(context.getDomain().compoundTasks, context);
 
     if (immediate)
       return "(:immediate " + s.substring(1);

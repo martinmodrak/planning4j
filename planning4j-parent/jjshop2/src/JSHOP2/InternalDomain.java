@@ -373,7 +373,10 @@ public class InternalDomain
     //-- domain. This way, all the variable symbols that have the same index
     //-- will point to the same thing rather than pointing to duplicate copies.        
     s += "\t\tcontext.initializeVars(" + varsMaxSize + ");" + endl;
-    
+
+    //-- Pre-initialize constants for all the constants needed by domain, so 
+    //-- that Method constructors may be succefully run
+    s += "\t\tcontext.initializeConstants(NUM_CONSTANTS);" + endl;
     
     //Initialize user function implementations
     for (int i = 0; i < calcs.size(); i++)
