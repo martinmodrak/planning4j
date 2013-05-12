@@ -31,6 +31,17 @@ public class Predicate extends CompileTimeObject
    *
    *  @param headIn
    *          the head of the predicate.
+   *  @param paramIn
+   *          the argument list of the predicate. Must be variable free
+  */
+   public Predicate(int headIn, Term paramIn){
+       this(headIn, 0, paramIn);
+   }
+  
+  /** To initialize this predicate.
+   *
+   *  @param headIn
+   *          the head of the predicate.
    *  @param varCountIn
    *          number of the variables of the predicate.
    *  @param paramIn
@@ -206,9 +217,9 @@ public class Predicate extends CompileTimeObject
    *          what <code>String</code> should each constant symbol be mapped
    *          to.
   */
-  public void print(String[] constants)
+  public void print(String[] constants, JSHOP2 context)
   {
-    System.out.println(toString(constants));
+    System.out.println(toString(constants, context));
   }
 
   /** To set the number of variables for this predicate.
@@ -267,20 +278,20 @@ public class Predicate extends CompileTimeObject
    *  this predicate. This function is used to print predicates other than
    *  logical atoms (such as task atoms).
    *
-   *  @param constants
+   *  @param headSymbols, String[] constants
    *          what <code>String</code> should each constant symbol be mapped
    *          to.
    *  @return
    *          the <code>String</code> representation of this predicate.
   */
-  public String toString(String[] constants)
+  public String toString(String[] headSymbols, JSHOP2 context)
   {
     //-- If this predicate is a variable symbol, just print it as a variable.
     if (isVar())
       return "VAR" + varIdx;
 
     //-- First, make up the head of the predicate.
-    String s = "(" + constants[head];
+    String s = "(" + headSymbols[head];
 
     //-- If the argument list is a list term (which it should be usually):
     if (param instanceof TermList)
@@ -289,7 +300,7 @@ public class Predicate extends CompileTimeObject
         return  s + ")";
       else
         //-- Converting (a . (b)) to (a b).
-        return s + " " + ((TermList)param).getList().toString() + ")";
+        return s + " " + ((TermList)param).getList().toString(context) + ")";
     else
     //-- If the argument list is not a list term (which should not happen
     //-- usually, but there is no reason to assume that it will not happen.

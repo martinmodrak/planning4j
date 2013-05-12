@@ -33,6 +33,11 @@ public class InternalMethod extends InternalElement
   */
   private Vector subs;
 
+  /**
+   * Name of the method - only for debugging purposes
+   */
+  private String name;
+  
   /** To initialize an <code>InternalMethod</code> object.
    *
    *  @param head
@@ -45,7 +50,7 @@ public class InternalMethod extends InternalElement
    *  @param subsIn
    *          a <code>Vector</code> of task lists.
   */
-  public InternalMethod(Predicate head, Vector labelsIn, Vector presIn,
+  public InternalMethod(String nameIn, Predicate head, Vector labelsIn, Vector presIn,
                         Vector subsIn)
   {
     //-- Set the head of this InternalMethod. Note the use of 'classCnt' to
@@ -58,6 +63,7 @@ public class InternalMethod extends InternalElement
     labels = labelsIn;
     pres = presIn;
     subs = subsIn;
+    name = nameIn;
 
     //-- To iterate over branch preconditions.
     Iterator e = pres.iterator();
@@ -89,6 +95,7 @@ public class InternalMethod extends InternalElement
 
     //-- The header of the class for this metohd at run time. Note the use of
     //-- 'getCnt()' to make the name of this class unique.
+    s += "/* Method " + this.name + "/" + this.getHead().getVarCount() + " */" + endl;
     s += "class Method" + getCnt() + " extends Method" + endl + "{" + endl;
 
     //-- The constructor of the class.
