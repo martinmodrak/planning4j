@@ -107,7 +107,7 @@ public class Plan
     //-- Iterate over the operator instances in the plan and print them.
     Iterator e = ops.iterator();
     while (e.hasNext())
-      retVal += ((Predicate)e.next()).toString(primitiveTasks) + endl;
+      retVal += ((Predicate)e.next()).toString(primitiveTasks, context) + endl;
 
     return retVal + "--------------------" + endl;
   }
