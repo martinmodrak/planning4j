@@ -213,6 +213,31 @@ public class List extends CompileTimeObject implements Iterable<Term>
       }
   }
 
+  @Override
+  public String toString()
+  {
+    //-- If tail is a list itself,
+    if (tail instanceof TermList)
+    {
+      if (tail.isNil()) {
+            return head.toString();
+        }
+      else
+      {
+        //-- Converting "(a . (b)) to "(a b)"
+        String s = tail.toString();
+
+        return head.toString() + " " + s.substring(1, s.length() - 1);
+      }
+    }
+    //-- If tail is not a list,
+    else {
+          return head.toString() + " . " + tail.toString();
+      }
+  }
+
+  
+  
   /**
    * Gets the term at given index.
    * Note: linear-time complexity;
