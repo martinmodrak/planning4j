@@ -252,16 +252,20 @@ op :
       cost = term
     )?
     {
-      //-- Add the primtive task this operator can achieve to the list of
-      //-- primitive tasks in the domain.
-      int index = domain.addPrimitiveTask(on.getText().toLowerCase());
 
-      //-- Create the head of the operator.
-      Predicate p = new Predicate(index, vars.size(), new TermList(tn));
+        String operatorName = on.getText().toLowerCase().substring(1);
 
-      //-- Create the object that represents the operator, and add it to the
-      //-- list of the operators in the domain.
-      domain.addOperator(new InternalOperator(p, pre, del, add, cost));
+        //-- Add the primtive task this operator can achieve to the list of
+        //-- primitive tasks in the domain.
+        int index = domain.addPrimitiveTask(operatorName);
+
+        //-- Create the head of the operator.
+        Predicate p = new Predicate(index, vars.size(), new TermList(tn));
+
+        //-- Create the object that represents the operator, and add it to the
+        //-- list of the operators in the domain.
+        domain.addOperator(new InternalOperator(operatorName, p, pre, del, add, cost));
+
 
       //-- The scope for the variables in an operator is within that operator,
       //-- so as soon as we get out of the operator body we should empty our

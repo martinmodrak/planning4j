@@ -33,6 +33,8 @@ public class InternalOperator extends InternalElement
   */
   private Vector del;
 
+  String operatorName;
+  
   /** The logical precondition of this operator.
   */
   private LogicalPrecondition pre;
@@ -65,7 +67,7 @@ public class InternalOperator extends InternalElement
    *  @param costIn
    *          the cost of the operator.
   */
-  public InternalOperator(Predicate head, LogicalPrecondition preIn,
+  public InternalOperator(String operatorName, Predicate head, LogicalPrecondition preIn,
                           Vector delIn, Vector addIn, Term costIn)
   {
     //-- Set the head of this InternalOperator. Note the use of 'classCnt' to
@@ -73,6 +75,7 @@ public class InternalOperator extends InternalElement
     //-- the same class.
     super(head, classCnt++);
 
+    this.operatorName = operatorName;
     //-- Set the precondition of this operator.
     pre = preIn;
 
@@ -177,10 +180,10 @@ public class InternalOperator extends InternalElement
 
     //-- The header of the class for this operator at run time. Note the use of
     //-- 'getCnt()' to make the name of this class unique.
-    s += "class Operator" + getCnt() + " extends Operator" + endl + "{" + endl;
+    s += "class " + getClassName() + " extends Operator" + endl + "{" + endl;
 
     //-- The constructor of the class.
-    s += "\tpublic Operator" + getCnt() + "()" + endl + "\t{" + endl;
+    s += "\tpublic " + getClassName() + "()" + endl + "\t{" + endl;
 
     //-- Call the constructor of the base class (class 'Operator') with the
     //-- code that produces the head of this method.
@@ -267,5 +270,9 @@ public class InternalOperator extends InternalElement
 
     //-- Close the class definition and return the resulting string.
     return s + endl + "}" + endl + endl;
+  }
+  
+  public String getClassName(){
+      return "Operator" + classCnt + "_" + operatorName;
   }
 }
