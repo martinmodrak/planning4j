@@ -340,14 +340,29 @@ public class TaskList extends CompileTimeObject
   */
   public String toString()
   {
+      return(toString(null));
+  }
+  
+    /** This function returns a printable <code>String</code> representation of
+   *  this task list.
+   *
+   *  @return
+   *          the <code>String</code> representation.
+  */
+  public String toString(JSHOP2 context)
+  {
     //-- If this is an empty task list,
     if (isEmpty())
       return "()";
     //-- If this is an atomic task list,
-    else if (subtasks == null)
-      return task.toString();
-    //-- If this is a non-atomic task list,
-    else
+    else if (subtasks == null){
+        if(context != null){
+          return task.toString(context);
+        } else {
+            return task.toString();
+        }
+    } 
+        else //-- If this is a non-atomic task list,
     {
       String s = "(";
 
@@ -363,7 +378,11 @@ public class TaskList extends CompileTimeObject
           if (!s.equals("("))
             s += " ";
           //-- Add the subtask to the result.
-          s += subtasks[i];
+          if(context != null){
+            s += subtasks[i].toString(context);          
+          } else {
+            s += subtasks[i].toString();                        
+          }
         }
 
       //-- Close the paranthesis and return the result.

@@ -442,7 +442,7 @@ public class InternalDomain
       {
         InternalMethod m = (InternalMethod)e.next();
         if (m.getHead().getHead() == i)
-          s += "\t\tmethods[" + i + "][" + j++ + "] = new Method" + m.getCnt() +
+          s += "\t\tmethods[" + i + "][" + j++ + "] = new " + m.getClassName() +
               "();" + endl;
       }
 
@@ -487,7 +487,7 @@ public class InternalDomain
       {
         InternalOperator o = (InternalOperator)e.next();
         if (o.getHead().getHead() == i)
-          s += "\t\tops[" + i + "][" + j++ + "] = new Operator" + o.getCnt() +
+          s += "\t\tops[" + i + "][" + j++ + "] = new " + o.getClassName() +
                "();" + endl;
       }
 

@@ -90,16 +90,17 @@ public class InternalMethod extends InternalElement
     String s = "";
 
     //-- First produce the initial code for the preconditions of each branch.
-    for (int i = 0; i < pres.size(); i++)
+    for (int i = 0; i < pres.size(); i++) {
       s += ((LogicalPrecondition)pres.get(i)).getInitCode();
+    }
 
     //-- The header of the class for this metohd at run time. Note the use of
     //-- 'getCnt()' to make the name of this class unique.
     s += "/* Method " + this.name + "/" + this.getHead().getVarCount() + " */" + endl;
-    s += "class Method" + getCnt() + " extends Method" + endl + "{" + endl;
+    s += "class " + getClassName() + " extends Method" + endl + "{" + endl;
 
     //-- The constructor of the class.
-    s += "\tpublic Method" + getCnt() + "()" + endl + "\t{" + endl;
+    s += "\tpublic " + getClassName() + "()" + endl + "\t{" + endl;
 
     //-- Call the constructor of the base class (class 'Method') with the code
     //-- that produces the head of this method.
@@ -113,15 +114,16 @@ public class InternalMethod extends InternalElement
     //-- For each possible decomposition,
     for (int i = 0; i < subs.size(); i++)
     {
-      if (((TaskList)subs.get(i)).isEmpty())
+      if (((TaskList)subs.get(i)).isEmpty()) {
         //-- This decomposition is an empty task list.
         s += "\t\tsubsIn[" + i + "] = TaskList.empty;" + endl;
-      else
+      } else {
         //-- This decomposition is not an empty task list, so call the function
         //-- that will produce the task list for this decomposition. This
         //-- function will be implemented later on. Note the use of variable
         //-- 'i' to make the header of the function being called unique.
         s += "\t\tsubsIn[" + i + "] = createTaskList" + i + "();" + endl;
+      }
     }
 
     //-- Call the function that sets the method's taks list to the array that
@@ -142,6 +144,9 @@ public class InternalMethod extends InternalElement
         s += ((TaskList)subs.get(i)).toCode() + "\t}" + endl + endl;
       }
     }
+    s += "\t@Override public String toString()" + endl;
+    s += "\t{" + endl + "\t\treturn \"" + name + "\";" + endl + endl;
+    s += "\t}" + endl;
 
     //-- The function that returns an iterator that can be used to find all the
     //-- bindings that satisfy a given precondition of this method and return
@@ -195,4 +200,8 @@ public class InternalMethod extends InternalElement
     //-- resulting string.
     return s + "\t}" + endl + "}" + endl + endl;
   }
+
+    public String getClassName() {
+        return "Method" + getCnt() +"_" + this.name;
+    }
 }
