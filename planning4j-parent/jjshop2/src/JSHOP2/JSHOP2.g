@@ -253,7 +253,7 @@ op :
     )?
     {
 
-        String operatorName = on.getText().toLowerCase().substring(1);
+        String operatorName = on.getText().toLowerCase();
 
         //-- Add the primtive task this operator can achieve to the list of
         //-- primitive tasks in the domain.
@@ -264,7 +264,7 @@ op :
 
         //-- Create the object that represents the operator, and add it to the
         //-- list of the operators in the domain.
-        domain.addOperator(new InternalOperator(operatorName, p, pre, del, add, cost));
+        domain.addOperator(new InternalOperator(operatorName.substring(1) /*remove leading exclamation mark*/, p, pre, del, add, cost));
 
 
       //-- The scope for the variables in an operator is within that operator,
