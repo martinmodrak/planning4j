@@ -162,6 +162,8 @@ public class JSHOP2
     
     private double costBound;
     
+    private int level;
+    
     /**
      * Finds unique optimal plan using branch and bound
      * @return the plan or null, if no solution is found
@@ -232,6 +234,7 @@ public class JSHOP2
     branchAndBound = branchAndBoundIn;
     costBound = Double.POSITIVE_INFINITY;
 
+    level = 0;
     //-- Call the helper function.
     findPlanHelper(tasks);
 
@@ -255,6 +258,12 @@ public class JSHOP2
     if(cancelled){
         return false;
     }
+    
+    if(logger.isTraceEnabled()){
+        logger.trace(getIndentString(level) + "Decomposing " + chosenTask.toString(this));
+    }
+    level++;
+    
     //-- The local variables we need every time this function is called.
     InternalVars v = new InternalVars();
 
@@ -273,14 +282,16 @@ public class JSHOP2
       //-- initially set to achieve, it means we have just achieved that task,
       //-- and not the whole task network. Therefore, try to achieve the rest
       //-- of the task network.
-      if (chosenTask != tasks)
-        return findPlanHelper(tasks);
+      if (chosenTask != tasks) {
+        boolean continuePlanning = findPlanHelper(tasks);
+        level--;
+        return continuePlanning;
       //-- Otherwise, add the current plan to the list of the plans for the
       //-- given task network. Note that in the case where we are looking for
       //-- more than one plan, we add a clone of the current plan to the list
       //-- rather than the current plan itself since the current plan will be
       //-- changed during the look for other plans.
-      else {
+      } else {
         
           
         if(branchAndBound)  {
@@ -305,6 +316,10 @@ public class JSHOP2
             }      
         }
         numPlansFound++;
+        
+        if(logger.isTraceEnabled()){
+            logger.trace("Plan found");
+        }
         
         return true;
       }
@@ -374,9 +389,11 @@ public class JSHOP2
                     //-- Recursively call the same function to achieve the
                     //-- remaining tasks. If a plan is found for the remaining
                     //-- tasks and we have found the maximum number of plans we are
-                    //-- allowed, return true.
-                    if (findPlanHelper(tasks) && planNo > 0 && numPlansFound >= planNo)
-                    return true;
+                    //-- allowed, return true.                    
+                    if (findPlanHelper(tasks) && planNo > 0 && numPlansFound >= planNo){
+                        level--;
+                        return true;
+                    }
                 }
 
                 if(cancelled){
@@ -435,6 +452,9 @@ public class JSHOP2
                 //-- Merge the two bindings.
                 Term.merge(v.nextB, v.binding);
 
+                if(logger.isTraceEnabled()){
+                    logger.trace(getIndentString(level) + "Trying method " + domain.compoundTasks[v.m[v.j].getHead().getHead()] + " - " + v.m[v.j].getLabel(v.k));
+                }
                 //-- Replace the decomposed task in task list with its
                 //-- decomposition according to this branch of this method.
                 v.tl.replace(v.m[v.j].getSubs()[v.k].bind(v.nextB));
@@ -445,9 +465,10 @@ public class JSHOP2
                 //-- decomposed, till an operator is seen and applied, or this
                 //-- whole task is achieved without seeing an operator (i.e.,
                 //-- this task was decomposed to an empty task list).
-                if (findPlanHelper(v.tl) && planNo > 0 && numPlansFound >= planNo)
-                  //-- A full plan is found, return true.
+                if (findPlanHelper(v.tl) && planNo > 0 && numPlansFound >= planNo) {
+                                    //-- A full plan is found, return true.
                   return true;
+                }
 
                 if(cancelled){
                     return false;
@@ -471,9 +492,21 @@ public class JSHOP2
     }
 
     //-- Return false, because all the options were tried and none worked.
+    level--;
+    if(logger.isTraceEnabled()){
+        logger.trace(getIndentString(level) + "Stopped decomposing " + chosenTask.toString(this));
+    }
     return false;
   }
 
+  private String getIndentString(int level){
+      StringBuilder sb = new StringBuilder();
+      for(int i = 0; i < level; i++){
+          sb.append("  ");
+      }
+      return sb.toString();
+  }
+  
   /** This function returns the planning domain.
    *
    *  @return

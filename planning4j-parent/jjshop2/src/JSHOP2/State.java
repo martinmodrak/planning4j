@@ -457,5 +457,23 @@ public class State
     e = delAdd[2].iterator();
     while (e.hasNext())
       addProtection((Predicate)e.next());
-  }  
+  } 
+  
+  public String toString(JSHOP2 context){
+      StringBuilder stateString = new StringBuilder();
+      
+      for(int i = 0; i < atoms.length; i++){
+          if(atoms[i].isEmpty()){
+              continue;
+          }
+          stateString.append(context.getConstant(i).toString(context)).append(":");          
+          for(int j = 0; j < atoms[i].size(); j++){
+              Term t = (Term) atoms[i].get(j);
+              stateString.append("\n\t").append(t.toString(context));
+          }
+          stateString.append("\n");
+      }
+      return stateString.toString();
+  }
+  
 }

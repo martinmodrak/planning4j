@@ -67,4 +67,8 @@ public class PreconditionAtomic extends Precondition
     //-- Forget all the subsequent bindings.
     boundP = p;
   }
+  
+  public String toString(JSHOP2 context){
+      return p.toString(context);
+  }
 }
