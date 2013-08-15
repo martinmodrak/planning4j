@@ -46,7 +46,18 @@ public class PDDLOperators {
     public static String makeAnd(String ... operands){
         return makeAnd(Arrays.asList(operands));
     }
+
+    public static String makeOr(List<String> operands){
+        if(operands.size() == 1){
+            return operands.get(0) ;
+        }
+        return makeOperatorExpression("or", operands);
+    }
     
+    public static String makeOr(String ... operands){
+        return makeOr(Arrays.asList(operands));
+    }
+
     
     public static String makeNot(String operand){
         return makeOperatorExpression("not", Collections.singletonList(operand));
