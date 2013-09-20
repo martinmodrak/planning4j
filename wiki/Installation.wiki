@@ -56,9 +56,10 @@ The current stable version can be found at
 
 http://diana.ms.mff.cuni.cz:8081/artifactory/libs-release-local/cz/cuni/amis/planning4j/
 
-The artifacts have quite a few dependencies (consider using Maven, it handles them automagically  ;-)). To see a list of dependencies see the [http://diana.ms.mff.cuni.cz:8080/job/Planning4J/site/ maven generated site] of our project. (look under artifact name -> dependencies) 
+The artifacts have quite a few dependencies (consider using Maven, it handles them automagically  ;-)). A zip with the dependencies can be found at http://diana.ms.mff.cuni.cz:8081/artifactory/libs-release-local/cz/cuni/amis/planning4j/planning4j-dependencies/ however, it is not built regularly and might get outdated.
+
+To see an up-to-date list of dependencies see the [http://diana.ms.mff.cuni.cz:8080/job/Planning4J/site/ maven generated site] of our project. (look under artifact name -> dependencies) 
 
 Currently the most dependencies are connected to the external-planners part and those can be seen at http://diana.ms.mff.cuni.cz:8080/job/Planning4J/site/external-planners-executor/dependencies.html
 
-Sorry it's not more user friendly. 
-However, if you want to use Planning4J without Maven, you may also try to ask nicely at [http://groups.google.com/group/planning4j-support Planning4J forum] and it is very likely I will fix a single-jar (or zip) distribution for you.
+If the dependencies pack is outdated, you may also try to ask nicely at [http://groups.google.com/group/planning4j-support Planning4J forum] and it is very likely I will update the dependencies file.
