@@ -14,7 +14,7 @@ The planners are contained in the external-planners-pack artifact. You can eithe
 
 This example can be also found in the Planning4JSimpleExample class in the test packages of external-planners-pack artifact.
 
-```
+```java
 import cz.cuni.amis.planning4j.*;
 import cz.cuni.amis.planning4j.external.plannerspack.PlannersPackUtils;
 import cz.cuni.amis.planning4j.external.ExternalPlanner;
