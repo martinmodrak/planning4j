@@ -31,7 +31,7 @@ More at [ValidatingPlans](ValidatingPlans.md).
 
 If you use Planning4J in your research application, please cite it as
 
-Cerny, M. 2012. Planning4J - Java API for AI planning. Available at http://code.google.com/p/planning4j
+Cerny, M. 2012. Planning4J - Java API for AI planning. Available at https://github.com/martincerny/planning4j/
 
 ### Publications using Planning4J ###
 
