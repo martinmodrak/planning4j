@@ -1,0 +1,1 @@
+Javadoc for all project artifacts can be found http://diana.ms.mff.cuni.cz:8080/job/Planning4J/javadoc/
